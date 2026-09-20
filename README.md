@@ -1,6 +1,6 @@
 # Stiff
 
-Native HTTP(S) and JSON building blocks for **Bend 2**. Write a Bend `IO`
+Native HTTP(S) client, HTTP server and JSON building blocks for **Bend 2**. Write a Bend `IO`
 program, compile it to an executable, and run it with libcurl and json-c.
 
 **Status:** experimental, pinned to Bend **2.0.20**. No Node or npm dependency.
@@ -9,7 +9,8 @@ This is not a static binary distribution or a production-readiness claim.
 ## Get started
 
 You need Clang, make, pkg-config, libcurl development files (7.85 or newer),
-json-c development files, and OpenSSL for tests. Python **3.11.8+** is used only
+json-c development files, libevent **2.1.12+** for server builds/tests, and OpenSSL
+for tests. Python **3.11.8+** is used only
 for setup and tests; it is not part of the application runtime. These Python
 tools use the standard library and require no packages or virtual environment.
 
@@ -39,6 +40,21 @@ If you already have Bend 2.0.20, skip setup and set `BEND` to its executable.
 Executables link dynamically to libcurl and json-c. The target machine needs
 those libraries and a CA trust store, but not Bend or Python. Build on the
 platform where the executable will run.
+
+## Run a native HTTP server
+
+```sh
+make server
+./.cache/native/server 127.0.0.1 8080
+```
+
+The [example](examples/server.bend) routes `GET /health` and `POST /echo`, and
+returns JSON. Handlers run concurrently; SIGINT/SIGTERM stops admissions and
+drains dispatched requests. Build your handler as `Incoming -> IO(Reply)` and
+pass it to `Web.serve(~handler)` after listening.
+
+See [server API and limits](docs/server.md) for configuration, headers, deadlines
+and shutdown semantics. This version uses HTTP with TLS at a reverse proxy.
 
 ## Use Stiff in your own project
 

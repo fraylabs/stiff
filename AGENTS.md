@@ -11,7 +11,9 @@ Never copy private product code, data or history.
   verify its laws. Check the verdict, not just a successful exit status.
 - Maintain the native-only workflow. Do not reintroduce JavaScript runtimes,
   package managers, hosted backends or test tooling.
-- Treat libcurl, json-c and the Bend compiler as trusted implementation, not
+- Server changes need libevent 2.1.12+ and the native lifecycle/framing tests;
+  preserve the distinction between network grace and application cancellation.
+- Treat libcurl, libevent, json-c and the Bend compiler as trusted implementation, not
   formally verified code. Do not disable TLS verification or add implicit retries.
 - Constructor packing is pinned private compiler ABI. Cover native layouts with
   actual compiled programs whenever types or foreign effects change.

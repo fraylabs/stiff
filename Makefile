@@ -1,4 +1,4 @@
-.PHONY: setup build test
+.PHONY: setup build server test
 
 setup:
 	python3 scripts/setup.py
@@ -8,3 +8,6 @@ build:
 
 test:
 	python3 -m unittest discover -s test -p 'test_*.py' -v
+
+server:
+	./scripts/build-native.sh examples/server.bend .cache/native/server
