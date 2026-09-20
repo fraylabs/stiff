@@ -1,16 +1,40 @@
 # Stiff
 
-HTTP building blocks for **Bend 2**. Write a Bend `IO` program and run it with
-Stiff's Node host. An early experiment by Fray.
+HTTP building blocks for **Bend 2**. Write a Bend `IO` program and run it as a
+native executable or with Stiff's Node host. An early experiment by Fray.
 
-Stiff pairs pure Bend request definitions and response policy with Node's HTTP(S)
-transport and JSON parser. The first slice supports GET and JSON POST, deadlines,
+Stiff pairs pure Bend request definitions and response policy with libcurl/json-c
+or Node's HTTP(S) transport and JSON parser. It supports GET and JSON POST, deadlines,
 cancellation, bounded response bodies, and explicit HTTP status handling.
 
 **Status:** experimental source prototype, pinned to Bend **2.0.20**. Bend entry
-points and a JavaScript API are supported. Execution requires the Stiff Node
-runner; native executables, the upstream Bun IO runner, and npm distribution are
-not supported yet.
+points, an experimental native CPU backend and a JavaScript API are supported.
+Native executables require libcurl and json-c, but **do not require Node**.
+This is a native-path proof, not a portable binary release or a production-readiness claim.
+The upstream Bun IO runner and npm distribution are not supported yet.
+
+## Native build (no Node required)
+
+Install the standalone **Bend 2.0.20** compiler, Clang, pkg-config, libcurl
+development files and json-c development files. Then:
+
+```sh
+./scripts/build-native.sh examples/get-json.bend .cache/native/get-json
+./.cache/native/get-json https://httpbin.org/json
+```
+
+Set `BEND` to a compiler path if it is not on PATH. The same program prints
+`HTTP 200` and `Sample Slide Show`. For the source checkout/Node toolchain below,
+the alternative builder is:
+
+```sh
+npm run build:native -- examples/get-json.bend .cache/native/get-json
+npm run test:native
+```
+
+The alternative builder and test harness use Node; the resulting program does
+not. See [native build and verification notes](docs/native.md) for dependencies,
+backend differences and the reproduced upstream sanitizer failure.
 
 ## Run it
 
@@ -62,13 +86,14 @@ relative to your `.bend` file. The example includes these imports and `show`.
 `Json.field(key, value)` returns `Some{value}` or `None{}`. JSON values use explicit
 `JsonNull`, `JsonBool`, `JsonNumber`, `JsonString`, `JsonArray` and `JsonObject`
 constructors. Array items and object entries are Bend lists. Numbers contain a
-decimal string **after Node's JSON parsing**, so they have JavaScript number
-precision, not arbitrary decimal precision. Duplicate keys follow Node's
-last-value behavior. The bridge rejects nonfinite numbers and nesting deeper
+decimal string after the host parser, with no arbitrary-precision guarantee.
+Node uses JavaScript number precision; native json-c uses its own numeric spelling
+and rejects integer tokens outside the JavaScript safe-integer range. Duplicate
+keys use the last value. The bridge rejects nonfinite numbers and nesting deeper
 than 128 levels with `json_number_range` and `json_too_deep` errors.
 
-The runner supports sequential `IO.pure`/`IO.bind`/`do`, `IO.print`, `IO.write`,
-`IO.print_err`, `IO.args`, `IO.sleep`, `IO.die`, and the two Stiff effects. Other
+The Node runner supports sequential `IO.pure`/`IO.bind`/`do`, `IO.print`, `IO.write`,
+`IO.print_err`, `IO.args`, `IO.sleep`, `IO.die`, Stiff HTTP and JSON parsing. Other
 effects fail explicitly. Channels, spawned tasks, file IO, and native sockets
 are not implemented by this runner. Ctrl-C aborts the active HTTP call or sleep,
 stops continuation delivery, and exits with code 130. The Bend API currently has
@@ -76,9 +101,8 @@ no custom-header option; that remains available through the JavaScript API.
 
 The runner uses the pinned compiler's IO operation representation and awaits
 asynchronous effects in Node. It does not modify upstream source. It runs trusted
-program source and foreign effects; it is not a sandbox. Stiff's `.c` effect stub
-deliberately refuses native compilation rather than silently supplying an
-unimplemented transport.
+program source and foreign effects; it is not a sandbox. Native compilation uses
+Bend's C runtime and Stiff's C effects, documented separately in the native notes.
 
 ## JavaScript API
 
@@ -150,15 +174,19 @@ including GET/POST, nested JSON lookup, transport errors, deadline/size limits,
 TLS trust, unsupported effects, asynchronous sleep and SIGINT cancellation. They
 also check that cancellation does not print the interrupted continuation's result.
 
-These proofs do **not** verify TLS, Node fetch, JSON parsing, the loader, or the
+`npm run test:native` builds and copies real executables outside the checkout,
+runs them with no Node on PATH, and checks the native HTTP/JSON boundary and
+failure paths against local fixtures.
+
+These proofs do **not** verify TLS, libcurl, Node fetch, JSON parsing, the loader, or the
 Bend compiler. The host adapter and compiler remain trusted dependencies.
 
 ## Direction
 
-The Bend entry point now works through a small Node runner. Next candidates are
-request headers in the Bend API, a stable distribution format, and a native
-effect backend. Each needs explicit compatibility and transport tests; compiler
-upgrades remain deliberate because the runner depends on compiler internals.
+The native path is working alongside the Node runner. Next candidates are
+request headers in the Bend API, a stable distribution format and broader backend
+conformance. Compiler upgrades remain deliberate because both adapters depend on
+compiler internals; sanitizer compatibility remains unresolved upstream.
 
 Contributions should include a runnable example or a failing case, clearly
 separate pure laws from host behavior, and keep compiler upgrades explicit.

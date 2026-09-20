@@ -9,6 +9,14 @@ type Json is Data:
   JsonArray{items: List<&2, Json>}
   JsonObject{entries: List<&2, Sigma<&2, &2, String, _ => Json>>}
 
+type ParseResult is Data:
+  JsonDone{value: Json}
+  JsonFailure{code: String, message: String}
+
+def Json.parse(text: String) -> IO(ParseResult):
+  import "./effects/json.c"
+  import "./effects/json.js"
+
 def lookup_step(found: Bool, value: Json, rest: Unit -> Maybe<Json>) -> Maybe<Json>:
   match found:
     case True{}:

@@ -8,7 +8,9 @@
   "engines": { "node": ">=26" },
   "scripts": {
     "setup": "node scripts/setup.mjs",
-    "test": "node --import ./.cache/bend/bend2/main.ts --test test/*.test.mjs",
+    "test": "node --import ./.cache/bend/bend2/main.ts --test test/http.test.mjs test/bend-io.test.mjs",
+    "test:native": "node --test test/native.test.mjs",
+    "build:native": "node scripts/build-native.mjs",
     "example": "node --import ./.cache/bend/bend2/main.ts examples/get-json.mjs",
     "bend": "node --import ./.cache/bend/bend2/main.ts scripts/run.mjs"
   }

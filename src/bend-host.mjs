@@ -1,4 +1,4 @@
-import { send, sendJson, StiffError } from './node.mjs';
+import { send, StiffError } from './node.mjs';
 
 function list(values) {
   let result = { $: 'Nil' };
@@ -35,17 +35,18 @@ export function createHost({ signal, args = [], stdout = process.stdout, stderr 
     args,
     signal,
     write(fd, data) { (fd === 2 ? stderr : stdout).write(data); },
+    parseJson(text) {
+      let value;
+      try { value = JSON.parse(text); }
+      catch { return { $: 'JsonFailure', code: 'invalid_json_response', message: 'Response is not valid JSON.' }; }
+      try { return { $: 'JsonDone', value: toBendJson(value) }; }
+      catch (error) { return errorResult(error, 'JsonFailure'); }
+    },
     async send(request) {
       try {
         const response = await send(request, { signal });
         return { $: 'HttpOk', response: { $: 'Response', status: response.status, body: response.body } };
       } catch (error) { return errorResult(error, 'HttpError'); }
-    },
-    async sendJson(request) {
-      try {
-        const response = await sendJson(request, { signal });
-        return { $: 'JsonOk', status: response.status, value: toBendJson(response.data) };
-      } catch (error) { return errorResult(error, 'JsonError'); }
     },
   };
 }

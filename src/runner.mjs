@@ -4,7 +4,7 @@ import * as Bend from '../.cache/bend/bend2/bend.ts';
 import * as Compiler from '../.cache/bend/bend2/comp.ts';
 import { createHost } from './bend-host.mjs';
 
-const supported = new Set(['stiff_send', 'stiff_send_json', 'io_print', 'io_write',
+const supported = new Set(['stiff_send', 'json_parse', 'io_print', 'io_write',
   'io_print_err', 'io_args', 'io_sleep']);
 
 /** Compile standard Bend IO and interpret its operations asynchronously in Node.

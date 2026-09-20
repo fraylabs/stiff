@@ -15,5 +15,8 @@ upgrade is explicitly tested. Do not copy private product code, data or history.
 - The Bend IO runner supports only the effects listed in README.md. Keep its
   compiler-internal integration in `src/runner.mjs`; cover changes with real
   `.bend` programs and retain explicit failure for unsupported effects.
-- Do not imply native executable or upstream Bun IO support. The working Bend
-  entry point requires Stiff's Node runner.
+- Native effects are an experimental CPU backend using libcurl/json-c. Run
+  `npm run test:native` after changing native code or the Bend-facing types.
+  Constructor packing is pinned compiler ABI, not a stable public interface.
+- See docs/native.md for numeric/Unicode limits and the reproduced upstream
+  sanitizer failure. Do not claim sanitizer verification or static portability.

@@ -12,3 +12,8 @@ jobs:
           node-version: '26'
       - run: npm run setup
       - run: npm test
+      - name: Install native build libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang pkg-config libcurl4-openssl-dev libjson-c-dev
+      - run: npm run test:native

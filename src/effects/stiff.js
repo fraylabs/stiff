@@ -4,8 +4,3 @@ function stiff_send(request) {
   if (typeof host === 'undefined') throw new Error('Use the Stiff Node IO runner: npm run bend -- program.bend');
   return host.send(request);
 }
-
-function stiff_send_json(request) {
-  if (typeof host === 'undefined') throw new Error('Use the Stiff Node IO runner: npm run bend -- program.bend');
-  return host.sendJson(request);
-}
