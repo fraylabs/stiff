@@ -25,6 +25,7 @@ class NativeTests(unittest.TestCase):
         cls.stop = threading.Event()
         cls.interrupted = threading.Event()
         cls.visits = {}
+        cls.proxy_headers = {}
         cls.lock = threading.Lock()
         for source, name in [("examples/get-json.bend", "get-json"),
                              ("test/fixtures/native-http.bend", "http"),
@@ -50,6 +51,12 @@ class NativeTests(unittest.TestCase):
 
             def log_message(self, *_args):
                 pass
+
+            def do_CONNECT(self):
+                cls.proxy_headers = {name.lower(): value for name, value in self.headers.items()}
+                self.send_response(502)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
 
             def do_GET(self):
                 with cls.lock:
@@ -77,9 +84,9 @@ class NativeTests(unittest.TestCase):
                         body = b'{"message":"Authenticated with Stiff"}'
                     else:
                         status, body = 401, b'{"message":"Unauthorized"}'
-                elif self.path == "/redirect":
+                elif self.path in ("/redirect", "/auth-redirect"):
                     status, body = 302, b"{}"
-                    headers["Location"] = "/destination"
+                    headers["Location"] = (cls.tls_url if self.path == "/auth-redirect" else "") + "/destination"
                 elif self.path == "/empty":
                     status, body = 204, b""
                 elif self.path == "/bad-json":
@@ -298,10 +305,59 @@ class NativeTests(unittest.TestCase):
         self.assertNotIn("/invalid-header", self.visits)
 
     def test_authenticated_redirect_does_not_forward(self):
-        result = self.execute("headers", self.base + "/redirect", "GET", "",
+        result = self.execute("headers", self.base + "/auth-redirect", "GET", "",
                               "Authorization", "Bearer synthetic-secret", "X-Api-Key", "synthetic-key")
         self.assertEqual(result.stdout, "302:{}\n")
         self.assertNotIn("/destination", self.visits)
+
+    def test_proxy_connect_excludes_application_credentials(self):
+        env = {**self.environment(), "NO_PROXY": "", "HTTPS_PROXY": self.base}
+        result = subprocess.run([str(self.directory / "headers"), self.tls_url, "GET", "",
+                                 "Authorization", "Bearer synthetic-secret", "X-Api-Key", "synthetic-key"],
+                                cwd=self.directory, env=env, capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(result.stderr.startswith("network:"), result.stderr)
+        self.assertIn("host", self.proxy_headers)
+        self.assertNotIn("authorization", self.proxy_headers)
+        self.assertNotIn("x-api-key", self.proxy_headers)
+
+    def test_standalone_pinned_authenticated_project(self):
+        with tempfile.TemporaryDirectory(prefix="stiff-consumer-") as directory:
+            project = Path(directory) / "app"
+            shutil.copytree(ROOT / "examples/auth-client", project,
+                            ignore=shutil.ignore_patterns("deps", "build"))
+            # Exercise the documented GitHub fetch, compiler install and build.
+            result = subprocess.run(["make", "setup", "build"], cwd=project,
+                                    capture_output=True, text=True, timeout=120,
+                                    env={k: v for k, v in os.environ.items() if k != "BEND"})
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            expected = (project / "stiff.rev").read_text().strip()
+            revision = subprocess.check_output(["git", "-C", str(project / "deps/stiff"),
+                                                "rev-parse", "HEAD"], text=True).strip()
+            self.assertEqual(revision, expected)
+            # Move only the executable outside both the application and dependency trees.
+            executable = Path(directory) / "auth-client"
+            shutil.copy2(project / "build/auth-client", executable)
+            for token, status in (("synthetic-test-token", 200), ("wrong-token", 401)):
+                with self.subTest(status=status):
+                    env = {**self.environment(), "STIFF_TOKEN": token}
+                    result = subprocess.run([str(executable), self.tls_url + "/auth"],
+                                            cwd=directory, env=env, capture_output=True,
+                                            text=True, timeout=5)
+                    self.assertEqual(result.returncode, 0 if status == 200 else 1)
+                    if status == 200:
+                        self.assertEqual(result.stdout, "HTTP 200\nAuthenticated with Stiff\n")
+                        self.assertEqual(result.stderr, "")
+                    else:
+                        self.assertEqual(result.stdout, "")
+                        self.assertEqual(result.stderr, "HTTP 401\n")
+                    self.assertNotIn(token, result.stdout + result.stderr)
+            # A changed pin must fail before compiling an unrequested dependency.
+            (project / "stiff.rev").write_text("0" * 40 + "\n")
+            result = subprocess.run(["make", "build"], cwd=project, capture_output=True,
+                                    text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Dependency revision differs", result.stderr)
 
     def test_pure_policy_boundaries_and_defaults(self):
         result = self.execute("policy")

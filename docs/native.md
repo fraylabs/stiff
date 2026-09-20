@@ -50,8 +50,9 @@ No native effect calls Node or shells out to the curl command.
   rejected; native POST validation also imposes the parser's nesting bound.
 - Constructor layouts are private Bend 2.0.20 ABI. In particular, HttpOk's nested
   Response is flattened and JsonBool packs its scalar in the constructor word.
-  Real native tests cover these layouts; every compiler upgrade needs a rebuild
-  and re-verification. Neither the compiler nor foreign effects are formally
+  Request now carries six fields; its header list contains boxed two-field Header
+  values. Real native tests cover these layouts; every compiler upgrade needs a
+  rebuild and re-verification. Neither the compiler nor foreign effects are formally
   verified by Stiff's pure laws.
 
 ## Evidence and checks

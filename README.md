@@ -40,6 +40,16 @@ Executables link dynamically to libcurl and json-c. The target machine needs
 those libraries and a CA trust store, but not Bend or Python. Build on the
 platform where the executable will run.
 
+## Use Stiff in your own project
+
+Copy [examples/auth-client](examples/auth-client) into a separate project and run
+`make setup build` there. It fetches Stiff directly from GitHub at the exact
+revision in `stiff.rev`, installs the pinned compiler, and builds a native client.
+Set `STIFF_TOKEN` in the environment, then run
+`./build/auth-client https://your-api.example/resource`.
+No registry or BendHub is involved. Commit the revision file alongside your app;
+upgrades are explicit. See the example README for dependency and token handling.
+
 ## Bend API
 
 The complete [example](examples/get-json.bend) sends an HTTPS request, matches
@@ -120,7 +130,10 @@ untrusted destinations need their own destination policy.
 `make test` checks the pure laws with the standalone Bend checker, requires a
 false proof to fail, and compiles actual executables for local HTTP/HTTPS tests.
 The executables are copied outside the checkout and run without source or tools
-on PATH. CI performs this native workflow on Linux without JavaScript actions.
+on PATH. The standalone example is also copied into a separate project, fetches
+its Git-pinned dependency and compiler, and calls a local HTTPS API with synthetic
+credentials. That integration check requires GitHub network access. CI performs
+this native workflow on Linux without JavaScript actions.
 
 The laws cover pure request policy. They do not verify libcurl, json-c, native
 memory safety, or the Bend compiler. Compiler layouts are pinned private ABI.
