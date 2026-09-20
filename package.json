@@ -1,0 +1,14 @@
+{
+  "name": "@fraylabs/stiff",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Experimental HTTP building blocks for Bend 2, hosted in Node.js",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=26" },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "test": "node --import ./.cache/bend/bend2/main.ts --test test/*.test.mjs",
+    "example": "node --import ./.cache/bend/bend2/main.ts examples/get-json.mjs"
+  }
+}
