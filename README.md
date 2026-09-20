@@ -59,6 +59,8 @@ to your `.bend` file. The example includes these imports and `show`.
 | --- | --- |
 | `Http.get(url)` | GET request with default limits |
 | `Http.post_json(url, body)` | JSON POST request; body is JSON text |
+| `Http.with_header(name, value, request)` | Set a header; latest call wins, case-insensitively |
+| `Http.with_bearer(token, request)` | Set `Authorization: Bearer <token>` |
 | `Http.with_timeout(ms, request)` | Request with a whole-transfer deadline |
 | `Http.with_max_bytes(bytes, request)` | Request with a response-size limit |
 | `Net.Stiff.send(request)` | `HttpOk{Response{status, body}}` or `HttpError{code, message}` |
@@ -73,7 +75,7 @@ object entries are Bend lists. `Json.as_string` returns an optional String.
 
 ## Behavior
 
-- GET and JSON POST; no custom-header option yet.
+- GET and JSON POST with custom headers and bearer authentication.
 - Default deadline: 10 seconds, covering headers and body.
 - Default response limit: 1 MiB after decompression, before UTF-8 decoding.
 - HTTP(S) only; embedded URL credentials are rejected.
@@ -84,9 +86,25 @@ object entries are Bend lists. `Json.as_string` returns an optional String.
 - Bodies must be valid UTF-8. JSON POST bodies are validated before sending.
 - Native SIGINT terminates the process, preventing continuation output. There is
   no per-request cancellation token.
-- Failure codes include `invalid_request`, `invalid_json_request`, `network`,
+- Failure codes include `invalid_request`, `invalid_header`, `invalid_json_request`, `network`,
   `timeout`, `body_too_large`, `invalid_utf8`, `invalid_json_response`,
   `json_number_range`, and `json_too_deep`.
+
+Header names must be ASCII HTTP tokens. Values reject NUL, CR/LF and other
+control characters except horizontal tabs. Empty values are sent explicitly.
+Limits are 128 entries, 8 KiB per name/value, and 64 KiB total including separators;
+these apply before duplicate names are resolved. Invalid headers fail before
+network access, and errors never include header values.
+
+Stiff owns `Host`, `Content-Length`, `Transfer-Encoding`, `Connection`, `Expect`,
+`Trailer`, `Upgrade`, `Proxy-Authorization`, `Proxy-Connection`, `Accept-Encoding`
+and `TE`; these cannot be supplied. `Accept` defaults to `application/json` and
+JSON POST adds `Content-Type: application/json`; either can be overridden.
+`with_bearer` formats a header only: it does not acquire or refresh credentials.
+Use HTTPS for real credentials. Custom headers are excluded from proxy CONNECT.
+
+The `Request` constructor now has a sixth field, `headers: List<&2, Header>`.
+Prefer the request helpers; direct constructor users must add `Nil{}` for no headers.
 
 Numbers are decimal strings from json-c, without an arbitrary-precision
 contract. Integer tokens outside ±9,007,199,254,740,991 are rejected. Duplicate

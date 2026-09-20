@@ -2,15 +2,17 @@ import Base
 import ../../src/http.bend as Http
 import ../../src/io.bend as Net
 
-def number(value: Maybe<&2, U32>, fallback: U32) -> U32:
-  match value:
-    case Some{n}: n
-    case None{}: fallback
+def headers(args: List<String>, request: Http.Request) -> Http.Request:
+  match args:
+    case Con{name, Con{value, tail}}:
+      headers(tail, Http.with_header(name, value, request))
+    case other:
+      request
 
 def request(args: List<String>) -> Http.Request:
   match args:
-    case Con{url, Con{method, Con{body, Con{timeout, Con{limit, tail}}}}}:
-      Http.Request{method, url, body, number(U32.read(timeout), 10000), number(U32.read(limit), 1048576), Nil{}}
+    case Con{url, Con{method, Con{body, tail}}}:
+      headers(tail, Http.Request{method, url, body, 2000, 1048576, Nil{}})
     case other:
       Http.get("http://127.0.0.1:1")
 
@@ -19,7 +21,7 @@ def show(result: Net.HttpResult) -> IO(Unit):
     case Net.HttpOk{Net.Response{status, body}}:
       IO.print(U32.show(status) ++ ":" ++ body)
     case Net.HttpError{code, message}:
-      IO.die(Unit, 1, code)
+      IO.die(Unit, 1, code ++ ": " ++ message)
 
 def main() -> IO(Unit):
   do IO<Unit>:

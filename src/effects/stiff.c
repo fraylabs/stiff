@@ -3,12 +3,53 @@
 #include <limits.h>
 #include <math.h>
 
+#define STIFF_MAX_HEADERS 128
+typedef struct { char *name, *value; } StiffHeader;
+
 typedef struct {
+  StiffHeader headers[STIFF_MAX_HEADERS];
+  size_t header_count;
   char *method, *url, *body, *response;
   size_t body_size, used, capacity, limit;
   long timeout, status;
   const char* error;
 } StiffRequest;
+
+// ASCII-only comparison: HTTP field names are ASCII tokens, independent of locale.
+static int stiff_header_eq(const char* a, const char* b) {
+  while (*a && *b) {
+    unsigned x = (unsigned char)*a++, y = (unsigned char)*b++;
+    if (x >= 'A' && x <= 'Z') x += 'a' - 'A';
+    if (y >= 'A' && y <= 'Z') y += 'a' - 'A';
+    if (x != y) return 0;
+  }
+  return *a == *b;
+}
+
+static int stiff_header_valid(const char* name, size_t n, const char* value, size_t v) {
+  if (!n || n > 8192 || v > 8192) return 0;
+  for (size_t i = 0; i < n; i++) {
+    unsigned c = (unsigned char)name[i];
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+      || (c && strchr("!#$%&'*+-.^_`|~", c)))) return 0;
+  }
+  for (size_t i = 0; i < v; i++) {
+    unsigned c = (unsigned char)value[i];
+    if ((c < 32 && c != '\t') || c == 127) return 0;
+  }
+  // The transport owns routing, framing, compression and connection management.
+  const char* reserved[] = {"Host", "Content-Length", "Transfer-Encoding", "Connection",
+    "Expect", "Trailer", "Upgrade", "Proxy-Authorization", "Proxy-Connection", "Accept-Encoding", "TE"};
+  for (size_t i = 0; i < sizeof(reserved) / sizeof(*reserved); i++)
+    if (stiff_header_eq(name, reserved[i])) return 0;
+  return 1;
+}
+
+static int stiff_has_header(StiffRequest* request, const char* name, size_t before) {
+  for (size_t i = 0; i < before; i++)
+    if (stiff_header_eq(request->headers[i].name, name)) return 1;
+  return 0;
+}
 
 static pthread_once_t stiff_curl_once = PTHREAD_ONCE_INIT;
 static CURLcode stiff_curl_ready;
@@ -93,13 +134,32 @@ static void stiff_send_call(IoWork* work) {
   curl_url_get(url, CURLUPART_USER, &user, 0);
   curl_url_get(url, CURLUPART_PASSWORD, &password, 0);
   if ((user && *user) || (password && *password)) { request->error = "invalid_request"; goto done; }
-  headers = curl_slist_append(NULL, "Accept: application/json");
-  if (!headers) { request->error = "network"; goto done; }
-  if (!strcmp(request->method, "POST")) {
-    if (!stiff_valid_json(request->body, request->body_size)) { request->error = "invalid_json_request"; goto done; }
-    struct curl_slist* next = curl_slist_append(headers, "Content-Type: application/json");
+  for (size_t i = 0; i < request->header_count; i++) {
+    StiffHeader* header = &request->headers[i];
+    if (stiff_has_header(request, header->name, i)) continue;
+    size_t n = strlen(header->name), v = strlen(header->value);
+    char* line = malloc(n + v + 3);
+    if (!line) { request->error = "network"; goto done; }
+    // libcurl's semicolon form sends an explicitly empty value.
+    if (v) snprintf(line, n + v + 3, "%s: %s", header->name, header->value);
+    else snprintf(line, n + v + 3, "%s;", header->name);
+    struct curl_slist* next = curl_slist_append(headers, line);
+    free(line);
     if (!next) { request->error = "network"; goto done; }
     headers = next;
+  }
+  if (!stiff_has_header(request, "Accept", request->header_count)) {
+    struct curl_slist* next = curl_slist_append(headers, "Accept: application/json");
+    if (!next) { request->error = "network"; goto done; }
+    headers = next;
+  }
+  if (!strcmp(request->method, "POST")) {
+    if (!stiff_valid_json(request->body, request->body_size)) { request->error = "invalid_json_request"; goto done; }
+    if (!stiff_has_header(request, "Content-Type", request->header_count)) {
+      struct curl_slist* next = curl_slist_append(headers, "Content-Type: application/json");
+      if (!next) { request->error = "network"; goto done; }
+      headers = next;
+    }
   }
 #define STIFF_SET(option, value) do { if (curl_easy_setopt(curl, option, value) != CURLE_OK) { request->error = "network"; goto done; } } while (0)
   STIFF_SET(CURLOPT_CURLU, url);
@@ -111,6 +171,7 @@ static void stiff_send_call(IoWork* work) {
   STIFF_SET(CURLOPT_TIMEOUT_MS, request->timeout);
   STIFF_SET(CURLOPT_ACCEPT_ENCODING, "");
   STIFF_SET(CURLOPT_HTTPHEADER, headers);
+  STIFF_SET(CURLOPT_HEADEROPT, (long)CURLHEADER_SEPARATE);
   STIFF_SET(CURLOPT_WRITEFUNCTION, stiff_receive);
   STIFF_SET(CURLOPT_WRITEDATA, request);
   const char* ca = getenv("STIFF_CA_BUNDLE");
@@ -148,14 +209,17 @@ static Term stiff_send_pack(Env e, IoWork* work) {
     // Bend 2.0.20 flattens HttpOk{Response{status, body}} into two fields.
     result = io_node(e, CID_HTTPOK, request->status, io_str(e, request->response, request->used));
   }
+  for (size_t i = 0; i < request->header_count; i++) {
+    free(request->headers[i].name); free(request->headers[i].value);
+  }
   free(request->method); free(request->url); free(request->body); free(request->response); free(request);
   work->data = NULL;
   return result;
 }
 
 static Term stiff_send_run(Env e, Term* f, IoWork* work) {
-  Term fields[5];
-  spare_free(e, cls_fit(5), ctr_take(e, f[0], 5, fields));
+  Term fields[6];
+  spare_free(e, cls_fit(6), ctr_take(e, f[0], 6, fields));
   StiffRequest* request = io_mem(calloc(1, sizeof(StiffRequest)));
   u64 method_size, url_size, body_size;
   request->method = io_cstr(e, fields[0], &method_size);
@@ -165,6 +229,30 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
   request->timeout = (u32)fields[3];
   request->limit = (u32)fields[4];
   work->data = (char*)request;
+  Term items = fields[5];
+  size_t header_bytes = 0;
+  while (term_aux(items) != CID_NIL) {
+    if (request->header_count == STIFF_MAX_HEADERS) {
+      term_sink(e, items);
+      request->error = "invalid_header";
+      break;
+    }
+    // List nodes hold a boxed Header and tail in Bend 2.0.20.
+    Term pair[2], header[2];
+    spare_free(e, cls_fit(2), ctr_take(e, items, 2, pair));
+    spare_free(e, cls_fit(2), ctr_take(e, pair[0], 2, header));
+    items = pair[1];
+    StiffHeader* entry = &request->headers[request->header_count++];
+    u64 n, v;
+    entry->name = io_cstr(e, header[0], &n);
+    entry->value = io_cstr(e, header[1], &v);
+    if (!stiff_header_valid(entry->name, n, entry->value, v) || n + v + 4 > 65536 - header_bytes) {
+      term_sink(e, items);
+      request->error = "invalid_header";
+      break;
+    }
+    header_bytes += n + v + 4;
+  }
   if (io_nul(request->method, method_size) || io_nul(request->url, url_size)
     || (strcmp(request->method, "GET") && strcmp(request->method, "POST"))
     || (!strcmp(request->method, "GET") && body_size != 0)
@@ -172,6 +260,7 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
     request->error = "invalid_request";
     return stiff_send_pack(e, work);
   }
+  if (request->error) return stiff_send_pack(e, work);
   return io_work(work, stiff_send_call, stiff_send_pack);
 }
 

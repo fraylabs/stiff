@@ -15,3 +15,15 @@ law setting_timeout_preserves_body_limit:
   for +ms: U32
   for +request: Http.Request
   {Http.body_limit(Http.with_timeout(ms, request)) == Http.body_limit(request) : U32}
+
+law setting_header_preserves_timeout:
+  for +name: String
+  for +value: String
+  for +request: Http.Request
+  {Http.timeout(Http.with_header(name, value, request)) == Http.timeout(request) : U32}
+
+law setting_header_preserves_body_limit:
+  for +name: String
+  for +value: String
+  for +request: Http.Request
+  {Http.body_limit(Http.with_header(name, value, request)) == Http.body_limit(request) : U32}

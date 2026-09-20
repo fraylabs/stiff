@@ -29,7 +29,9 @@ class NativeTests(unittest.TestCase):
         for source, name in [("examples/get-json.bend", "get-json"),
                              ("test/fixtures/native-http.bend", "http"),
                              ("test/fixtures/native-json.bend", "json"),
-                             ("test/fixtures/native-policy.bend", "policy")]:
+                             ("test/fixtures/native-policy.bend", "policy"),
+                             ("test/fixtures/native-headers.bend", "headers"),
+                             ("test/fixtures/native-header-nul.bend", "header-nul")]:
             result = subprocess.run([str(ROOT / "scripts/build-native.sh"), source,
                                      str(ROOT / ".cache/native" / name)], cwd=ROOT,
                                     capture_output=True, text=True, timeout=60)
@@ -66,7 +68,16 @@ class NativeTests(unittest.TestCase):
                 status = 503 if self.path == "/status" else 200
                 body = b'{"slideshow":{"title":"Native Bend"}}'
                 headers = {}
-                if self.path == "/redirect":
+                if self.path == "/headers":
+                    body = json.dumps({name.lower(): self.headers.get_all(name)
+                                       for name in self.headers.keys()}).encode()
+                elif self.path == "/auth":
+                    if (self.headers.get("Authorization") == "Bearer synthetic-test-token"
+                            and self.headers.get("User-Agent") == "stiff-auth-example"):
+                        body = b'{"message":"Authenticated with Stiff"}'
+                    else:
+                        status, body = 401, b'{"message":"Unauthorized"}'
+                elif self.path == "/redirect":
                     status, body = 302, b"{}"
                     headers["Location"] = "/destination"
                 elif self.path == "/empty":
@@ -235,6 +246,62 @@ class NativeTests(unittest.TestCase):
                 if child.poll() is None:
                     child.kill()
                     child.wait()
+
+    def test_custom_headers_and_case_insensitive_replacement(self):
+        result = self.execute("headers", self.tls_url + "/headers", "GET", "",
+                              "X-Api-Key", "synthetic-key", "x-api-key", "replacement",
+                              "Accept", "application/vnd.test+json", "X-Empty", "",
+                              "Authorization", "Bearer synthetic-test-token")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        status, body = result.stdout.split(":", 1)
+        self.assertEqual(status, "200")
+        headers = json.loads(body)
+        self.assertEqual(headers["x-api-key"], ["replacement"])
+        self.assertEqual(headers["authorization"], ["Bearer synthetic-test-token"])
+        self.assertEqual(headers["accept"], ["application/vnd.test+json"])
+        self.assertEqual(headers["x-empty"], [""])
+
+    def test_post_content_type_override(self):
+        result = self.execute("headers", self.base + "/headers", "POST", "{}",
+                              "content-type", "application/vnd.test+json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        headers = json.loads(result.stdout.split(":", 1)[1])
+        self.assertEqual(headers["content-type"], ["application/vnd.test+json"])
+        self.assertEqual(headers["content-length"], ["2"])
+
+    def test_header_validation_precedes_network_and_redacts_errors(self):
+        cases = [("", "x"), ("Bad Name", "x"), ("X:Injected", "x"), ("X\r\nBad", "x"),
+                 ("X-Test", "synthetic-secret\r\nInjected: true"), ("X-Test", "bad\x01"),
+                 ("X-Test", "bad\x7f"), ("X-Test", "x" * 8193), ("🌱", "x")]
+        cases += [(name, "x") for name in ("HOST", "content-length", "Transfer-Encoding",
+                  "Connection", "Expect", "Trailer", "Upgrade", "Proxy-Authorization",
+                  "Proxy-Connection", "Accept-Encoding", "TE")]
+        for name, value in cases:
+            with self.subTest(name=name):
+                result = self.execute("headers", self.base + "/invalid-header", "GET", "", name, value)
+                self.assertEqual(result.returncode, 1)
+                self.assertEqual(result.stdout, "")
+                self.assertEqual(result.stderr, "invalid_header: Native HTTP request failed.\n")
+        self.assertNotIn("/invalid-header", self.visits)
+
+    def test_embedded_nul_header_rejection(self):
+        result = self.execute("header-nul")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "invalid_header:invalid_header\n")
+
+    def test_header_resource_limits(self):
+        for pairs in ([item for i in range(129) for item in (f"X-{i}", "v")],
+                      [item for i in range(9) for item in (f"X-{i}", "v" * 8192)]):
+            result = self.execute("headers", self.base + "/invalid-header", "GET", "", *pairs)
+            self.assertEqual(result.returncode, 1)
+            self.assertTrue(result.stderr.startswith("invalid_header:"), result.stderr)
+        self.assertNotIn("/invalid-header", self.visits)
+
+    def test_authenticated_redirect_does_not_forward(self):
+        result = self.execute("headers", self.base + "/redirect", "GET", "",
+                              "Authorization", "Bearer synthetic-secret", "X-Api-Key", "synthetic-key")
+        self.assertEqual(result.stdout, "302:{}\n")
+        self.assertNotIn("/destination", self.visits)
 
     def test_pure_policy_boundaries_and_defaults(self):
         result = self.execute("policy")
