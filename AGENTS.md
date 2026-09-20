@@ -1,22 +1,20 @@
 # Stiff
 
-Stiff is an experimental open-source Bend 2 networking library. Keep changes
-self-contained in this repository and preserve the exact compiler pin until an
-upgrade is explicitly tested. Do not copy private product code, data or history.
+Stiff is an experimental native Bend 2 networking library. Keep changes inside
+this repository and preserve the compiler pin until an upgrade is tested.
+Never copy private product code, data or history.
 
-- Read README.md for the current support boundary.
-- Run `npm run setup`, then `npm test` after changing code or laws.
-- Keep `src/PROOF.bend` in the test path; compiling an application alone is not a
-  substitute for checking laws.
-- Treat the Node transport, codec and Bend compiler as trusted implementation,
-  not formally verified code.
-- Do not disable TLS validation or introduce implicit retries of side effects.
-- Keep generated compiler sources, test certificates and build outputs ignored.
-- The Bend IO runner supports only the effects listed in README.md. Keep its
-  compiler-internal integration in `src/runner.mjs`; cover changes with real
-  `.bend` programs and retain explicit failure for unsupported effects.
-- Native effects are an experimental CPU backend using libcurl/json-c. Run
-  `npm run test:native` after changing native code or the Bend-facing types.
-  Constructor packing is pinned compiler ABI, not a stable public interface.
+- Read README.md for the current API and support boundary.
+- Run `make setup`, then `make test` after changing code or laws. Setup and tests
+  use Python's standard library; applications use the native Bend/C runtime.
+- Keep src/PROOF.bend in the checks. Compiling an application alone does not
+  verify its laws. Check the verdict, not just a successful exit status.
+- Maintain the native-only workflow. Do not reintroduce JavaScript runtimes,
+  package managers, hosted backends or test tooling.
+- Treat libcurl, json-c and the Bend compiler as trusted implementation, not
+  formally verified code. Do not disable TLS verification or add implicit retries.
+- Constructor packing is pinned private compiler ABI. Cover native layouts with
+  actual compiled programs whenever types or foreign effects change.
+- Keep compiler downloads, generated C, binaries and test certificates ignored.
 - See docs/native.md for numeric/Unicode limits and the reproduced upstream
   sanitizer failure. Do not claim sanitizer verification or static portability.

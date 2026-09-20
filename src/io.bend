@@ -15,7 +15,6 @@ type JsonResult is Data:
 
 def Stiff.send(request: Http.Request) -> IO(HttpResult):
   import "./effects/stiff.c"
-  import "./effects/stiff.js"
 
 def finish_json(status: U32, result: Json.ParseResult) -> IO(JsonResult):
   match result:

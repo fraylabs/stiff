@@ -1,6 +1,6 @@
 import Base
 
-# Pure request policy. Network effects are supplied by the Node host.
+# Pure request policy. Network effects are supplied by the native backend.
 type Request is Data:
   Request{method: String, url: String, body: String, timeout_ms: U32, max_bytes: U32}
 

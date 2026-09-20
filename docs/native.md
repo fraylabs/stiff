@@ -1,23 +1,27 @@
 # Native path proof
 
 Stiff compiles a Bend `main() -> IO(...)` to C, links its HTTP and JSON effects
-against libcurl and json-c, and runs as a native executable. The same
-`examples/get-json.bend` works on both the native and Node backends.
+against libcurl and json-c, and runs as a native executable. The runnable application is `examples/get-json.bend`.
 
-## Build paths
+## Build
 
-- **Without Node:** `scripts/build-native.sh input.bend output`, using standalone
-  Bend **2.0.20**, Clang, pkg-config and the two native development libraries.
-  `BEND` and `CC` can select executables. Generated C stays beside the output.
-- **From the source toolchain:** `npm run setup`, then
-  `npm run build:native -- input.bend output`. Node 26 runs the pinned compiler
-  source during this build only.
+`make setup` installs the checksum-verified standalone Bend **2.0.20** release
+under `.cache/toolchain`. Alternatively, supply an existing compiler with `BEND`.
+The application build uses only Bend, Clang, pkg-config, libcurl and json-c:
 
-Both paths link dynamically. This is not a self-contained static binary: the
+```sh
+./scripts/build-native.sh input.bend output
+```
+
+Python's standard library supplies the installer and test harness. There is no
+JavaScript backend, package manifest or runtime, source loader, or npm tooling.
+The build does not invoke Python once the compiler is installed.
+
+Executables link dynamically. This is not a self-contained static binary: the
 target machine still needs compatible libcurl/json-c libraries and a CA trust
 store. Build on the target platform; there is no cross-compilation or Windows
 support claim. Compiler/pkg-config flags currently assume dependency paths
-without spaces. No global tools are installed by either build script.
+without spaces. No global tools are installed by the setup or build scripts.
 
 The native HTTP effect uses libcurl's easy interface on a Bend IO worker, with
 an explicit [whole-transfer deadline](https://curl.se/libcurl/c/CURLOPT_TIMEOUT_MS.html).
@@ -31,14 +35,13 @@ No native effect calls Node or shells out to the curl command.
 
 ## Native-specific limits
 
-- `STIFF_CA_BUNDLE` selects a PEM CA file without disabling verification. The
-  Node backend uses Node's trust configuration instead.
+- `STIFF_CA_BUNDLE` selects a PEM CA file without disabling verification.
 - SIGINT terminates the native process through the OS. This stops continuation
   delivery, but is not a per-request cancellation API and cannot undo a remote
-  side effect. Node's runner uses an AbortSignal before exiting.
+  side effect.
 - The native backend inherits libcurl's supported compression, DNS, proxy and
-  trust-store behavior. These are not asserted identical to Node fetch.
-- JSON entry order and numeric spelling may differ between hosts. Native integer
+  trust-store behavior.
+- JSON entry order and numeric spelling may differ across parser versions. Native integer
   tokens outside ±9,007,199,254,740,991 fail with `json_number_range`, avoiding
   silent json-c integer saturation. No exact-number API is promised.
 - Native JSON rejects NUL object keys and unpaired surrogate escapes rather
@@ -57,19 +60,17 @@ Local development verification on macOS arm64 used Apple Clang, system libcurl
 8.7.1 and json-c 0.19. The executable fetched public HTTPS JSON successfully with
 `PATH=/nonexistent`; `file` identified a Mach-O arm64 executable and `otool -L`
 listed libSystem, libcurl and libjson-c, with no Node runtime. The standalone
-compiler build path is also exercised locally, independently of the Node source
-builder.
+compiler build path is also exercised locally.
 
 ```sh
-npm test                 # Existing Node and proof checks
-npm run test:native      # Builds native programs and exercises local fixtures
+make test               # Native programs, transport fixtures and pure-law checks
 ```
 
 The native suite copies binaries to an isolated temporary directory and runs
 them with a minimal environment and no executable search path. It covers HTTPS
 trust/rejection, GET/POST, no redirects/retries, deadlines, decompressed body
 limits, invalid UTF-8, empty bodies, malformed JSON, native JSON constructors,
-numeric/nesting limits and SIGINT. CI runs both suites on Linux.
+numeric/nesting limits and SIGINT. CI runs this suite on Linux using shell steps without JavaScript actions.
 
 ## Sanitizers: failed upstream-runtime check
 
@@ -80,7 +81,7 @@ The following minimal program imports Base only, with no Stiff code, and
 reproduces a sanitizer failure before its print succeeds:
 
 ```sh
-STIFF_NATIVE_SANITIZE=1 npm run build:native -- \
+STIFF_NATIVE_SANITIZE=1 ./scripts/build-native.sh \
   test/fixtures/native-runtime-smoke.bend .cache/native/runtime-smoke
 ./.cache/native/runtime-smoke
 ```

@@ -15,7 +15,6 @@ type ParseResult is Data:
 
 def Json.parse(text: String) -> IO(ParseResult):
   import "./effects/json.c"
-  import "./effects/json.js"
 
 def lookup_step(found: Bool, value: Json, rest: Unit -> Maybe<Json>) -> Maybe<Json>:
   match found:
