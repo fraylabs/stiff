@@ -1,4 +1,5 @@
 #include <json-c/json.h>
+#include <limits.h>
 #include <math.h>
 
 static unsigned stiff_hex4(const char* text) {

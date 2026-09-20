@@ -1,5 +1,6 @@
 #include <curl/curl.h>
 #include <json-c/json.h>
+#include <limits.h>
 #include <math.h>
 
 typedef struct {
