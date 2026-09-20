@@ -9,6 +9,7 @@
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "test": "node --import ./.cache/bend/bend2/main.ts --test test/*.test.mjs",
-    "example": "node --import ./.cache/bend/bend2/main.ts examples/get-json.mjs"
+    "example": "node --import ./.cache/bend/bend2/main.ts examples/get-json.mjs",
+    "bend": "node --import ./.cache/bend/bend2/main.ts scripts/run.mjs"
   }
 }

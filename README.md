@@ -1,13 +1,16 @@
 # Stiff
 
-HTTP building blocks for **Bend 2**. An early, Node-hosted experiment by Fray.
+HTTP building blocks for **Bend 2**. Write a Bend `IO` program and run it with
+Stiff's Node host. An early experiment by Fray.
 
 Stiff pairs pure Bend request definitions and response policy with Node's HTTP(S)
 transport and JSON parser. The first slice supports GET and JSON POST, deadlines,
 cancellation, bounded response bodies, and explicit HTTP status handling.
 
-**Status:** experimental source prototype, pinned to Bend **2.0.20**. This is not
-yet a standalone Bend IO library, native backend, web framework, or npm release.
+**Status:** experimental source prototype, pinned to Bend **2.0.20**. Bend entry
+points and a JavaScript API are supported. Execution requires the Stiff Node
+runner; native executables, the upstream Bun IO runner, and npm distribution are
+not supported yet.
 
 ## Run it
 
@@ -18,7 +21,7 @@ git clone https://github.com/fraylabs/stiff.git
 cd stiff
 npm run setup
 npm test
-npm run example -- https://httpbin.org/json
+npm run bend -- examples/get-json.bend
 ```
 
 Setup fetches the upstream Bend source into ignored `.cache/bend/` and checks its
@@ -27,7 +30,57 @@ and installs no npm dependencies. The source loader is required because this
 Bend release does not package it with the standalone binary. Node may print
 warnings about upstream module loading; that integration remains experimental.
 
-## Use the prototype
+## Write a Bend program
+
+The runnable [example](examples/get-json.bend) sends an HTTPS request, matches the
+result, reads the nested JSON `slideshow.title` field and prints it. Pass another
+URL as an argument:
+
+```sh
+npm run bend -- examples/get-json.bend https://httpbin.org/json
+# HTTP 200
+# Sample Slide Show
+```
+
+The main operation uses standard Bend `IO` syntax:
+
+```python
+def main() -> IO(Unit):
+  do IO<Unit>:
+    response : Net.JsonResult <- Net.Stiff.send_json(Http.get("https://httpbin.org/json"))
+    show(response)
+```
+
+Here `Http` imports `src/http.bend` and `Net` imports `src/io.bend` using paths
+relative to your `.bend` file. The example includes these imports and `show`.
+
+| Operation | Bend result |
+| --- | --- |
+| `Net.Stiff.send(request)` | `HttpOk{Response{status, body}}` or `HttpError{code, message}` |
+| `Net.Stiff.send_json(request)` | `JsonOk{status, value}` or `JsonError{code, message}` |
+
+`Json.field(key, value)` returns `Some{value}` or `None{}`. JSON values use explicit
+`JsonNull`, `JsonBool`, `JsonNumber`, `JsonString`, `JsonArray` and `JsonObject`
+constructors. Array items and object entries are Bend lists. Numbers contain a
+decimal string **after Node's JSON parsing**, so they have JavaScript number
+precision, not arbitrary decimal precision. Duplicate keys follow Node's
+last-value behavior. The bridge rejects nonfinite numbers and nesting deeper
+than 128 levels with `json_number_range` and `json_too_deep` errors.
+
+The runner supports sequential `IO.pure`/`IO.bind`/`do`, `IO.print`, `IO.write`,
+`IO.print_err`, `IO.args`, `IO.sleep`, `IO.die`, and the two Stiff effects. Other
+effects fail explicitly. Channels, spawned tasks, file IO, and native sockets
+are not implemented by this runner. Ctrl-C aborts the active HTTP call or sleep,
+stops continuation delivery, and exits with code 130. The Bend API currently has
+no custom-header option; that remains available through the JavaScript API.
+
+The runner uses the pinned compiler's IO operation representation and awaits
+asynchronous effects in Node. It does not modify upstream source. It runs trusted
+program source and foreign effects; it is not a sandbox. Stiff's `.c` effect stub
+deliberately refuses native compilation rather than silently supplying an
+unimplemented transport.
+
+## JavaScript API
 
 ```js
 import { Http, sendJson } from './src/node.mjs';
@@ -92,15 +145,20 @@ certificate rejection and explicit trust, JSON, cancellation, deadlines,
 redirects, size limits and UTF-8 errors. Tests use ephemeral certificates and
 require no provider credentials or external API.
 
+Bend IO integration tests run real `.bend` files through the compiler and runner,
+including GET/POST, nested JSON lookup, transport errors, deadline/size limits,
+TLS trust, unsupported effects, asynchronous sleep and SIGINT cancellation. They
+also check that cancellation does not print the interrupted continuation's result.
+
 These proofs do **not** verify TLS, Node fetch, JSON parsing, the loader, or the
 Bend compiler. The host adapter and compiler remain trusted dependencies.
 
 ## Direction
 
-The next design question is how a Bend program should perform asynchronous HTTP
-effects without depending on a JavaScript entry point. That needs a deliberate
-effect API and backend compatibility work. The current prototype establishes a
-testable transport contract before committing to native bindings or a framework.
+The Bend entry point now works through a small Node runner. Next candidates are
+request headers in the Bend API, a stable distribution format, and a native
+effect backend. Each needs explicit compatibility and transport tests; compiler
+upgrades remain deliberate because the runner depends on compiler internals.
 
 Contributions should include a runnable example or a failing case, clearly
 separate pure laws from host behavior, and keep compiler upgrades explicit.

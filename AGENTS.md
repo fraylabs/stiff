@@ -12,5 +12,8 @@ upgrade is explicitly tested. Do not copy private product code, data or history.
   not formally verified code.
 - Do not disable TLS validation or introduce implicit retries of side effects.
 - Keep generated compiler sources, test certificates and build outputs ignored.
-- Do not imply native or standalone Bend IO support until an actual supported
-  backend and runnable example exist.
+- The Bend IO runner supports only the effects listed in README.md. Keep its
+  compiler-internal integration in `src/runner.mjs`; cover changes with real
+  `.bend` programs and retain explicit failure for unsupported effects.
+- Do not imply native executable or upstream Bun IO support. The working Bend
+  entry point requires Stiff's Node runner.
