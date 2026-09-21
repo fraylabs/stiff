@@ -3,6 +3,8 @@ import http.client
 import json
 from pathlib import Path
 import select
+import queue
+import threading
 import signal
 import socket
 import subprocess
@@ -34,7 +36,9 @@ class StreamingTests(unittest.TestCase):
             env={"PATH": "/nonexistent"}, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, text=True)
         self.addCleanup(self.cleanup_server)
-        line = self.server.stdout.readline().strip()
+        lines = queue.Queue()
+        threading.Thread(target=lambda: lines.put(self.server.stdout.readline()), daemon=True).start()
+        line = lines.get(timeout=5).strip()
         self.assertTrue(line.startswith("LISTENING "), line)
         self.port = int(line.split()[1])
 
@@ -82,7 +86,9 @@ class StreamingTests(unittest.TestCase):
             peer.sendall(b"GET /stream-close HTTP/1.1\r\nHost: localhost\r\n\r\n")
             received = b""
             while b"5\r\nalpha\r\n" not in received:
-                received += peer.recv(4096)
+                chunk = peer.recv(4096)
+                self.assertTrue(chunk, f"closed before first stream chunk: {received!r}")
+                received += chunk
             self.assertIn(b"Transfer-Encoding: chunked", received)
             self.assertIn(b"Connection: close", received)
             self.assertNotIn(b"beta", received)
@@ -122,7 +128,9 @@ class StreamingTests(unittest.TestCase):
             peer.sendall(b"GET /events HTTP/1.1\r\nHost: localhost\r\n\r\n")
             response = b""
             while not response.endswith(b"0\r\n\r\n"):
-                response += peer.recv(4096)
+                chunk = peer.recv(4096)
+                self.assertTrue(chunk, f"closed before stream terminator: {response!r}")
+                response += chunk
             self.assertIn(b"Connection: keep-alive", response)
             peer.settimeout(1.5)
             try:
