@@ -65,9 +65,9 @@ Routes:
 | `PUT /notes/:id` | Validated version comparison and durable operation receipt |
 | `GET /operations/:id` | Reconcile a durable write outcome, or 404 |
 
-Path and operation IDs contain 1–64 Unicode scalars; the path router retains raw
-URL encoding and does not decode `%2F`. The store additionally enforces its
-255-byte key/operation limit. Titles contain 1–80 scalars, `done` is a required
+Path and operation IDs contain 1–63 Unicode scalars, ensuring they fit the store's
+255-byte key/operation limit even with four-byte UTF-8 scalars. The path router
+retains raw URL encoding and does not decode `%2F`. Titles contain 1–80 scalars, `done` is a required
 boolean, and optional tags contain at most eight strings of 1–24 scalars each.
 Objects reject unknown fields. Expected versions range from 0 to 4,294,967,294;
 the store reserves room for the next version increment.

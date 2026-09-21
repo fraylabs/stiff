@@ -9,7 +9,7 @@ import ../src/store.bend as Db
 # Local single-workspace demonstration. Bind only to loopback; no implicit auth.
 def schema() -> Schema.Schema:
   Schema.Object{[
-    Schema.Field{"operation_id", True{}, Schema.Text{1n, 64n}},
+    Schema.Field{"operation_id", True{}, Schema.Text{1n, 63n}},
     Schema.Field{"expected_version", True{}, Schema.UInt{0, 4294967294}},
     Schema.Field{"note", True{}, Schema.Object{[
       Schema.Field{"title", True{}, Schema.Text{1n, 80n}},
@@ -95,7 +95,7 @@ def reconciled(result: Db.OperationResult) -> IO(Web.Reply):
 
 def with_id(value: Maybe<String>, next: String -> IO(Web.Reply)) -> IO(Web.Reply):
   match value:
-    case Some{+id}: Schema.apply(Schema.Text{1n, 64n}, Json.string(id), v => next(id))
+    case Some{+id}: Schema.apply(Schema.Text{1n, 63n}, Json.string(id), v => next(id))
     case None{}: App.error(500, "route_error", "Missing route parameter")
 
 def read(store: Db.Store, params: List<&2, Router.Param>, request: Web.Incoming) -> IO(Web.Reply):

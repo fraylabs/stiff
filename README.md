@@ -4,7 +4,7 @@ Native HTTP, application and storage building blocks for **Bend 2**. Write a Ben
 `IO` program with routing, schemas, streaming and durable local state, then compile
 it to a native executable.
 
-**Status:** experimental 0.2.0 candidate, pinned to Bend **2.0.20**. No Node or npm dependency.
+**Status:** experimental 0.2.0, pinned to Bend **2.0.20**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
 ## Get started

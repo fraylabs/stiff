@@ -143,6 +143,15 @@ class NotesTests(unittest.TestCase):
         self.assertEqual(sorted(result[0] for result in results), [200, 409])
         self.assertEqual(self.request('GET', '/notes/race')[1]['version'], 2)
 
+    def test_unicode_operation_id_fits_store_byte_limit(self):
+        self.assertEqual(self.request('PUT', '/notes/unicode', self.mutation('😀' * 63))[0], 200)
+        status, result, _ = self.request('PUT', '/notes/unicode', self.mutation('😀' * 64, 1))
+        self.assertEqual(status, 422)
+        self.assertEqual(result['error']['path'], ['operation_id'])
+        status, result, _ = self.request('GET', '/notes/' + 'x' * 64)
+        self.assertEqual(status, 422)
+        self.assertEqual(result['error']['code'], 'validation_failed')
+
     def test_lost_http_acknowledgement_reconciles_after_process_kill(self):
         payload = self.mutation('uncertain')
         body = json.dumps(payload).encode()
