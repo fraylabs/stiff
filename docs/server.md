@@ -110,6 +110,6 @@ TCP resets, request deadlines, signal/programmatic shutdown and grace expiry.
 The standalone client and existing pure-law checks remain in the same suite.
 
 This is experimental. Libevent, native effects and the Bend compiler are trusted
-implementation, not formally verified. The previously reproduced Bend runtime
-sanitizer failure remains unresolved; see [native notes](native.md). Native-only
+implementation, not formally verified. Combined sanitizers run through an explicit standard-ABI diagnostic profile;
+the original ABI incompatibility remains. See [sanitizer notes](sanitizers.md). Native-only
 execution and passing integration tests do not establish memory safety.

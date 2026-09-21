@@ -155,9 +155,12 @@ class NativeTests(unittest.TestCase):
         return env
 
     def execute(self, name, *args, trust=True):
-        return subprocess.run([str(self.directory / name), *args], cwd=self.directory,
-                              env=self.environment(trust), capture_output=True, text=True,
-                              encoding="utf-8", timeout=5)
+        result = subprocess.run([str(self.directory / name), *args], cwd=self.directory,
+                                env=self.environment(trust), capture_output=True, text=True,
+                                encoding="utf-8", timeout=5)
+        for diagnostic in ("ERROR: AddressSanitizer", "ERROR: LeakSanitizer", "runtime error:"):
+            self.assertNotIn(diagnostic, result.stderr)
+        return result
 
     def http(self, route, method="GET", body="", timeout="2000", limit="1048576"):
         url = self.base + route if route.startswith("/") else route

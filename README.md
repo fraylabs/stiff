@@ -187,8 +187,10 @@ this native workflow on Linux without JavaScript actions.
 
 The laws cover pure request policy. They do not verify libcurl, json-c, native
 memory safety, or the Bend compiler. Compiler layouts are pinned private ABI.
-A sanitizer failure also reproduces in a Base-only Bend program with no Stiff
-imports; it remains unresolved. See [native verification notes](docs/native.md).
+The sanitizer failure was isolated to generated calling conventions on the
+inspected macOS toolchain. `make test-sanitize` exercises an explicit standard-C
+ABI with ASan/UBSan; normal builds remain unchanged. The original instrumented
+ABI is still incompatible. See [sanitizer findings and coverage limits](docs/sanitizers.md).
 
 Contributions should include a runnable example or failing case, preserve the
 compiler pin unless deliberately upgrading it, and distinguish pure proofs from

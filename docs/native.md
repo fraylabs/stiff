@@ -77,23 +77,19 @@ trust/rejection, GET/POST, no redirects/retries, deadlines, decompressed body
 limits, invalid UTF-8, empty bodies, malformed JSON, native JSON constructors,
 numeric/nesting limits and SIGINT. CI runs this suite on Linux using shell steps without JavaScript actions.
 
-## Sanitizers: failed upstream-runtime check
+## Sanitizers
 
-An additional combined AddressSanitizer/UndefinedBehaviorSanitizer run **does not
-pass** on the inspected macOS toolchain. It reports pointer arithmetic in the
-generated Bend runtime and then `bend: memory fault (machine stack overflow?)`.
-The following minimal program imports Base only, with no Stiff code, and
-reproduces a sanitizer failure before its print succeeds:
+The original macOS failure is isolated to an interaction between sanitizer
+instrumentation and Bend's generated calling conventions. Stiff now has an
+explicit standard-C-ABI diagnostic profile with combined ASan/UBSan enabled,
+fail-fast checks and deliberate-fault detector tests:
 
 ```sh
-STIFF_NATIVE_SANITIZE=1 ./scripts/build-native.sh \
-  test/fixtures/native-runtime-smoke.bend .cache/native/runtime-smoke
-./.cache/native/runtime-smoke
+make diagnose-sanitizers
+make test-sanitize
 ```
 
-Observed UBSan report in that minimal case: `applying zero offset to null pointer`.
-The HTTP build additionally reported overflowing pointer subtraction. This
-isolates a failure to the pinned compiler/runtime configuration; it does not
-establish that Stiff's native code is memory-safe. Upstream source is preserved
-unchanged, checks are not suppressed, and no sanitizer-clean claim is made.
-Keep this backend experimental until the runtime/checking issue is understood.
+Default builds and the pinned compiler remain unchanged. The original
+instrumented ABI remains incompatible on the inspected toolchain; diagnostic
+coverage does not establish memory safety. See [the investigation and coverage
+limits](sanitizers.md).

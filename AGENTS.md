@@ -18,5 +18,7 @@ Never copy private product code, data or history.
 - Constructor packing is pinned private compiler ABI. Cover native layouts with
   actual compiled programs whenever types or foreign effects change.
 - Keep compiler downloads, generated C, binaries and test certificates ignored.
-- See docs/native.md for numeric/Unicode limits and the reproduced upstream
-  sanitizer failure. Do not claim sanitizer verification or static portability.
+- See docs/native.md for numeric/Unicode limits and docs/sanitizers.md for the
+  generated-ABI instrumentation incompatibility. Use `make test-sanitize` for
+  the explicit diagnostic profile; never generalize its coverage to the default
+  ABI, uninstrumented dependencies or full memory safety. No static portability claim.

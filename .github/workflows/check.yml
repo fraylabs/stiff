@@ -5,6 +5,13 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [normal, sanitized]
+    env:
+      STIFF_NATIVE_ABI: ${{ matrix.profile == 'sanitized' && 'standard' || 'compiler' }}
+      STIFF_NATIVE_SANITIZE: ${{ matrix.profile == 'sanitized' && 'combined' || '0' }}
     steps:
       - name: Check out the exact public commit
         run: |
@@ -16,5 +23,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang make pkg-config libcurl4-openssl-dev libjson-c-dev libevent-dev python3 openssl
+      - run: clang --version
       - run: make setup
       - run: make test

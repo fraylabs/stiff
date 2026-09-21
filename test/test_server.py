@@ -56,8 +56,12 @@ class ServerTests(unittest.TestCase):
             except subprocess.TimeoutExpired:
                 self.server.kill()
                 self.server.wait()
+        diagnostics = self.server.stderr.read()
         self.server.stdout.close()
         self.server.stderr.close()
+        self.assertEqual(self.server.returncode, 0, diagnostics)
+        for marker in ("ERROR: AddressSanitizer", "ERROR: LeakSanitizer", "runtime error:"):
+            self.assertNotIn(marker, diagnostics)
 
     def request(self, method="GET", path="/health", body=None, headers=None):
         connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=4)
