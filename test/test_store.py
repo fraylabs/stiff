@@ -18,9 +18,11 @@ class StoreTests(unittest.TestCase):
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.directory = Path(cls.temporary.name)
         cls.binary = cls.directory / "store-cli"
+        # This multi-command fixture generates a large match tree; hosted macOS
+        # Bend compilation can exceed three minutes before Clang even starts.
         result = subprocess.run(
             [str(ROOT / "scripts/build-native.sh"), "test/fixtures/store-cli.bend", str(cls.binary)],
-            cwd=ROOT, capture_output=True, text=True, timeout=180)
+            cwd=ROOT, capture_output=True, text=True, timeout=600)
         if result.returncode:
             raise RuntimeError(result.stdout + result.stderr)
         cls.binary.with_suffix(".c").unlink()
