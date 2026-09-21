@@ -26,9 +26,11 @@ class NativeTests(unittest.TestCase):
         cls.interrupted = threading.Event()
         cls.visits = {}
         cls.proxy_headers = {}
+        cls.methods = {}
         cls.lock = threading.Lock()
         for source, name in [("examples/get-json.bend", "get-json"),
                              ("test/fixtures/native-http.bend", "http"),
+                             ("examples/methods.bend", "methods"),
                              ("test/fixtures/native-json.bend", "json"),
                              ("test/fixtures/native-policy.bend", "policy"),
                              ("test/fixtures/native-headers.bend", "headers"),
@@ -63,6 +65,7 @@ class NativeTests(unittest.TestCase):
             def do_GET(self):
                 with cls.lock:
                     cls.visits[self.path] = cls.visits.get(self.path, 0) + 1
+                    cls.methods[self.path] = self.command
                 if self.path in ("/slow", "/slow-body", "/interrupt"):
                     if self.path == "/slow-body":
                         self.send_response(200)
@@ -77,7 +80,14 @@ class NativeTests(unittest.TestCase):
                 status = 503 if self.path == "/status" else 200
                 body = b'{"slideshow":{"title":"Native Bend"}}'
                 headers = {}
-                if self.path == "/headers":
+                if self.path == "/method":
+                    body = json.dumps({
+                        "method": self.command,
+                        "body": self.rfile.read(int(self.headers.get("Content-Length", "0"))).decode(),
+                        "content_type": self.headers.get("Content-Type"),
+                        "authorization": self.headers.get("Authorization"),
+                    }).encode()
+                elif self.path == "/headers":
                     body = json.dumps({name.lower(): self.headers.get_all(name)
                                        for name in self.headers.keys()}).encode()
                 elif self.path == "/auth":
@@ -116,11 +126,12 @@ class NativeTests(unittest.TestCase):
                 self.send_header("Connection", "close")
                 self.end_headers()
                 try:
-                    self.wfile.write(body)
+                    if self.command != "HEAD":
+                        self.wfile.write(body)
                 except (BrokenPipeError, ConnectionResetError):
                     pass
 
-            do_POST = do_GET
+            do_POST = do_PUT = do_PATCH = do_DELETE = do_HEAD = do_GET
 
         cls.servers = []
         for secure in (False, True):
@@ -146,6 +157,7 @@ class NativeTests(unittest.TestCase):
     def setUp(self):
         with self.lock:
             self.visits.clear()
+            self.methods.clear()
         self.interrupted.clear()
 
     def environment(self, trust=True):
@@ -187,6 +199,54 @@ class NativeTests(unittest.TestCase):
     def test_json_post_once(self):
         self.assertEqual(self.http("/post", "POST", "[1,2,3]").stdout, "200:[1,2,3]\n")
         self.assertEqual(self.visits.get("/post"), 1)
+
+    def test_json_update_methods_and_bodyless_delete(self):
+        for base in (self.base, self.tls_url):
+            for method in ("PUT", "PATCH", "DELETE"):
+                with self.subTest(base=base, method=method):
+                    before = self.visits.get("/method", 0)
+                    result = self.execute("methods", base + "/method", method)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    status, body = result.stdout.split(":", 1)
+                    self.assertEqual(status, "200")
+                    self.assertEqual(json.loads(body), {
+                        "method": method,
+                        "body": "" if method == "DELETE" else '{"message":"🌱"}',
+                        "content_type": None if method == "DELETE" else "application/json",
+                        "authorization": "Bearer synthetic-test-token",
+                    })
+                    self.assertEqual(self.visits["/method"], before + 1)
+
+    def test_head_ignores_representation_length_and_returns_empty_body(self):
+        for base in (self.base, self.tls_url):
+            # Advertised representation exceeds the one-byte body limit.
+            result = self.execute("methods", base + "/large", "HEAD")
+            self.assertEqual((result.returncode, result.stdout, result.stderr), (0, "200:\n", ""))
+            self.assertEqual(self.methods["/large"], "HEAD")
+        self.assertEqual(self.http("/status", "HEAD").stdout, "503:\n")
+
+    def test_new_methods_preserve_transport_policy(self):
+        for method, body in (("PUT", "{}"), ("PATCH", "[]"), ("DELETE", ""), ("HEAD", "")):
+            with self.subTest(method=method):
+                self.assertEqual(self.http("/slow", method, body, timeout="80").stderr, "timeout\n")
+                result = self.http("/redirect", method, body)
+                self.assertEqual(result.stdout, "302:" + ("" if method == "HEAD" else "{}") + "\n")
+                self.assertNotIn("/destination", self.visits)
+                if method != "HEAD":
+                    self.assertEqual(self.http("/gzip", method, body, limit="10").stderr, "body_too_large\n")
+                result = self.execute("http", self.tls_url, method, body, "2000", "1048576", trust=False)
+                self.assertEqual(result.stderr, "network\n")
+
+    def test_method_and_json_body_validation_precedes_network(self):
+        for method in ("PUT", "PATCH"):
+            for body in ("", "{", "NaN", "{} garbage"):
+                with self.subTest(method=method, body=body):
+                    self.assertEqual(self.http("/invalid-method", method, body).stderr, "invalid_json_request\n")
+        for method in ("GET", "HEAD", "DELETE"):
+            self.assertEqual(self.http("/invalid-method", method, "{}").stderr, "invalid_request\n")
+        for method in ("put", "OPTIONS", "CONNECT", "TRACE", "PUT ", "PATCH\r\nX-Bad: yes"):
+            self.assertEqual(self.http("/invalid-method", method).stderr, "invalid_request\n")
+        self.assertNotIn("/invalid-method", self.visits)
 
     def test_invalid_requests_before_sending(self):
         for url in ("file:///tmp/anything", "ftp://example.com", "http://user:pass@127.0.0.1"):

@@ -85,6 +85,10 @@ to your `.bend` file. The example includes these imports and `show`.
 | --- | --- |
 | `Http.get(url)` | GET request with default limits |
 | `Http.post_json(url, body)` | JSON POST request; body is JSON text |
+| `Http.put_json(url, body)` | JSON PUT request |
+| `Http.patch_json(url, body)` | JSON PATCH request |
+| `Http.delete(url)` | DELETE request without a request body |
+| `Http.head(url)` | HEAD request; response body is empty |
 | `Http.with_header(name, value, request)` | Set a header; latest call wins, case-insensitively |
 | `Http.with_bearer(token, request)` | Set `Authorization: Bearer <token>` |
 | `Http.with_timeout(ms, request)` | Request with a whole-transfer deadline |
@@ -133,9 +137,28 @@ Errors include `invalid_json_value`, `invalid_json_limit`, `json_too_large`,
 are escaped; valid Unicode is emitted as UTF-8. No partial output is returned.
 Serialization is a bounded synchronous native effect, not a pure verified law.
 
+## Update and delete resources
+
+Use `Http.put_json(url, text)`, `Http.patch_json(url, text)` or
+`Http.delete(url)` with `Net.Stiff.send` (or `send_json` when a JSON response
+is expected). The [methods example](examples/methods.bend) compiles and runs
+these helpers with a caller-supplied endpoint.
+
+PUT/PATCH use the same JSON validation, authentication, deadlines and response
+limits as POST. Custom content types such as `application/merge-patch+json` can
+be set with `Http.with_header`; Stiff does not interpret patch semantics.
+GET, HEAD and DELETE reject nonempty request bodies. Only the six exact uppercase
+methods are supported, including when using the `Request` constructor directly.
+
+Use `Stiff.send(Http.head(url))` for a status-only check. HEAD returns an empty
+body even when the server advertises a nonzero representation length.
+`send_json` still requires a JSON response, so use `send` for HEAD and responses
+such as HTTP 204. Response headers are not yet exposed.
+Stiff adds no retries for any method; a timeout does not prove that a write failed.
+
 ## Behavior
 
-- GET and JSON POST with custom headers and bearer authentication.
+- GET, HEAD, DELETE and JSON POST/PUT/PATCH with custom headers and bearer authentication.
 - Default deadline: 10 seconds, covering headers and body.
 - Default response limit: 1 MiB after decompression, before UTF-8 decoding.
 - HTTP(S) only; embedded URL credentials are rejected.
@@ -143,7 +166,7 @@ Serialization is a bounded synchronous native effect, not a pure verified law.
   selects a PEM CA file without bypassing verification.
 - HTTP 3xx, 4xx and 5xx are responses. Redirects are not followed and Stiff adds
   no retry loop. A timeout or interruption cannot undo an external operation.
-- Bodies must be valid UTF-8. JSON POST bodies are validated before sending.
+- Bodies must be valid UTF-8. JSON POST/PUT/PATCH bodies are validated before sending.
 - Native SIGINT terminates the process, preventing continuation output. There is
   no per-request cancellation token.
 - Failure codes include `invalid_request`, `invalid_header`, `invalid_json_request`, `network`,
@@ -159,7 +182,7 @@ network access, and errors never include header values.
 Stiff owns `Host`, `Content-Length`, `Transfer-Encoding`, `Connection`, `Expect`,
 `Trailer`, `Upgrade`, `Proxy-Authorization`, `Proxy-Connection`, `Accept-Encoding`
 and `TE`; these cannot be supplied. `Accept` defaults to `application/json` and
-JSON POST adds `Content-Type: application/json`; either can be overridden.
+JSON POST/PUT/PATCH adds `Content-Type: application/json`; either can be overridden.
 `with_bearer` formats a header only: it does not acquire or refresh credentials.
 Use HTTPS for real credentials. Custom headers are excluded from proxy CONNECT.
 

@@ -74,8 +74,8 @@ performance or binary-compatibility equivalence is claimed between profiles.
 (default) or `standard`. These controls also work with `build-native.sh` directly.
 
 CI runs normal and standard-ABI combined-sanitizer profiles independently on
-Linux. Local evidence uses macOS arm64. The normal suite has 44 functional/proof
-checks; the instrumented suite adds the two deliberate-fault detector checks.
+Linux. Local evidence uses macOS arm64. The instrumented suite runs the
+normal functional/proof checks plus the two deliberate-fault detector checks.
 
 ## Coverage limits
 

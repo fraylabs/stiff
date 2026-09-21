@@ -13,6 +13,18 @@ def get(url: String) -> Request:
 def post_json(url: String, body: String) -> Request:
   Request{"POST", url, body, 10000, 1048576, Nil{}}
 
+def put_json(url: String, body: String) -> Request:
+  Request{"PUT", url, body, 10000, 1048576, Nil{}}
+
+def patch_json(url: String, body: String) -> Request:
+  Request{"PATCH", url, body, 10000, 1048576, Nil{}}
+
+def delete(url: String) -> Request:
+  Request{"DELETE", url, "", 10000, 1048576, Nil{}}
+
+def head(url: String) -> Request:
+  Request{"HEAD", url, "", 10000, 1048576, Nil{}}
+
 def with_timeout(ms: U32, request: Request) -> Request:
   match request:
     case Request{method, url, body, timeout_ms, max_bytes, headers}:

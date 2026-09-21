@@ -118,6 +118,11 @@ static size_t stiff_receive(char* data, size_t size, size_t count, void* context
   return n;
 }
 
+// Only these exact methods can carry a JSON request body.
+static int stiff_json_method(const char* method) {
+  return !strcmp(method, "POST") || !strcmp(method, "PUT") || !strcmp(method, "PATCH");
+}
+
 static void stiff_send_call(IoWork* work) {
   StiffRequest* request = (StiffRequest*)work->data;
   pthread_once(&stiff_curl_once, stiff_curl_init);
@@ -153,7 +158,7 @@ static void stiff_send_call(IoWork* work) {
     if (!next) { request->error = "network"; goto done; }
     headers = next;
   }
-  if (!strcmp(request->method, "POST")) {
+  if (stiff_json_method(request->method)) {
     if (!stiff_valid_json(request->body, request->body_size)) { request->error = "invalid_json_request"; goto done; }
     if (!stiff_has_header(request, "Content-Type", request->header_count)) {
       struct curl_slist* next = curl_slist_append(headers, "Content-Type: application/json");
@@ -176,10 +181,15 @@ static void stiff_send_call(IoWork* work) {
   STIFF_SET(CURLOPT_WRITEDATA, request);
   const char* ca = getenv("STIFF_CA_BUNDLE");
   if (ca && *ca) { STIFF_SET(CURLOPT_CAINFO, ca); }
-  if (!strcmp(request->method, "POST")) {
-    STIFF_SET(CURLOPT_POST, 1L);
+  if (stiff_json_method(request->method)) {
     STIFF_SET(CURLOPT_POSTFIELDS, request->body);
     STIFF_SET(CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)request->body_size);
+    STIFF_SET(CURLOPT_CUSTOMREQUEST, request->method);
+  } else if (!strcmp(request->method, "HEAD")) {
+    // A custom method string alone would still wait for a response body.
+    STIFF_SET(CURLOPT_NOBODY, 1L);
+  } else if (!strcmp(request->method, "DELETE")) {
+    STIFF_SET(CURLOPT_CUSTOMREQUEST, "DELETE");
   }
   CURLcode result = curl_easy_perform(curl);
   if (!request->error && result != CURLE_OK)
@@ -254,8 +264,9 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
     header_bytes += n + v + 4;
   }
   if (io_nul(request->method, method_size) || io_nul(request->url, url_size)
-    || (strcmp(request->method, "GET") && strcmp(request->method, "POST"))
-    || (!strcmp(request->method, "GET") && body_size != 0)
+    || (!stiff_json_method(request->method) && strcmp(request->method, "GET")
+      && strcmp(request->method, "HEAD") && strcmp(request->method, "DELETE"))
+    || (!stiff_json_method(request->method) && body_size != 0)
     || request->timeout < 1 || request->timeout > INT_MAX || request->limit < 1 || request->limit > INT_MAX) {
     request->error = "invalid_request";
     return stiff_send_pack(e, work);

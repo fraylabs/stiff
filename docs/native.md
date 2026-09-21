@@ -29,6 +29,14 @@ It preserves TLS certificate/hostname verification, refuses non-HTTP protocols,
 does not follow redirects, adds no retry loop, and limits decompressed response
 bytes. UTF-8 is checked before constructing a Bend String.
 
+POST/PUT/PATCH retain their JSON buffers until transfer completion and use
+[POSTFIELDS](https://curl.se/libcurl/c/CURLOPT_POSTFIELDS.html) with an explicit byte
+length. PUT/PATCH select the verb with
+[CUSTOMREQUEST](https://curl.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html).
+HEAD uses [NOBODY](https://curl.se/libcurl/c/CURLOPT_NOBODY.html), so an advertised
+representation length does not make the client wait for a body.
+Method validation runs before network access.
+
 JSON decoding uses [json-c's strict parser](https://json-c.github.io/json-c/json-c-current-release/doc/html/json__tokener_8h.html).
 JSON encoding consumes the native Bend value with a depth/output-byte bound,
 escapes string controls and validates Unicode scalars and number tokens. Builders
@@ -51,7 +59,7 @@ No native effect calls Node or shells out to the curl command.
 - Native JSON rejects NUL object keys and unpaired surrogate escapes rather
   than accepting json-c's lossy conversion. Embedded NUL string values and valid
   Unicode surrogate pairs are supported. JSON values deeper than 128 levels are
-  rejected; native POST validation also imposes the parser's nesting bound.
+  rejected; native POST/PUT/PATCH validation also imposes the parser's nesting bound.
 - Constructor layouts are private Bend 2.0.20 ABI. In particular, HttpOk's nested
   Response is flattened and JsonBool packs its scalar in the constructor word.
   Request now carries six fields; its header list contains boxed two-field Header
@@ -73,7 +81,7 @@ make test               # Native programs, transport fixtures and pure-law check
 
 The native suite copies binaries to an isolated temporary directory and runs
 them with a minimal environment and no executable search path. It covers HTTPS
-trust/rejection, GET/POST, no redirects/retries, deadlines, decompressed body
+trust/rejection, GET/HEAD/POST/PUT/PATCH/DELETE, no redirects/retries, deadlines, decompressed body
 limits, invalid UTF-8, empty bodies, malformed JSON, native JSON constructors,
 numeric/nesting limits and SIGINT. CI runs this suite on Linux using shell steps without JavaScript actions.
 
