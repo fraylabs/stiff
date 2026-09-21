@@ -116,7 +116,13 @@ class Server:
                     self.process.terminate()
                     return
             except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
-                if self.process.poll() is None:
+                # Linux can remove the memory map before the child becomes
+                # waitable; macOS ps can likewise race process teardown. Ignore
+                # a missing final sample only after observing actual exit.
+                try:
+                    self.process.wait(timeout=0.25)
+                    return
+                except subprocess.TimeoutExpired:
                     self.sampling_errors.append(type(error).__name__)
             self.stop_sampling.wait(0.25)
 

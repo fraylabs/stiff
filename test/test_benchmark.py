@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import threading
+from unittest.mock import Mock
 import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -21,6 +23,25 @@ class BenchmarkTests(unittest.TestCase):
         self.assertEqual(benchmark.percentile(histogram, .5), 1)
         self.assertEqual(benchmark.percentile(histogram, .99), 10)
         self.assertIsNone(benchmark.percentile(histogram, 1))
+
+    def test_rss_teardown_race_requires_observed_exit(self):
+        for exited in (True, False):
+            with self.subTest(exited=exited):
+                server = benchmark.Server.__new__(benchmark.Server)
+                server.process = Mock()
+                server.process.poll.return_value = None
+                server.stop_sampling = threading.Event()
+                server.sampling_errors = []
+                server.rss = Mock(side_effect=RuntimeError("VmRSS unavailable"))
+                def wait(timeout):
+                    server.stop_sampling.set()
+                    if not exited:
+                        raise subprocess.TimeoutExpired("native-server", timeout)
+                    return 0
+                server.process.wait.side_effect = wait
+                server.sample()
+                self.assertEqual(server.sampling_errors, [] if exited else ["RuntimeError"])
+                server.process.wait.assert_called_once_with(timeout=0.25)
 
     def test_native_measurement_overload_recovery_and_shutdown(self):
         with tempfile.TemporaryDirectory(prefix="stiff-measurement-") as directory:

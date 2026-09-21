@@ -39,7 +39,8 @@ responses and uses actual elapsed time, including the final in-flight requests.
 The five-second socket timeout is an I/O timeout, not an absolute request deadline.
 
 RSS is sampled every 250 ms using `/proc` on Linux and `ps` on macOS. Sampling
-can miss short peaks. A configurable RSS guard defaults to 512 MiB; crossing it
+can miss short peaks. A missing sample during teardown is discarded only after
+observing process exit; a still-running process with unavailable RSS fails sampling. A configurable RSS guard defaults to 512 MiB; crossing it
 requests termination, marks the run failed and preserves the partial report.
 This is a sampled stop condition, not a hard memory sandbox. The JSON windows
 also record RSS after a 500 ms settling interval. Neither a lower RSS reading
@@ -110,6 +111,8 @@ The report recorded source SHA-256
 and executable SHA-256
 `5ea79bf27e9e4ea6ea680800911aa184ff2b0451cf793f8a100f63d98524be34`.
 The parent Git revision was `bc740b0e499049210ba908ed7096827517654801`;
-the benchmark additions were in the working tree. Raw local reports are ignored
+the benchmark additions were in the working tree. A later harness fix verifies
+process exit before discarding a missing final RSS sample during Linux teardown;
+the native server and workload are unchanged. Raw local reports are ignored
 under `.cache/benchmark/`; rerun the command for a fresh machine-specific report.
 These observations do not establish a production capacity rating.
