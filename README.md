@@ -59,6 +59,18 @@ finishes, and cooperative checkpoints let handlers stop after request expiry.
 See [server API and limits](docs/server.md) for configuration, headers, deadlines
 and shutdown semantics. This version uses HTTP with TLS at a reverse proxy.
 
+## Build an application
+
+[Application helpers](docs/app.md) provide exact method/path routing, 404/405
+responses, composable middleware, structured application errors, and required
+JSON text-field validation. [The runnable app](examples/app.bend) combines them
+in a native health/greeting API:
+
+```sh
+./scripts/build-native.sh examples/app.bend .cache/native/app
+./.cache/native/app 127.0.0.1 8080
+```
+
 ## Use Stiff in your own project
 
 Copy [examples/auth-client](examples/auth-client) into a separate project and run
