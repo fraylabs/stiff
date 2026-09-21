@@ -11,6 +11,8 @@ import subprocess
 import tempfile
 import threading
 import unittest
+import urllib.parse
+import random
 
 ROOT = Path(__file__).resolve().parent.parent
 BEND = os.environ.get("BEND", str(ROOT / ".cache/toolchain/bin/bend"))
@@ -32,6 +34,9 @@ class NativeTests(unittest.TestCase):
                              ("test/fixtures/native-http.bend", "http"),
                              ("examples/methods.bend", "methods"),
                              ("examples/response-headers.bend", "response-headers"),
+                             ("examples/query-client.bend", "query-client"),
+                             ("test/fixtures/native-url.bend", "url"),
+                             ("test/fixtures/native-url-cases.bend", "url-cases"),
                              ("test/fixtures/native-json.bend", "json"),
                              ("test/fixtures/native-policy.bend", "policy"),
                              ("test/fixtures/native-headers.bend", "headers"),
@@ -140,7 +145,12 @@ class NativeTests(unittest.TestCase):
                 status = 503 if self.path == "/status" else 200
                 body = b'{"slideshow":{"title":"Native Bend"}}'
                 headers = {}
-                if self.path == "/method":
+                if self.path.startswith("/query?"):
+                    body = json.dumps({
+                        "target": self.path,
+                        "pairs": urllib.parse.parse_qsl(urllib.parse.urlsplit(self.path).query, keep_blank_values=True),
+                    }).encode()
+                elif self.path == "/method":
                     body = json.dumps({
                         "method": self.command,
                         "body": self.rfile.read(int(self.headers.get("Content-Length", "0"))).decode(),
@@ -380,6 +390,75 @@ class NativeTests(unittest.TestCase):
                 result = self.response_headers("/response-" + route)
                 self.assertEqual((result.returncode, result.stdout, result.stderr),
                                  (1, "", "invalid_response_header\n"))
+
+    def test_url_component_encoding_matches_independent_reference(self):
+        rng = random.Random(20260921)
+        alphabet = "abcXYZ012-._~ /?&=+#%:\\é🌱中\t\r\n"
+        samples = ["", "AZaz09-._~", "a b+c/%?#&=", "🌱 café", "%2F"] + [
+            "".join(rng.choice(alphabet) for _ in range(30)) for _ in range(24)]
+        for text in samples:
+            with self.subTest(text=text):
+                result = self.execute("url", text)
+                self.assertEqual((result.returncode, result.stdout, result.stderr),
+                                 (0, urllib.parse.quote(text, safe="-._~") + "\n", ""))
+
+    def test_query_append_preserves_existing_bytes_duplicates_and_fragment(self):
+        for base, expected in (
+            ("https://example.com/p", "https://example.com/p?q=a%20b&q=c%2Bd"),
+            ("https://example.com/p?", "https://example.com/p?q=a%20b&q=c%2Bd"),
+            ("https://example.com/p?raw=%2f+#f?x", "https://example.com/p?raw=%2f+&q=a%20b&q=c%2Bd#f?x"),
+            ("https://example.com/p?x=?#frag", "https://example.com/p?x=?&q=a%20b&q=c%2Bd#frag"),
+            ("https://example.com/p?x=1&", "https://example.com/p?x=1&q=a%20b&q=c%2Bd"),
+            ("http://[::1]:8080/#f", "http://[::1]:8080/?q=a%20b&q=c%2Bd#f"),
+        ):
+            with self.subTest(base=base):
+                result = self.execute("url", base, "query", "q", "a b", "q", "c+d")
+                self.assertEqual((result.returncode, result.stdout, result.stderr), (0, expected + "\n", ""))
+                result = self.execute("url", base, "query")
+                self.assertEqual((result.returncode, result.stdout, result.stderr), (0, base + "\n", ""))
+        result = self.execute("url", "https://example.com", "query", "", "", "&", "=#")
+        self.assertEqual(result.stdout, "https://example.com?=&%26=%3D%23\n")
+
+    def test_url_invalid_input_and_unicode_recovery(self):
+        for base in ("", "/relative", "ftp://example.com", "https://", "https://user:secret@example.com/",
+                     "https://@example.com/", "https://example.com/a b", "https://example.com/🌱",
+                     "https://example.com/%", "https://example.com/%xz", "http://example.com:99999",
+                     "https://example.com/\\x", "https://example.com/\r\nInjected:yes"):
+            with self.subTest(base=base):
+                result = self.execute("url", base, "query", "unused", "secret")
+                self.assertEqual((result.returncode, result.stdout, result.stderr), (1, "", "invalid_url\n"))
+        result = self.execute("url-cases")
+        self.assertEqual((result.returncode, result.stderr), (0, ""))
+        self.assertEqual(result.stdout.splitlines(), [
+            "%00", "invalid_url_text", "invalid_url_text", "invalid_url", "invalid_url_text",
+            "https://example.com/?%00=%00", "still%20usable",
+        ])
+
+    def test_url_output_and_parameter_limits(self):
+        result = self.execute("url", "a" * 65536)
+        self.assertEqual((result.returncode, len(result.stdout), result.stderr), (0, 65537, ""))
+        for args in (("a" * 65537,), ("🌱" * 5500,),
+                     ("https://example.com/" + "a" * 65536, "query"),
+                     ("https://example.com/", "query", "q", "a" * 65536)):
+            result = self.execute("url", *args)
+            self.assertEqual((result.returncode, result.stdout, result.stderr), (1, "", "url_too_large\n"))
+        result = self.execute("url", "https://example.com", "query", *(["q", "v"] * 128))
+        self.assertEqual((result.returncode, result.stderr), (0, ""))
+        self.assertEqual(result.stdout.count("q=v"), 128)
+        result = self.execute("url", "https://example.com", "query", *(["q", "v"] * 129))
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (1, "", "too_many_query_params\n"))
+
+    def test_query_client_transmits_data_without_query_injection(self):
+        value = "🌱 &admin=true#fragment +/%"
+        for base in (self.base, self.tls_url):
+            result = self.execute("query-client", base + "/query?existing=%2f#local", value)
+            self.assertEqual((result.returncode, result.stderr), (0, ""))
+            status, body = result.stdout.split(":", 1)
+            self.assertEqual(status, "200")
+            decoded = json.loads(body)
+            self.assertEqual(decoded["pairs"], [["existing", "/"], ["q", value], ["tag", "a"], ["tag", "b"]])
+            self.assertEqual(decoded["target"], "/query?existing=%2f&q=" +
+                             urllib.parse.quote(value, safe="-._~") + "&tag=a&tag=b")
 
     def test_invalid_requests_before_sending(self):
         for url in ("file:///tmp/anything", "ftp://example.com", "http://user:pass@127.0.0.1"):

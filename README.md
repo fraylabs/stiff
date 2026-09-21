@@ -158,6 +158,50 @@ body even when the server advertises a nonzero representation length.
 such as HTTP 204. Response headers are available even for HEAD and HTTP error statuses.
 Stiff adds no retries for any method; a timeout does not prove that a write failed.
 
+## Build URLs and queries
+
+Import `src/url.bend` as `Url`. `Url.Url.with_query(base, params)` appends
+raw name/value pairs to an absolute HTTP(S) URL:
+
+```python
+Url.Url.with_query("https://example.com/search?limit=10#results", [
+  Url.QueryParam{"q", "Bend & 🌱"},
+  Url.QueryParam{"tag", "a"},
+  Url.QueryParam{"tag", "b"}])
+# UrlReady{"https://example.com/search?limit=10&q=Bend%20%26%20%F0%9F%8C%B1&tag=a&tag=b#results"}
+```
+
+Both `with_query` and `Url.Url.encode_component(text)` return
+`IO(Url.UrlResult)`: match `UrlReady{text}` or `UrlError{code}`.
+Construction performs no network request. The
+[query client example](examples/query-client.bend) builds a URL and sends it:
+
+```sh
+./scripts/build-native.sh examples/query-client.bend .cache/native/query-client
+./.cache/native/query-client https://your-api.example/search 'Bend & 🌱'
+```
+
+Components use UTF-8 percent encoding, uppercase hex, and `%20` for spaces.
+Only letters, digits and `-._~` remain literal. Reserved delimiters, plus signs,
+percent signs and embedded NUL are encoded as data. Inputs are raw text:
+already-encoded `%2F` becomes `%252F`. This is not form encoding or a whole-URL
+encoder. Encoding `.` or `..` does not prevent path traversal.
+
+Query pairs retain order, repeated names and empty names/values. Existing base
+query bytes and fragments are preserved without decoding, sorting or replacing
+fields; the HTTP transport may still normalize other URL components.
+Base URLs must be ASCII URI text with valid percent escapes and an explicit
+lowercase `http://` or `https://` scheme. Credentials, raw spaces, controls,
+backslashes and unencoded Unicode are rejected. URL syntax is checked with
+libcurl. This does not restrict destinations or provide an SSRF filter.
+
+Each operation has a 65,536-byte output limit; `with_query` also limits base
+input to 65,536 bytes and accepts at most 128 pairs. Encoding expansion and the
+existing query/fragment count toward the output limit. Failures return no partial
+URL and never echo inputs. Codes include `invalid_url`, `invalid_url_text`,
+`url_too_large`, `too_many_query_params`, `url_initialization` and
+`url_allocation`. These are bounded native effects, not formally verified laws.
+
 ## Read response headers
 
 `Net.Response{status, body, headers}` exposes a list of

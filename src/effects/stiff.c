@@ -54,9 +54,13 @@ static int stiff_has_header(StiffRequest* request, const char* name, size_t befo
   return 0;
 }
 
+// Native effects share one generated translation unit and one libcurl lifetime.
+#ifndef STIFF_CURL_INIT_DEFINED
+#define STIFF_CURL_INIT_DEFINED
 static pthread_once_t stiff_curl_once = PTHREAD_ONCE_INIT;
 static CURLcode stiff_curl_ready;
 static void stiff_curl_init(void) { stiff_curl_ready = curl_global_init(CURL_GLOBAL_DEFAULT); }
+#endif
 
 static int stiff_utf8(const unsigned char* p, size_t n) {
   size_t i = 0;
