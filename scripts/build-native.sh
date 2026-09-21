@@ -21,6 +21,19 @@ case "$2" in *.bend|*.c|*.js|*.mjs|*.json|*.md)
 esac
 mkdir -p "$(dirname "$2")"
 BEND_NO_TELEMETRY=1 "$stiff_bend" "$1" -o "$2.c"
+# Opt-in diagnostic ABI: retain the compiler pin and all sanitizer checks, but
+# use ordinary C calls throughout the generated translation unit.
+case "${STIFF_NATIVE_ABI:-compiler}" in
+  compiler) ;;
+  standard)
+    [ "$(grep -cFx '#define PRESERVE(A) __attribute__((A))' "$2.c")" = 1 ] || {
+      echo 'Unexpected Bend calling-convention definition; refusing to rewrite.' >&2; exit 1;
+    }
+    sed 's/^#define PRESERVE(A) __attribute__((A))$/#define PRESERVE(A)/' "$2.c" > "$2.c.abi"
+    mv "$2.c.abi" "$2.c"
+    ;;
+  *) echo 'STIFF_NATIVE_ABI must be compiler or standard.' >&2; exit 2 ;;
+esac
 # pkg-config emits compiler argument words; this build assumes paths without spaces.
 stiff_libraries='libcurl json-c'
 if grep -q '^#define STIFF_SERVER_EFFECT 1' "$2.c"; then
@@ -29,8 +42,14 @@ if grep -q '^#define STIFF_SERVER_EFFECT 1' "$2.c"; then
 fi
 stiff_flags=$(pkg-config --cflags --libs $stiff_libraries)
 stiff_compile_flags=-O2
-if [ "${STIFF_NATIVE_SANITIZE:-0}" = 1 ]; then
-  stiff_compile_flags='-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer'
+case "${STIFF_NATIVE_SANITIZE:-0}" in
+  0) ;;
+  1|combined) stiff_sanitizers=address,undefined ;;
+  address|undefined) stiff_sanitizers=$STIFF_NATIVE_SANITIZE ;;
+  *) echo 'STIFF_NATIVE_SANITIZE must be 0, address, undefined or combined.' >&2; exit 2 ;;
+esac
+if [ "${STIFF_NATIVE_SANITIZE:-0}" != 0 ]; then
+  stiff_compile_flags="-O1 -g -fsanitize=$stiff_sanitizers -fno-sanitize-recover=all -fno-omit-frame-pointer"
 fi
 set -f
 # Intentional word splitting of pkg-config flags, never evaluated as shell code.
