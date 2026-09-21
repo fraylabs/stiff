@@ -11,7 +11,8 @@ make server
 ./.cache/native/server 127.0.0.1 8080
 ```
 
-The example serves `GET /health`, `POST /echo` (validated JSON) and `GET /slow`
+The example serves `GET /health`, `POST /echo` (parse and re-encode),
+`POST /inspect` (construct a response around the parsed value) and `GET /slow`
 (a 250 ms asynchronous handler). Other method/path combinations return 404.
 It prints the actual bound port, so `127.0.0.1 0` is useful for tests. SIGINT or
 SIGTERM initiates shutdown. TLS belongs at a reverse proxy for this first version;
@@ -31,6 +32,7 @@ The handler template must refer to a top-level definition, as in
 | `Web.config(address, port)` | Default configuration; address is an IPv4/IPv6 literal |
 | `Web.Server.listen(config)` | `Listening{actual_port}` or `ListenError{code}` |
 | `Web.serve(~handler)` | Receive requests and spawn concurrent handler computations |
+| `Web.json_value(status, value)` | Encode a JSON value into `IO(Reply)`; encoding failures become a fixed HTTP 500 |
 | `Web.json(status, body)` | JSON content type with the supplied text; does not serialize or validate it |
 | `Web.with_header(name, value, reply)` | Latest same-name value wins, ignoring case |
 | `Web.header(lowercase_name, headers)` | First matching incoming header value, or `None` |

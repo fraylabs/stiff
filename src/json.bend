@@ -1,6 +1,6 @@
 import Base
 
-# Numbers contain the decimal rendering produced by the host JSON parser.
+# Numbers contain decimal tokens; native effects validate syntax and range.
 type Json is Data:
   JsonNull{}
   JsonBool{value: Bool}
@@ -43,3 +43,32 @@ def as_string(value: Json) -> Maybe<String>:
       Some{text}
     case other:
       None{}
+
+# Builders preserve list order. Duplicate object keys are rejected on encoding.
+def object(entries: List<&2, Sigma<&2, &2, String, _ => Json>>) -> Json:
+  JsonObject{entries}
+
+def array(items: List<&2, Json>) -> Json:
+  JsonArray{items}
+
+def string(text: String) -> Json:
+  JsonString{text}
+
+def boolean(value: Bool) -> Json:
+  JsonBool{value}
+
+def null() -> Json:
+  JsonNull{}
+
+def u32(value: U32) -> Json:
+  JsonNumber{U32.show(value)}
+
+type EncodeResult is Data:
+  JsonEncoded{text: String}
+  JsonEncodeFailure{code: String, message: String}
+
+def Json.stringify_with_limit(value: Json, max_bytes: U32) -> IO(EncodeResult):
+  import "./effects/json.c"
+
+def Json.stringify(value: Json) -> IO(EncodeResult):
+  Json.stringify_with_limit(value, 16777216)

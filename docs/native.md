@@ -30,6 +30,10 @@ does not follow redirects, adds no retry loop, and limits decompressed response
 bytes. UTF-8 is checked before constructing a Bend String.
 
 JSON decoding uses [json-c's strict parser](https://json-c.github.io/json-c/json-c-current-release/doc/html/json__tokener_8h.html).
+JSON encoding consumes the native Bend value with a depth/output-byte bound,
+escapes string controls and validates Unicode scalars and number tokens. Builders
+with duplicate keys or NUL keys fail explicitly. Tests exercise encoding-only
+programs as well as decode/encode round trips.
 HTTP and JSON are separate effects; `Stiff.send_json` composes them in Bend.
 No native effect calls Node or shells out to the curl command.
 

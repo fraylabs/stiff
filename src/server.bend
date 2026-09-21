@@ -1,4 +1,5 @@
 import Base
+import ./json.bend as Json
 
 type ServerHeader is Data:
   ServerHeader{name: String, value: String}
@@ -30,6 +31,16 @@ type Replied is Data:
 
 def json(status: U32, body: String) -> Reply:
   Reply{status, Con{ServerHeader{"Content-Type", "application/json"}, Nil{}}, body}
+
+def encoded_reply(status: U32, result: Json.EncodeResult) -> IO(Reply):
+  match result:
+    case Json.JsonEncoded{text}:
+      IO.pure(Reply, json(status, text))
+    case Json.JsonEncodeFailure{code, message}:
+      IO.pure(Reply, json(500, "{\"error\":\"JSON encoding failed\"}"))
+
+def json_value(status: U32, value: Json.Json) -> IO(Reply):
+  IO.bind(Json.EncodeResult, Reply, Json.Json.stringify(value), encoded_reply(status))
 
 def with_header(name: String, value: String, reply: Reply) -> Reply:
   match reply:

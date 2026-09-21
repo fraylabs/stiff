@@ -1,4 +1,5 @@
 import Base
+import ../../src/json.bend as Json
 import ../../src/server.bend as Web
 import ../../examples/server.bend as Example
 
@@ -43,12 +44,18 @@ def special(found: Bool, +path: String, headers: List<&2, Web.ServerHeader>, met
     case True{}: IO.pure(Web.Reply, Web.with_header("X-Bad", "secret\r\nInjected: yes", Web.json(200, "{}")))
     case False{}: bad_status(String.eq(path, "/bad-status"), path, headers, method, body)
 
+def encode_failure(found: Bool, +path: String, headers: List<&2, Web.ServerHeader>, method: String, body: String) -> IO(Web.Reply):
+  match found:
+    case True{}:
+      Web.json_value(200, Json.object([("same", Json.string("private-value")), ("same", Json.null())]))
+    case False{}: special(String.eq(path, "/bad-response"), path, headers, method, body)
+
 def handler(request: Web.Incoming) -> IO(Web.Reply):
   match request:
     case Web.Incoming{id, method, +path, target, headers, body}:
       do IO<Web.Reply>:
         IO.print("HANDLING " ++ path)
-        special(String.eq(path, "/bad-response"), path, headers, method, body)
+        encode_failure(String.eq(path, "/encode-failure"), path, headers, method, body)
 
 def start(result: Web.Started) -> IO(Unit):
   match result:

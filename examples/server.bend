@@ -2,33 +2,48 @@ import Base
 import ../src/server.bend as Web
 import ../src/json.bend as Json
 
-def echo(parsed: Json.ParseResult, body: String) -> IO(Web.Reply):
+def message(status: U32, key: String, text: String) -> IO(Web.Reply):
+  Web.json_value(status, Json.object([(key, Json.string(text))]))
+
+def echo(parsed: Json.ParseResult) -> IO(Web.Reply):
   match parsed:
-    case Json.JsonDone{value}: IO.pure(Web.Reply, Web.json(200, body))
-    case other: IO.pure(Web.Reply, Web.json(400, "{\"error\":\"invalid JSON\"}"))
+    case Json.JsonDone{value}: Web.json_value(200, value)
+    case other: message(400, "error", "invalid JSON")
 
-def echo_route(found: Bool, +body: String) -> IO(Web.Reply):
+def inspect(parsed: Json.ParseResult) -> IO(Web.Reply):
+  match parsed:
+    case Json.JsonDone{value}:
+      Web.json_value(200, Json.object([
+        ("received", value),
+        ("accepted", Json.boolean(True{})),
+        ("labels", Json.array([Json.string("native"), Json.string("Bend")]))]))
+    case other: message(400, "error", "invalid JSON")
+
+def inspect_route(found: Bool, body: String) -> IO(Web.Reply):
   match found:
-    case True{}:
-      IO.bind(Json.ParseResult, Web.Reply, Json.Json.parse(body), parsed => echo(parsed, body))
-    case False{}:
-      IO.pure(Web.Reply, Web.json(404, "{\"error\":\"not found\"}"))
+    case True{}: IO.bind(Json.ParseResult, Web.Reply, Json.Json.parse(body), inspect)
+    case False{}: message(404, "error", "not found")
 
-def slow_route(found: Bool, key: String, body: String) -> IO(Web.Reply):
+def echo_route(found: Bool, key: String, body: String) -> IO(Web.Reply):
+  match found:
+    case True{}: IO.bind(Json.ParseResult, Web.Reply, Json.Json.parse(body), echo)
+    case False{}: inspect_route(String.eq(key, "POST /inspect"), body)
+
+def slow_route(found: Bool, +key: String, body: String) -> IO(Web.Reply):
   match found:
     case True{}:
       do IO<Web.Reply>:
         IO.sleep(250)
-        IO.pure(Web.Reply, Web.json(200, "{\"message\":\"finished\"}"))
-    case False{}:
-      echo_route(String.eq(key, "POST /echo"), body)
+        message(200, "message", "finished")
+    case False{}: echo_route(String.eq(key, "POST /echo"), key, body)
 
 def health_route(found: Bool, +key: String, body: String) -> IO(Web.Reply):
   match found:
     case True{}:
-      IO.pure(Web.Reply, Web.with_header("X-Stiff", "native", Web.json(200, "{\"message\":\"healthy\"}")))
-    case False{}:
-      slow_route(String.eq(key, "GET /slow"), key, body)
+      do IO<Web.Reply>:
+        reply : Web.Reply <- message(200, "message", "healthy")
+        IO.pure(Web.Reply, Web.with_header("X-Stiff", "native", reply))
+    case False{}: slow_route(String.eq(key, "GET /slow"), key, body)
 
 def route(+key: String, body: String) -> IO(Web.Reply):
   health_route(String.eq(key, "GET /health"), key, body)

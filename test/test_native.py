@@ -32,7 +32,9 @@ class NativeTests(unittest.TestCase):
                              ("test/fixtures/native-json.bend", "json"),
                              ("test/fixtures/native-policy.bend", "policy"),
                              ("test/fixtures/native-headers.bend", "headers"),
-                             ("test/fixtures/native-header-nul.bend", "header-nul")]:
+                             ("test/fixtures/native-header-nul.bend", "header-nul"),
+                             ("test/fixtures/native-encode.bend", "encode"),
+                             ("test/fixtures/native-encode-cases.bend", "encode-cases")]:
             result = subprocess.run([str(ROOT / "scripts/build-native.sh"), source,
                                      str(ROOT / ".cache/native" / name)], cwd=ROOT,
                                     capture_output=True, text=True, timeout=60)
@@ -229,7 +231,7 @@ class NativeTests(unittest.TestCase):
         self.assertEqual(self.execute("json", '{"key":1,"key":2}').stdout, "object:2\n")
 
     def test_json_rejections(self):
-        for value in ("{", "{} {}", "/*x*/{}", "[1,]", "01", '{"key\\u0000suffix":1}',
+        for value in ("{", "{} {}", "/*x*/{}", "[1,]", "01", "1.", '{"key\\u0000suffix":1}',
                       '"\\ud800"', '"\\udc00"'):
             with self.subTest(value=value):
                 self.assertEqual(self.execute("json", value).stderr, "invalid_json_response\n")
@@ -358,6 +360,54 @@ class NativeTests(unittest.TestCase):
                                     text=True, timeout=10)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Dependency revision differs", result.stderr)
+
+    def test_json_builders_and_escaping(self):
+        result = self.execute("encode")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {
+            "string": 'quote" slash\\ newline\n tab\t null\0 🌱',
+            "array": [True, False, None, 42]})
+        self.assertNotIn("\0", result.stdout)
+
+    def test_json_roundtrip_all_values(self):
+        values = [None, True, False, 0, -1, 1.25, 9007199254740991,
+                  "".join(chr(i) for i in range(32)) + '\"\\🌱é',
+                  [], {}, [1, {"quoted\"key": [False, None, "\0"]}],
+                  {"a": "text", "b": [1, 2, 3]}]
+        for value in values:
+            with self.subTest(value=value):
+                result = self.execute("encode", json.dumps(value))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout), value)
+        at_boundary = "[" * 128 + "null" + "]" * 128
+        result = self.execute("encode", at_boundary)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), at_boundary)
+
+    def test_constructed_json_numbers_are_validated(self):
+        for number in ("0", "-0", "1.25", "1e-5", "9007199254740991", "-9007199254740991"):
+            result = self.execute("encode", number, "number")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), number)
+        for number in ("", "NaN", "Infinity", "01", "+1", "1.", ".1", "1e", " 1", "1 ",
+                       "1,2", "null", '1} ,"injected": true'):
+            result = self.execute("encode", number, "number")
+            self.assertEqual(result.returncode, 1, number)
+            self.assertEqual(result.stderr, "invalid_json_value\n")
+        for number in ("1e999", "9007199254740992", "-9007199254740992"):
+            result = self.execute("encode", number, "number")
+            self.assertEqual(result.returncode, 1)
+            self.assertEqual(result.stderr, "json_number_range\n")
+
+    def test_json_encoding_limits_rejections_and_recovery(self):
+        result = self.execute("encode-cases")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        lines = result.stdout.splitlines()
+        self.assertEqual(lines[:11], ['"\\u000a"', "json_too_large", "invalid_json_value",
+                          "invalid_json_value", "invalid_json_value", "invalid_json_value",
+                          "json_too_deep", "invalid_json_limit", "invalid_json_limit", "[]", "{}"])
+        self.assertEqual(json.loads(lines[11]), {'"\\\n🌱': "value"})
+        self.assertEqual(lines[12:], ["invalid_json_value", "json_too_large", '"🌱"', "json_too_large", '"still usable"'])
 
     def test_pure_policy_boundaries_and_defaults(self):
         result = self.execute("policy")

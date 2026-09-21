@@ -48,8 +48,8 @@ make server
 ./.cache/native/server 127.0.0.1 8080
 ```
 
-The [example](examples/server.bend) routes `GET /health` and `POST /echo`, and
-returns JSON. Handlers run concurrently; SIGINT/SIGTERM stops admissions and
+The [example](examples/server.bend) routes `GET /health`, `POST /echo` and `POST /inspect`,
+and constructs JSON responses from Bend values. Handlers run concurrently; SIGINT/SIGTERM stops admissions and
 drains dispatched requests. Build your handler as `Incoming -> IO(Reply)` and
 pass it to `Web.serve(~handler)` after listening.
 
@@ -92,12 +92,46 @@ to your `.bend` file. The example includes these imports and `show`.
 | `Net.Stiff.send(request)` | `HttpOk{Response{status, body}}` or `HttpError{code, message}` |
 | `Net.Stiff.send_json(request)` | `JsonOk{status, value}` or `JsonError{code, message}` |
 | `Json.Json.parse(text)` | `JsonDone{value}` or `JsonFailure{code, message}` |
+| `Json.Json.stringify(value)` | `JsonEncoded{text}` or `JsonEncodeFailure{code, message}` |
+| `Json.Json.stringify_with_limit(value, max_bytes)` | Encode with an explicit UTF-8 output-byte limit |
 | `Json.field(key, value)` | `Some{value}` or `None{}` |
 | `Http.is_success(status)` | Whether status is 200–299 |
 
 `Json` imports `src/json.bend`. Values have explicit `JsonNull`, `JsonBool`,
 `JsonNumber`, `JsonString`, `JsonArray` and `JsonObject` constructors. Arrays and
 object entries are Bend lists. `Json.as_string` returns an optional String.
+
+## Build JSON responses
+
+`Json.object`, `Json.array`, `Json.string`, `Json.boolean`, `Json.null` and
+`Json.u32` build values directly. Objects take a list of `(name, value)` pairs;
+arrays take a list of values. For example, in a handler importing `server.bend`
+as `Web` and `json.bend` as `Json`:
+
+```python
+Web.json_value(200, Json.object([
+  ("message", Json.string("Hello \"Bend\"")),
+  ("items", Json.array([Json.u32(1), Json.boolean(True{}), Json.null()]))]))
+```
+
+`Web.json_value(status, value)` returns `IO(Web.Reply)` with the JSON content
+type and correct escaping. An encoding failure becomes a fixed JSON HTTP 500;
+use `Json.Json.stringify` directly if you need to handle its error yourself.
+`Web.json(status, text)` remains the raw-text helper.
+
+Encoding defaults to a 16 MiB UTF-8 output limit. An explicit limit must be
+1–16,777,216 bytes; depth is limited to 128, matching the decoder. Invalid Unicode
+scalars, NUL object keys and duplicate object keys are rejected. Existing parse
+behavior still resolves duplicate input keys to the last value before encoding.
+Object and array builders preserve list order; encoding preserves that order.
+
+`JsonNumber{decimal}` permits signed/fractional/exponent values, but encoding
+validates exact JSON number syntax and the decoder's numeric range. It preserves
+the supplied valid token; it does not promise arbitrary-precision arithmetic.
+Errors include `invalid_json_value`, `invalid_json_limit`, `json_too_large`,
+`json_too_deep` and `json_number_range`. String controls (including embedded NUL)
+are escaped; valid Unicode is emitted as UTF-8. No partial output is returned.
+Serialization is a bounded synchronous native effect, not a pure verified law.
 
 ## Behavior
 
@@ -132,7 +166,7 @@ Use HTTPS for real credentials. Custom headers are excluded from proxy CONNECT.
 The `Request` constructor now has a sixth field, `headers: List<&2, Header>`.
 Prefer the request helpers; direct constructor users must add `Nil{}` for no headers.
 
-Numbers are decimal strings from json-c, without an arbitrary-precision
+Decoded numbers are decimal strings from json-c, without an arbitrary-precision
 contract. Integer tokens outside ±9,007,199,254,740,991 are rejected. Duplicate
 keys use the last value; object-entry ordering is unspecified. Nesting beyond
 128 levels, NUL object keys and unpaired Unicode surrogate escapes are rejected.

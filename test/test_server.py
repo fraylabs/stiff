@@ -108,6 +108,17 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.request("POST", "/echo", "{")[0], 400)
         self.assertEqual(self.request(path="/missing")[0], 404)
 
+    def test_api_constructs_json_response_from_parsed_input(self):
+        value = {"text": 'quotes" backslash\\ newline\n nul\0 🌱', "items": [None, True, 1.25]}
+        status, headers, body = self.request("POST", "/inspect", json.dumps(value))
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body), {"received": value, "accepted": True, "labels": ["native", "Bend"]})
+        self.assertEqual(self.request("POST", "/inspect", "{")[0], 400)
+        status, headers, body = self.request(path="/encode-failure")
+        self.assertEqual(status, 500)
+        self.assertEqual(json.loads(body), {"error": "JSON encoding failed"})
+        self.assertNotIn(b"private-value", body)
+
     def test_bounded_bodies_and_utf8(self):
         self.assertEqual(self.request("POST", "/echo", b"x" * 1025)[0], 413)
         self.assertEqual(self.request("POST", "/echo", b"\xff")[0], 400)
