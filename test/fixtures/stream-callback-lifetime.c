@@ -1,4 +1,8 @@
 /* Compile around generated C to exercise the actual registered callback. */
+/* Match Bend's feature selection before the first system header. */
+#ifndef __APPLE__
+#define _GNU_SOURCE
+#endif
 #include <event2/http.h>
 static void (*retained_callback)(struct evhttp_connection*, void*);
 static void* retained_argument;
