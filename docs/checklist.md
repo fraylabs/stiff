@@ -1,81 +1,117 @@
 # Framework completion checklist
 
-Stiff 0.2.0 release criteria, September 21, 2026. This is the
-current result/evidence record, not a claim that passing unit tests establishes
-production readiness. Unchecked requirements remain open.
+Stiff **0.2.0** completes this bounded framework release checklist. Source revision
+`4b20f169249b601d807b2d6aaeddda07a59532a2` is the verified release target.
+[Published experimental release](https://github.com/fraylabs/stiff/releases/tag/v0.2.0).
+Stiff remains experimental: completing these checks is not a general
+production-readiness or memory-safety certification.
 
-September 21 callback lifetime repair: the retained libevent chunk callback now
-uses stable slot storage instead of the freed effect reply, checks connection
-ownership, and waits for the HTTP-facing output buffer to drain. The deterministic
-regression in `test/fixtures/stream-callback-lifetime.c` covers repeated callbacks
-after reply reclamation, pending output, closed/cleared slots and slot reuse on a
-different connection. An isolated build of the original callback fails this
-regression with ASan `heap-use-after-free`; the repaired callback passes.
-Stiff Builder 2 verified **132 normal tests** and **135 compiler-profile combined
-ASan/UBSan tests** on local macOS arm64, including pure proof verdicts, native
-server/streaming journeys and sanitizer detector checks. Local logs are retained
-under ignored `.cache/stiff-builder-2-{normal-tests,sanitizer-tests,before-fix}.log`.
-This fixes the observed lifetime defect; platform CI and release completion
-remain open below. Existing sanitizer coverage limits still apply.
+- [x] **Richer application APIs:** raw path parameters, unsigned integer/boolean/
+  optional/nullable/array/nested-object schemas, unknown-field rejection and shared
+  application/transport error envelopes. [API and contracts](schema.md).
+- [x] **Streaming and persistent connections:** bounded request/response streaming,
+  explicit keep-alive and working SSE. WebSockets and HTTP/2 are outside this
+  release; SSE covers the demonstrated need. [Streaming contract](streaming.md).
+- [x] **Execution controls:** cancellation of running native effects through an
+  isolated process, hard CPU limits, Linux cgroup resident-memory enforcement,
+  and bounded best-effort logging with slow/failed-sink tests. Per-handler
+  cancellation remains cooperative. [Execution boundaries](execution.md).
+- [x] **Persistence and recovery:** SQLite atomic version comparisons plus durable
+  operation receipts, idempotent replays/conflicts, concurrent writes, SIGKILL
+  recovery and uncertain-response reconciliation. [Store contract](store.md).
+- [x] **Verification:** independent-arrival load, repeated longer local workloads,
+  varied server/application/recovery tests, independent journey QA and passing
+  normal/sanitizer jobs on Linux/macOS arm64/x64. Evidence below.
+- [x] **Compiler/runtime:** the supported compiler-profile sanitizer build resolves
+  the observed instrumentation incompatibility with the narrow `preserve_none`
+  mitigation, retaining `preserve_most` and all checks. All six diagnostic
+  combinations and deliberate detector canaries pass. The upstream Clang defect
+  and native trust boundaries remain explicit. [Sanitizer contract](sanitizers.md).
+- [x] **Release stability:** versioned API/upgrade contract, private store schema
+  validation, deployment examples and a verified native archive with provenance,
+  third-party notices and checksums. [Compatibility](compatibility.md),
+  [deployment](../examples/deploy/notes.service), [changelog](../CHANGELOG.md).
 
-- [x] Richer application APIs: path parameters; boolean/numeric/optional/nested
-  schema validation; consistent application and transport errors.
-- [x] Streaming and persistent connections: bounded response and request streaming,
-  keep-alive, demonstrated SSE; evaluate WebSockets against an actual use case.
-- [x] Execution controls: cancellable running effects; hard process memory/CPU
-  limits; bounded logging resilient to slow/failed sinks.
-- [x] Persistence and recovery: atomic transactions, restart/crash recovery,
-  idempotency conflicts and uncertain-operation handling.
-- [ ] Verification: independently driven load, repeated longer soaks, varied
-  workloads, native and sanitizer journeys across supported platforms.
-- [x] Compiler/runtime: resolve the default calling-convention instrumentation
-  failure without suppressing checks or merely renaming the diagnostic profile.
-- [ ] Release stability: documented/versioned API contract, upgrade guidance,
-  deployment examples, and verified release artifacts.
+## Integrated persistent application
 
-Existing delivered baseline: native HTTP(S)/JSON client, bounded HTTP server,
-cooperative checkpoints and handler budgets, exact routes/middleware/text
-validation, correlation/logging/metrics. Baseline commit `6e1a3b0` passed 81 normal
-and 83 diagnostic-sanitizer tests on macOS arm64 and Linux CI. New work below must
-supply its own evidence; those results do not cover the pending changes.
+The [notes HTTP application](notes.md) combines routing, nested schemas,
+request observability and SQLite in one native executable. Its journeys cover
+create/read/update, concurrent version races, replay/input conflicts, durable
+rejected receipts, lost HTTP acknowledgements, SIGKILL/restart/reconciliation,
+metrics, invalid input and packaged execution outside the checkout.
 
-Before the callback lifetime repair, the local compiler-profile ASan/UBSan suite
-passed **134 tests**. Dedicated
-transport checks passed 18 streaming and 27 existing server tests in both normal
-and combined-sanitizer builds. Independent QA additionally exercised blocked
-response writes through reset, deadline and shutdown grace. Storage covers
-rejected-database preservation, conflicting/replayed operations, lost
-acknowledgements and crash recovery. The supervisor covers running HTTP effect
-cancellation, CPU limits, platform memory behavior, descendant cleanup and
-slow/failed logging, including injected setup failure and interrupted syscalls.
+Independent QA on `bb12dc7` used a separate compiled executable and black-box
+journeys, including 36 observed handler results, parallel identical requests,
+request-ID spoof resistance, log redaction, oversized-body rejection and recovery.
+Two QA findings were fixed and reverified: expected versions must leave room for
+incrementing, and Unicode identifiers must fit the store's byte bound. The final
+six-test application suite includes the corresponding boundary regressions.
+There are no remaining blocking/high/medium findings from that review.
 
-The compiler mitigation passed all six diagnostic combinations and deliberate
-ASan/UBSan fault canaries. Normal output retains Bend's calling conventions;
-instrumented output changes only the two ASan-incompatible `preserve_none` sites.
-This is not a proof of generated-runtime or dependency memory safety.
+## Platform and lifetime verification
 
-Release contracts are documented in [compatibility](compatibility.md),
-[streaming](streaming.md), [storage](store.md), [execution](execution.md),
-[schema](schema.md) and [dependency pins](dependencies.md). Request streaming
-uses pinned libevent 2.2.2-alpha with a tracked, hash-verified error-header patch.
-Content-Length uploads use a 64 KiB Bend-facing queue; chunk-framed uploads can
-buffer one complete frame up to the configured aggregate body limit. Per-handler
-cancellation remains cooperative; preemptive cancellation uses an isolated
-process. Linux cgroups provide the deployment resident-memory boundary.
-WebSockets and HTTP/2 are outside this release; SSE covers the demonstrated
-streaming use case.
+[All eight CI jobs](https://github.com/fraylabs/stiff/actions/runs/35609870142)
+passed on release source `4b20f16`: Ubuntu 24.04 x64/arm64 and macOS 15 x64/arm64,
+each with normal and combined ASan/UBSan builds. The normal suites run 138 tests;
+the sanitizer suites run 141, including detector canaries. Both Linux normal jobs
+also verify kernel cgroup resident-memory enforcement. Exact job results and
+counts are in [platform evidence](evidence/0.2.0/platform.json).
 
-Final platform CI, repeated load reports and clean release packaging are still
-in progress. The remaining boxes stay open until their actual results are linked.
+The retained libevent callback now uses stable slot storage, checks connection
+ownership and waits for output drain instead of retaining an effect-owned reply.
+Its native regression covers reply reclamation, repeated/stale callbacks,
+pending output, closure, cleared slots and connection/slot reuse. An isolated
+original-callback build failed with ASan `heap-use-after-free`; the repair passes.
+The Linux regression harness also selects Bend's feature macros before its first
+system header. This does not change runtime code or suppress instrumentation.
 
-Two sequential 300-second runs against one native process offered 100 requests/s
-from an independent process scheduler: **30,000 GET + 30,000 POST succeeded**,
-with zero client drops, transport/status/semantic errors or timeouts. The process
-then passed a fresh health request and graceful shutdown. Exact reports:
-[health](evidence/2026-09-21-health-300s.json) and
-[greeting](evidence/2026-09-21-greeting-300s.json). P99 completion latency was
-9.50 ms and 9.97 ms respectively on a shared macOS arm64 development host;
-these loopback observations are not deployment capacity or long-duration
-production evidence. The reports retain dirty-tree provenance and an independently
-verified matching committed source tree (`fd00415`). Subsequent source changes
-are a comment and an explicit compile-time bracket-depth allowance.
+All six local compiler/standard ABI diagnostic combinations passed:
+[diagnostic evidence](evidence/0.2.0/sanitizer-profiles.json). Pure proof verdicts
+and false-proof rejection remain in the full native suite. Normal binaries retain
+Bend's original ABI; instrumented binaries make only the documented mitigation.
+
+## Workload evidence
+
+Two partially overlapping **600-second** local persistent runs each offered
+30,000 reads and 15,000 idempotent PUTs from separate, independently scheduled
+load processes: **90,000 requests total**, zero drops, timeouts, status, transport
+or semantic failures. Each server then accepted a fresh mutation, shut down
+cleanly, reopened the same database and returned the durable replay result.
+
+- [First run](evidence/0.2.0/notes-soak-first-summary.json),
+  [reads](evidence/0.2.0/notes-soak-first-reads.json),
+  [writes/replays](evidence/0.2.0/notes-soak-first-replays.json).
+- [Final application run](evidence/0.2.0/notes-soak-final-summary.json),
+  [reads](evidence/0.2.0/notes-soak-final-reads.json),
+  [writes/replays](evidence/0.2.0/notes-soak-final-replays.json).
+
+The final run used clean `bb12dc7`; runtime source under `src/`, `native/`,
+`scripts/`, `examples/` and `VERSION` is identical in release `4b20f16` (the only
+later change is the Linux test harness). Final-run P99 was 14.25 ms for reads
+and 14.81 ms for replays; sampled peak RSS was 22,288 KiB. The first run used
+`5ac374f`, before the final identifier-bound correction. Reports retain exact
+revision/binary provenance rather than attributing old results to new code.
+
+These are finite, shared-host loopback measurements with repeated identical
+writes, not deployment capacity, sustained fresh-write throughput, long-term
+memory proof or separate-host network measurements. Earlier varied 300-second
+GET/POST runs remain as [health](evidence/2026-09-21-health-300s.json) and
+[greeting](evidence/2026-09-21-greeting-300s.json); their original revision limits
+remain in those reports. Native tests separately exercise overload, streaming,
+large/invalid bodies, concurrent fresh writes, cancellation and recovery.
+
+## Release artifact and remaining boundaries
+
+The clean macOS arm64 archive contains `app`, `notes`, `stiff-run`, deployment
+units, licenses, dependency provenance and SHA-256 checksums. The exact archive
+was extracted outside the checkout and passed supervised create/read/restart/
+replay checks with no build tools on PATH. [Artifact verification and manifest](evidence/0.2.0/release-archive.json).
+The published asset and checksum were downloaded again and matched the verified
+local bytes. Other platforms build from the tested, pinned source.
+
+The compiler stays at Bend 2.0.20; servers statically include scoped libevent
+2.2.2-alpha. Native dependencies and compiler internals are trusted, not formally
+verified. System curl/JSON/SQLite libraries remain dynamic dependencies.
+macOS does not claim Linux's hard resident-memory contract. Notes is a local
+single-workspace example, not authentication or a multi-tenant service. Store
+receipts cover local transactions, not exactly-once external operations.

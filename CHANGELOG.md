@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## 0.2.0 — September 21, 2026
 
 - Add raw path parameters and nested typed request-schema validation.
 - Add bounded request/response streams, SSE and explicit HTTP keep-alive for streams.
@@ -16,4 +16,5 @@
 - Package both native example applications, deployment units and dependency manifests.
 
 Experimental API; see docs/compatibility.md and docs/checklist.md for verified
-coverage and remaining limits. This entry does not imply a published release.
+coverage and remaining limits. Published as an experimental release at
+https://github.com/fraylabs/stiff/releases/tag/v0.2.0.

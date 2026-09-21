@@ -1,0 +1,65 @@
+{
+  "counts": {
+    "accepted": 30000,
+    "completed": 30000,
+    "drain_timeout_errors": 0,
+    "dropped": 0,
+    "errors": 0,
+    "internal_errors": 0,
+    "json_errors": 0,
+    "offered": 30000,
+    "response_too_large_errors": 0,
+    "status_errors": 0,
+    "succeeded": 30000,
+    "timeout_errors": 0,
+    "transport_errors": 0
+  },
+  "latency_ms": {
+    "count": 30000,
+    "max": 90.885000070557,
+    "mean": 2.527845472873499,
+    "min": 0.7249158807098866,
+    "p50": 1.556833041831851,
+    "p95": 7.079333998262882,
+    "p99": 14.252417022362351
+  },
+  "load": {
+    "drain_timeout_seconds": 15.0,
+    "duration_seconds": 600.0,
+    "max_offered_samples": 1000000,
+    "queue_capacity": 512,
+    "rate_per_second": 50.0,
+    "timeout_seconds": 5.0,
+    "workers": 8
+  },
+  "request": {
+    "expected_statuses": [
+      200
+    ],
+    "json_expectation_count": 2,
+    "max_response_bytes": 1048576,
+    "method": "GET",
+    "requires_json": true
+  },
+  "schedule_lag_ms": {
+    "count": 30000,
+    "max": 126.5542081091553,
+    "mean": 2.457897076002943,
+    "min": 0.05804095417261124,
+    "p50": 2.434125170111656,
+    "p95": 3.922291100025177,
+    "p99": 7.1402499452233315
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-21T14:00:43.521613+00:00",
+  "statuses": {
+    "200": 30000
+  },
+  "target": "http://127.0.0.1:53789/notes/soak",
+  "timing": {
+    "actual_completion_rate": 49.999677575002416,
+    "actual_offer_rate": 49.99978480650528,
+    "offering_elapsed_seconds": 600.0025823330507,
+    "total_elapsed_seconds": 600.003869124921
+  }
+}

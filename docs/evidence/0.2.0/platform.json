@@ -1,0 +1,71 @@
+{
+  "revision": "4b20f169249b601d807b2d6aaeddda07a59532a2",
+  "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "test (ubuntu-24.04, normal)",
+      "conclusion": "success",
+      "tests": 138,
+      "test_seconds": 201.112,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011157",
+      "kernel_memory_enforced": true
+    },
+    {
+      "name": "test (macos-15-intel, normal)",
+      "conclusion": "success",
+      "tests": 138,
+      "test_seconds": 366.074,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011377",
+      "kernel_memory_enforced": false
+    },
+    {
+      "name": "test (macos-15, normal)",
+      "conclusion": "success",
+      "tests": 138,
+      "test_seconds": 253.781,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011424",
+      "kernel_memory_enforced": false
+    },
+    {
+      "name": "test (macos-15-intel, sanitized)",
+      "conclusion": "success",
+      "tests": 141,
+      "test_seconds": 626.733,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011447",
+      "kernel_memory_enforced": false
+    },
+    {
+      "name": "test (ubuntu-24.04, sanitized)",
+      "conclusion": "success",
+      "tests": 141,
+      "test_seconds": 307.477,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011488",
+      "kernel_memory_enforced": false
+    },
+    {
+      "name": "test (ubuntu-24.04-arm, sanitized)",
+      "conclusion": "success",
+      "tests": 141,
+      "test_seconds": 271.523,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011517",
+      "kernel_memory_enforced": false
+    },
+    {
+      "name": "test (macos-15, sanitized)",
+      "conclusion": "success",
+      "tests": 141,
+      "test_seconds": 469.298,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011616",
+      "kernel_memory_enforced": false
+    },
+    {
+      "name": "test (ubuntu-24.04-arm, normal)",
+      "conclusion": "success",
+      "tests": 138,
+      "test_seconds": 177.655,
+      "url": "https://github.com/fraylabs/stiff/actions/runs/35609870142/job/106366011782",
+      "kernel_memory_enforced": true
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "archive": "stiff-0.2.0-darwin-arm64.tar.gz",
+  "sha256": "864b160b09965cb20aa8fe2bb6dd60d7a77d218efed759ff01c722acebe44dd9",
+  "manifest": {
+    "schema_version": 1,
+    "static_libraries": {
+      "libevent": {
+        "archive_sha256": "4ab1b369bcb5af0c5971b8ade4e95a2c1326f6d0dc1ba75d620bf0331c3184a8",
+        "build": {
+          "library_type": "STATIC",
+          "mbedtls": false,
+          "openssl": false,
+          "position_independent_code": true,
+          "tests": false
+        },
+        "license_sha256": "75092d5ecfeefefacc0f345b6f0172234ca580c279c537de7229597cfbfd71e7",
+        "package_version": "2.2.2",
+        "patches": [
+          {
+            "path": "patches/libevent-error-headers.patch",
+            "sha256": "77f3200db9822c892f2eafe7ded46822add96c34fd0f4b3077f0d7d5addb6461",
+            "upstream_status": "local-not-submitted"
+          }
+        ],
+        "runtime_version": "2.2.2-alpha-dev",
+        "source_commit": "df3ecad3a040fd6d4fad4287defe113395de6fd7",
+        "source_tag": "release-2.2.2-alpha",
+        "source_tag_object": "58bc9c771db13a518362ed5803739d7942ea7650",
+        "source_url": "https://github.com/libevent/libevent/releases/download/release-2.2.2-alpha/libevent-2.2.2-alpha.tar.gz",
+        "version": "2.2.2-alpha"
+      }
+    },
+    "version": "0.2.0",
+    "revision": "4b20f169249b601d807b2d6aaeddda07a59532a2",
+    "dirty": false,
+    "platform": "darwin-arm64",
+    "bend": "2.0.20",
+    "runtime_libraries": {
+      "libcurl": "8.7.1",
+      "json-c": "0.19",
+      "sqlite3": "3.51.0"
+    },
+    "binaries": {
+      "app": {
+        "sanitizer": "none",
+        "bend_abi": "compiler"
+      },
+      "notes": {
+        "sanitizer": "none",
+        "bend_abi": "compiler"
+      },
+      "stiff-run": {
+        "sanitizer": "none",
+        "language": "C11"
+      }
+    },
+    "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)"
+  },
+  "checksums": true,
+  "outside_checkout": true,
+  "no_build_tools_on_path": true,
+  "supervised_create_read_restart_replay": true,
+  "published_url": "https://github.com/fraylabs/stiff/releases/tag/v0.2.0",
+  "published_tag_revision": "4b20f169249b601d807b2d6aaeddda07a59532a2",
+  "downloaded_asset_sha256": "864b160b09965cb20aa8fe2bb6dd60d7a77d218efed759ff01c722acebe44dd9",
+  "published_download_matches": true
+}

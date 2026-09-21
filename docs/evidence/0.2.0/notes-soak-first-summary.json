@@ -1,0 +1,23 @@
+{
+  "revision": "5ac374fb06df793829075d59bc8993a3fccff41c",
+  "dirty": false,
+  "platform": "macOS-26.5.1-arm64-arm-64bit",
+  "binary_sha256": "13f7b89b1c495c9e48e85bc38b4b74fa783470a771192f35adff68375bb2725d",
+  "duration_seconds": 600,
+  "elapsed_seconds": 600.7691369056702,
+  "workloads": [
+    "reads.json",
+    "replays.json"
+  ],
+  "rss_kib": {
+    "samples": 591,
+    "first": 7184,
+    "last": 13952,
+    "max": 22640
+  },
+  "fresh_write": true,
+  "graceful_shutdown": true,
+  "restart_read": true,
+  "restart_replay": true,
+  "limits": "Shared-host loopback; repeated identical durable writes, not deployment capacity or long-term memory proof."
+}

@@ -1,0 +1,73 @@
+{
+  "platform": "macOS-26.5.1-arm64-arm-64bit",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+  "bend_pin": "2.0.20",
+  "results": [
+    {
+      "abi": "compiler",
+      "sanitizer": "address",
+      "build_exit": 0,
+      "preserve_macro": "attribute",
+      "preserve_none_sites": 0,
+      "preserve_most_sites": 1,
+      "exit": 0,
+      "stdout": "runtime smoke\n",
+      "stderr": ""
+    },
+    {
+      "abi": "compiler",
+      "sanitizer": "undefined",
+      "build_exit": 0,
+      "preserve_macro": "attribute",
+      "preserve_none_sites": 2,
+      "preserve_most_sites": 1,
+      "exit": 0,
+      "stdout": "runtime smoke\n",
+      "stderr": ""
+    },
+    {
+      "abi": "compiler",
+      "sanitizer": "combined",
+      "build_exit": 0,
+      "preserve_macro": "attribute",
+      "preserve_none_sites": 0,
+      "preserve_most_sites": 1,
+      "exit": 0,
+      "stdout": "runtime smoke\n",
+      "stderr": ""
+    },
+    {
+      "abi": "standard",
+      "sanitizer": "address",
+      "build_exit": 0,
+      "preserve_macro": "empty",
+      "preserve_none_sites": 2,
+      "preserve_most_sites": 1,
+      "exit": 0,
+      "stdout": "runtime smoke\n",
+      "stderr": ""
+    },
+    {
+      "abi": "standard",
+      "sanitizer": "undefined",
+      "build_exit": 0,
+      "preserve_macro": "empty",
+      "preserve_none_sites": 2,
+      "preserve_most_sites": 1,
+      "exit": 0,
+      "stdout": "runtime smoke\n",
+      "stderr": ""
+    },
+    {
+      "abi": "standard",
+      "sanitizer": "combined",
+      "build_exit": 0,
+      "preserve_macro": "empty",
+      "preserve_none_sites": 2,
+      "preserve_most_sites": 1,
+      "exit": 0,
+      "stdout": "runtime smoke\n",
+      "stderr": ""
+    }
+  ]
+}

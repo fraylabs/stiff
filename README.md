@@ -7,6 +7,9 @@ it to a native executable.
 **Status:** experimental 0.2.0, pinned to Bend **2.0.20**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
+[Stiff 0.2.0 release and verified macOS arm64 archive](https://github.com/fraylabs/stiff/releases/tag/v0.2.0).
+[Completed checklist and verification evidence](docs/checklist.md).
+
 ## Get started
 
 You need Clang, make, pkg-config, libcurl development files (7.85 or newer),
