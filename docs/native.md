@@ -109,3 +109,8 @@ Uninstrumented builds and the pinned compiler remain unchanged. Address-sanitize
 builds remove only preserve_none while retaining preserve_most. Instrumented
 coverage does not establish memory safety. See [the investigation and coverage
 limits](sanitizers.md).
+
+Builds set Clang’s parser bracket-depth limit to 1024. Bend’s generated nested
+match chains can exceed upstream Clang’s default 256 even when the same program
+compiles with Apple Clang. This is a finite compile-time parser allowance, not
+a change to application recursion, stack limits or runtime validation.

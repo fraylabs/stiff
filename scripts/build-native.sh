@@ -103,7 +103,9 @@ esac
 if [ "${STIFF_NATIVE_SANITIZE:-0}" != 0 ]; then
   stiff_compile_flags="-O1 -g -fsanitize=$stiff_sanitizers -fno-sanitize-recover=all -fno-omit-frame-pointer"
 fi
+# Bend can generate deeply nested C for otherwise ordinary match chains.
+# Set an explicit finite parser limit across Apple/upstream Clang defaults.
 set -f
 # Intentional word splitting of pkg-config flags, never evaluated as shell code.
-"$stiff_cc" -std=c11 $stiff_compile_flags "$2.c" -lpthread -lm $stiff_flags -o "$2"
+"$stiff_cc" -std=c11 -fbracket-depth=1024 $stiff_compile_flags "$2.c" -lpthread -lm $stiff_flags -o "$2"
 echo "Built $2. Native libraries: $stiff_library_label."
