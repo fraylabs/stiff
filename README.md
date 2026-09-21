@@ -304,6 +304,13 @@ Contributions should include a runnable example or failing case, preserve the
 compiler pin unless deliberately upgrading it, and distinguish pure proofs from
 foreign implementation behavior.
 
+## Load and recovery measurements
+
+`make benchmark` runs native loopback workloads and records validated throughput,
+latency percentiles, sampled memory, overload rejection, recovery and shutdown.
+See [the workload, report format and limits](docs/benchmark.md). A short version
+also runs in CI. Passing these checks is not a production-capacity claim.
+
 ## License
 
 MIT. Bend is an independent upstream project; its downloaded compiler retains

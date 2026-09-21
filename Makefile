@@ -1,4 +1,4 @@
-.PHONY: setup build server test test-sanitize diagnose-sanitizers
+.PHONY: setup build server test test-sanitize diagnose-sanitizers benchmark
 
 setup:
 	python3 scripts/setup.py
@@ -18,3 +18,7 @@ test-sanitize:
 
 diagnose-sanitizers:
 	python3 scripts/diagnose-sanitizers.py
+
+# Local loopback only. Raw reports and binaries stay ignored.
+benchmark:
+	python3 scripts/benchmark.py
