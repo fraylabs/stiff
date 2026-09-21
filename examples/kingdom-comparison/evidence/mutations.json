@@ -1,0 +1,53 @@
+{
+  "experiments": [
+    {
+      "mutation": "pass_does_not_change_turn",
+      "language": "bend",
+      "proof_exit": 1,
+      "proof_accepted": false,
+      "proof_verdict": "Error:\n- expected : engine.Outcome{True{}, engine.State{gold0, gold1, bank, owner, mortgaged, 0}}\n- observed : engine.Outcome{True{}, engine.State{gold0, gold1, bank, owner, mortgaged, 1}}\nContext:\n- gold0     : U32\n- gold1     : U32\n- bank      : U32\n- owner     : U32\n- mortgaged : Bool\nLocation: LAWS.pass0_changes_only_turn\n13 | def Laws.pass0_changes_only_turn(gold0, gold1, bank, owner, mortgaged):\n14>|   {==}\n15 |",
+      "ordinary_compilation_accepted": true,
+      "expected_output": "ok 20 20 100 0 0 1\n",
+      "actual_output": "ok 20 20 100 0 0 0\n",
+      "independent_example_detected_error": true,
+      "worker_tests_detected_error": true,
+      "worker_test_exit": 1
+    },
+    {
+      "mutation": "pass_does_not_change_turn",
+      "language": "rust",
+      "proof_accepted": null,
+      "ordinary_compilation_accepted": true,
+      "expected_output": "ok 20 20 100 0 0 1\n",
+      "actual_output": "ok 20 20 100 0 0 0\n",
+      "independent_example_detected_error": true,
+      "worker_tests_detected_error": true,
+      "worker_test_exit": 101
+    },
+    {
+      "mutation": "mortgage_creates_one_gold",
+      "language": "bend",
+      "proof_exit": 0,
+      "proof_accepted": true,
+      "proof_verdict": "All terms check.",
+      "ordinary_compilation_accepted": true,
+      "expected_output": "ok 25 20 95 0 1 1\n",
+      "actual_output": "ok 26 20 95 0 1 1\n",
+      "independent_example_detected_error": true,
+      "worker_tests_detected_error": true,
+      "worker_test_exit": 1
+    },
+    {
+      "mutation": "mortgage_creates_one_gold",
+      "language": "rust",
+      "proof_accepted": null,
+      "ordinary_compilation_accepted": true,
+      "expected_output": "ok 25 20 95 0 1 1\n",
+      "actual_output": "ok 26 20 95 0 1 1\n",
+      "independent_example_detected_error": true,
+      "worker_tests_detected_error": true,
+      "worker_test_exit": 101
+    }
+  ],
+  "interpretation": "Shows delivered proof/test coverage only; not language limits or a bug-free claim."
+}

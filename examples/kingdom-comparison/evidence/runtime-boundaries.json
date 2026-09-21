@@ -1,0 +1,47 @@
+{
+  "scope": "fixed initial state; sequential CLI; finite action/state model",
+  "includes_reserved_runtime_flags": true,
+  "oracle_reachable_states": 8,
+  "command_classes_per_state": 19,
+  "state_command_edges": 152,
+  "scenarios_per_implementation": 168,
+  "expected_output_lines_per_implementation": 4099,
+  "oracle_sha256": "4e13b7e21af58e732ca94eedb8ebd9b36d6b65a3b60d08d19668ad20fb0bc670",
+  "prompt_sha256": "5da9d9e32b3f8b1db8248fcba16ce1c072c306750db596ca052e861bda0c5acd",
+  "binary_sha256": {
+    "bend": "8c4aade9da5a9959eda4e86090b037b0ac7bdda49b407fff70ff148e1ee565ba",
+    "rust": "7178c65ff07f76ddb2a4f0329299eb8a8ff76ab54bb550a3e6fd809952507449"
+  },
+  "passed": false,
+  "failures": [
+    {
+      "case": "runtime-delimiter",
+      "language": "bend",
+      "exit": 0,
+      "expected": "error 20 20 100 0 0 0\n",
+      "actual": "",
+      "stderr": ""
+    },
+    {
+      "case": "runtime-threads",
+      "language": "bend",
+      "exit": 0,
+      "expected": "error 20 20 100 0 0 0\nerror 20 20 100 0 0 0\n",
+      "actual": "",
+      "stderr": ""
+    },
+    {
+      "case": "runtime-delimiter-before-move",
+      "language": "bend",
+      "exit": 0,
+      "expected": "error 20 20 100 0 0 0\nok 20 20 100 0 0 1\n",
+      "actual": "ok 20 20 100 0 0 1\n",
+      "stderr": ""
+    }
+  ],
+  "limitations": [
+    "No arbitrary initial-state input, concurrent requests, persistence or networking.",
+    "Finite behavioral enumeration is not a compiler-checked proof.",
+    "One paired run cannot establish a general language ranking."
+  ]
+}

@@ -355,6 +355,11 @@ Contributions should include a runnable example or failing case, preserve the
 compiler pin unless deliberately upgrading it, and distinguish pure proofs from
 foreign implementation behavior.
 
+The [same-prompt kingdom comparison](examples/kingdom-comparison) contains
+independent Bend 2 and Rust rules engines, shared behavioral checks, and deliberate
+faults showing what the delivered proofs and tests catch. Its report also records
+a native CLI argument difference; it is not a claim of bug-free game logic.
+
 ## Load and recovery measurements
 
 `make benchmark` runs native loopback workloads and records validated throughput,

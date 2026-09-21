@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-22",
+  "platform": "macOS arm64",
+  "compiler_versions": {
+    "bend": "bend 2.0.20",
+    "rust": "rustc 1.95.0 (59807616e 2026-04-14)"
+  },
+  "model": "gpt-5.6-sol",
+  "reasoning_effort": "high",
+  "contexts": "fresh task contexts; common prompt with language/directory-specific toolchain instructions",
+  "skill": "committed-execution v1.4",
+  "workers": {
+    "bend": "/root/kingdom_bend",
+    "rust": "/root/kingdom_rust"
+  },
+  "checks": {
+    "make_setup": "passed",
+    "stiff_native_suite": {
+      "result": "passed",
+      "tests": 138,
+      "seconds": 222.896
+    },
+    "integrated_make_test": "passed",
+    "bend_laws": {
+      "count": 10,
+      "verdict": "All terms check."
+    },
+    "bend_native_tests_and_cli": "passed",
+    "rust_tests": {
+      "engine": 3,
+      "cli": 4,
+      "exhaustive_state_action_cases": 640704,
+      "result": "passed"
+    },
+    "rustfmt": "passed",
+    "independent_cli_comparison": "passed",
+    "mutation_experiments": "completed; both tests catch both; Bend laws catch turn error only",
+    "reserved_runtime_argv_comparison": {
+      "result": "failed as documented",
+      "bend_mismatches": 3,
+      "rust_mismatches": 0,
+      "scope": "literal shared prompt applied to reserved runtime arguments"
+    }
+  },
+  "source_sha256": {
+    "bend/LAWS.bend": "628dd947fea41ed5e8c9c26cbb5bbd23c7a0d5af2857c4ea9e7ee94d2816a68f",
+    "bend/PROOF.bend": "54deea5a9fa1e8a42c6a7f1323cd22b4bae710e7f051dc65e2d1c971df7a830c",
+    "bend/README.md": "06755f08a97137530488ba5c1fbbd9209232da4fb19f455e1c19e1c667ba06f1",
+    "bend/WORKLOG.md": "e3b0331095508b1cb7e074c9387559e03f05d2280e05416149cd4ab7ef3a38dd",
+    "bend/engine.bend": "149e1e314526ad72ebb30551618ca38a77674a0162ae3afe26df4bf555f3eb81",
+    "bend/main.bend": "0d759a25b75a881b177678739cf85c94dd333e421ed4ea70e69be828275a9e25",
+    "bend/test.sh": "1f72e0826c253d1e80ee12ff10c174ce8211267a2a4b2ebf527e4cf96afe34e3",
+    "bend/tests.bend": "efb5c9afe282150a7ea8c6031c8063bb884f742402b65ef63abe79e72e71b9cb",
+    "rust/Makefile": "60d16f29a1b2b775cccd1e87b7c080d247d2f148892f53ab079cd05e2d9fd0be",
+    "rust/README.md": "e43bddcfbb11030917f4c78f74a6074a1d6104f2f12ee94df6981226b53c3ac9",
+    "rust/WORKLOG.md": "95d8cdf2cb5ad0d600e50a682dd7ff0ab1754ef35314c8629228f1f932108e10",
+    "rust/src/engine.rs": "0b162e0a2ba7c8866c38fb290640c20c6500e99a1d414f52079d75d5e0ea4070",
+    "rust/src/main.rs": "417c8b2ab16a385c9bb281b609daf3f734fc5c51de795d63adb6e3e1511bc18a",
+    "rust/tests/cli.rs": "df40a89606449bf8966f160e04af2427e90319451e2095a17bcb1f8bb26f860c"
+  },
+  "parent_harness_revision": "Initial mutation test binary name collided with Rust tests directory; fixed before recorded run.",
+  "parent_harness_sha256": {
+    "compare.py": "4e13b7e21af58e732ca94eedb8ebd9b36d6b65a3b60d08d19668ad20fb0bc670",
+    "mutations.py": "5dc2829fae1981c45a0fd53235bb44e62cfa2d4248f6198b1b46deadcf3c61a2"
+  }
+}
