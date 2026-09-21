@@ -10,7 +10,7 @@ import ../src/store.bend as Db
 def schema() -> Schema.Schema:
   Schema.Object{[
     Schema.Field{"operation_id", True{}, Schema.Text{1n, 64n}},
-    Schema.Field{"expected_version", True{}, Schema.UInt{0, 4294967295}},
+    Schema.Field{"expected_version", True{}, Schema.UInt{0, 4294967294}},
     Schema.Field{"note", True{}, Schema.Object{[
       Schema.Field{"title", True{}, Schema.Text{1n, 80n}},
       Schema.Field{"done", True{}, Schema.Boolean{}},
@@ -146,16 +146,16 @@ def opened(port: U32, result: Db.OpenResult) -> IO(Unit):
       IO.bind(Web.Started, Unit, Web.Server.listen(Web.config("127.0.0.1", port)), r => listening(store, r))
     case Db.StoreOpenError{code, message}: IO.die(Unit, 1, code)
 
+def start_port(path: String, port: Maybe<&2, U32>) -> IO(Unit):
+  match port:
+    case Some{n}: IO.bind(Db.OpenResult, Unit, Db.Store.open(path), r => opened(n, r))
+    case None{}: IO.die(Unit, 2, "Invalid port")
+
 def start(args: List<String>) -> IO(Unit):
   match args:
     case Con{path, Con{port, Nil{}}}:
       start_port(path, U32.read(port))
     case other: IO.die(Unit, 2, "usage: notes DATABASE PORT")
-
-def start_port(path: String, port: Maybe<&2, U32>) -> IO(Unit):
-  match port:
-    case Some{n}: IO.bind(Db.OpenResult, Unit, Db.Store.open(path), r => opened(n, r))
-    case None{}: IO.die(Unit, 2, "Invalid port")
 
 def main() -> IO(Unit):
   do IO<Unit>:

@@ -101,6 +101,7 @@ class NotesTests(unittest.TestCase):
         for payload, path in [
             ({}, ['operation_id']),
             ({**self.mutation('a'), 'expected_version': -1}, ['expected_version']),
+            ({**self.mutation('a'), 'expected_version': 4294967295}, ['expected_version']),
             ({**self.mutation('a'), 'note': {'title': '', 'done': False}}, ['note', 'title']),
             ({**self.mutation('a'), 'note': {'title': 'a', 'done': 'no'}}, ['note', 'done']),
             ({**self.mutation('a'), 'note': {'title': 'a', 'done': False, 'tags': [3]}}, ['note', 'tags', '0']),
@@ -120,6 +121,7 @@ class NotesTests(unittest.TestCase):
         status, body, _ = self.request('PUT', '/notes/first', raw=b'\xff')
         self.assertEqual(status, 400)
         self.assertEqual(set(body['error']), {'code', 'message'})
+        self.assertEqual(self.request('PUT', '/notes/absent', self.mutation('max-version', 4294967294))[0], 409)
 
     def test_idempotency_and_version_conflicts_survive_restart(self):
         payload = self.mutation('same')

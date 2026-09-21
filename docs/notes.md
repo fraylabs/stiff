@@ -69,7 +69,8 @@ Path and operation IDs contain 1–64 Unicode scalars; the path router retains r
 URL encoding and does not decode `%2F`. The store additionally enforces its
 255-byte key/operation limit. Titles contain 1–80 scalars, `done` is a required
 boolean, and optional tags contain at most eight strings of 1–24 scalars each.
-Objects reject unknown fields. Expected versions are unsigned 32-bit integers.
+Objects reject unknown fields. Expected versions range from 0 to 4,294,967,294;
+the store reserves room for the next version increment.
 Malformed JSON gets HTTP 400; schema errors get 422 with a field path; missing
 routes and wrong methods get 404/405, with `Allow` for 405. Errors use the shared
 `{"error":{"code":...,"message":...}}` envelope, with extra validation/conflict

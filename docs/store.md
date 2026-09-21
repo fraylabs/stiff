@@ -38,7 +38,9 @@ The runnable [store example](../examples/store.bend) accepts a database path:
 | `Store.compare_write(store, operation_id, key, expected, value)` | A committed result, an idempotency conflict or `StoreWriteError` |
 | `Store.operation(store, operation_id)` | The durable outcome for reconciliation, `StoreOperationUnknown{}` or an error |
 
-Expected version `0` means “create only if absent.” A positive version means
+Expected version `0` means “create only if absent.” Inputs are limited to
+0–4,294,967,294 so a successful write can increment the version without overflow.
+A positive version means
 “replace only this version.” Successful writes increment the version. A mismatch
 returns either `StoreVersionConflict{current_version, current_value}` or
 `StoreMissingConflict{}`. The store records successful and rejected comparisons,
