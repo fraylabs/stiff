@@ -1,0 +1,99 @@
+{
+  "counts": {
+    "accepted": 30000,
+    "completed": 30000,
+    "drain_timeout_errors": 0,
+    "dropped": 0,
+    "errors": 0,
+    "internal_errors": 0,
+    "json_errors": 0,
+    "offered": 30000,
+    "response_too_large_errors": 0,
+    "status_errors": 0,
+    "succeeded": 30000,
+    "timeout_errors": 0,
+    "transport_errors": 0
+  },
+  "latency_ms": {
+    "count": 30000,
+    "max": 75.29391697607934,
+    "mean": 1.151371777127497,
+    "min": 0.26529189199209213,
+    "p50": 0.5963749717921019,
+    "p95": 3.681250149384141,
+    "p99": 9.496041107922792
+  },
+  "load": {
+    "drain_timeout_seconds": 5.0,
+    "duration_seconds": 300.0,
+    "max_offered_samples": 1000000,
+    "queue_capacity": 512,
+    "rate_per_second": 100.0,
+    "timeout_seconds": 2.0,
+    "workers": 16
+  },
+  "provenance": {
+    "binary_sha256": "0454ad73513abe532884ac7aabbd622cbe9a012d44ab2b9e7f576a91cb529030",
+    "git_revision": "6e1a3b022be6312d4eb62e01a660abb58e8a7f3b",
+    "libevent_pin": {
+      "archive_sha256": "4ab1b369bcb5af0c5971b8ade4e95a2c1326f6d0dc1ba75d620bf0331c3184a8",
+      "build": {
+        "library_type": "STATIC",
+        "mbedtls": false,
+        "openssl": false,
+        "position_independent_code": true,
+        "tests": false
+      },
+      "license_sha256": "75092d5ecfeefefacc0f345b6f0172234ca580c279c537de7229597cfbfd71e7",
+      "package_version": "2.2.2",
+      "patches": [
+        {
+          "path": "patches/libevent-error-headers.patch",
+          "sha256": "77f3200db9822c892f2eafe7ded46822add96c34fd0f4b3077f0d7d5addb6461",
+          "upstream_status": "local-not-submitted"
+        }
+      ],
+      "runtime_version": "2.2.2-alpha-dev",
+      "source_commit": "df3ecad3a040fd6d4fad4287defe113395de6fd7",
+      "source_tag": "release-2.2.2-alpha",
+      "source_tag_object": "58bc9c771db13a518362ed5803739d7942ea7650",
+      "source_url": "https://github.com/libevent/libevent/releases/download/release-2.2.2-alpha/libevent-2.2.2-alpha.tar.gz",
+      "version": "2.2.2-alpha"
+    },
+    "matching_committed_sources": "fd00415266785716799fd49630c47dca49e85d4b",
+    "note": "Separate load process and native server on one shared macOS arm64 development host; not a capacity claim.",
+    "source_digest_method": "SHA-256 of sorted src/**/*.bend, src/**/*.c, examples/app.bend and scripts/build-native.sh: relative path, NUL, file bytes. Verified against committed tree after measurement.",
+    "source_sha256": "d57d7f2f36e874fa53a00a345f09d4f842de919d5b3036baad76856dd82e1356",
+    "working_tree_dirty": true
+  },
+  "request": {
+    "expected_statuses": [
+      200
+    ],
+    "json_expectation_count": 1,
+    "max_response_bytes": 1048576,
+    "method": "GET",
+    "requires_json": true
+  },
+  "schedule_lag_ms": {
+    "count": 30000,
+    "max": 24.027083069086075,
+    "mean": 2.4442817565519364,
+    "min": 0.08566607721149921,
+    "p50": 2.3967078886926174,
+    "p95": 3.7888330407440662,
+    "p99": 7.020833203569055
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-21T12:08:13.739200+00:00",
+  "statuses": {
+    "200": 30000
+  },
+  "target": "http://127.0.0.1:62225/health",
+  "timing": {
+    "actual_completion_rate": 99.99575912451458,
+    "actual_offer_rate": 99.99870710000283,
+    "offering_elapsed_seconds": 300.00387875013985,
+    "total_elapsed_seconds": 300.0127231660299
+  }
+}
