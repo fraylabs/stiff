@@ -1,0 +1,57 @@
+{
+  "package": "0xf5a52e743a7f75c5d624c27c9e0ec81f",
+  "hub": "https://hub.bend-lang.com",
+  "files": 17,
+  "manifest_sha256": "f5a52e743a7f75c5d624c27c9e0ec81fa480aa394fdcefbe14c1780b9bc95924",
+  "compiler": "bend 2.0.20",
+  "empty_cache_download": true,
+  "source_bytes_match": true,
+  "proof_verdict": "All terms check.",
+  "native_https": "passed",
+  "independently_built_example_https": true,
+  "persistent_application_tests": 6,
+  "altered_native_cache_rejected": true,
+  "restored_cache_verified": true,
+  "date": "2026-09-21",
+  "platform": "macOS arm64",
+  "status": "published and verified",
+  "library_release": "v0.2.0 experimental",
+  "library_and_build_tool_revision": "4b20f169249b601d807b2d6aaeddda07a59532a2",
+  "package_bytes": 146665,
+  "publication_response": [
+    "0xf5a52e743a7f75c5d624c27c9e0ec81f",
+    "import 0xf5a52e743a7f75c5d624c27c9e0ec81f/stiff.bend as Stiff"
+  ],
+  "full_native_suite": {
+    "tests": 138,
+    "result": "passed",
+    "seconds": 236.128
+  },
+  "standalone_example": {
+    "copied_outside_repository": true,
+    "setup_from_exact_git_revision": true,
+    "make_setup_build": "passed",
+    "final_hash_make_build": "passed",
+    "cached_native_file_tamper": "rejected"
+  },
+  "independent_review": {
+    "worker": "/root/hub_qa",
+    "model": "gpt-5.6-sol high",
+    "skill": "committed-execution v1.4",
+    "findings_addressed": [
+      "Package carries compiler pin, native trust boundary, dependency/build directions and MIT text.",
+      "Verified exact copied example and pinned Git tooling in addition to isolated library consumers.",
+      "Use --check-only for package checking.",
+      "Example verifies every cached package byte before native compilation."
+    ]
+  },
+  "earlier_publication": {
+    "package": "0x653e10f8f8c60f3424b51ec705933442",
+    "status": "superseded by canonical package after adding anchor build guidance; immutable upload retained"
+  },
+  "limits": [
+    "Experimental release; native C/compiler/dependencies remain trusted.",
+    "This package-consumption run covers macOS arm64. Prior runtime platform evidence is separate.",
+    "BendHub includes sources, not native dependencies, build scripts or prebuilt binaries."
+  ]
+}

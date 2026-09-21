@@ -5,7 +5,8 @@ is Bend 2.0.20, source `a5269a6b2c5ccd6752b66df4bc6f60678b4f49bc`.
 Server builds also pin the experimental libevent 2.2.2-alpha source; see
 [dependency policy](dependencies.md). The public API consists of the documented Bend modules and `stiff-run` CLI;
 generated C layouts and native effect internals are private. Applications compile
-against an exact Stiff Git revision. There is no hosted package registry.
+against an exact Stiff Git revision or [BendHub content hash](bendhub.md), with
+separately pinned native build tooling.
 
 Before 1.0, a minor release may change a public API; patch releases preserve the
 documented API unless correcting behavior that violates its security/bounds

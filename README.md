@@ -109,8 +109,12 @@ Copy [examples/auth-client](examples/auth-client) into a separate project and ru
 revision in `stiff.rev`, installs the pinned compiler, and builds a native client.
 Set `STIFF_TOKEN` in the environment, then run
 `./build/auth-client https://your-api.example/resource`.
-No registry or BendHub is involved. Commit the revision file alongside your app;
+This Git-based option requires no registry. Commit the revision file alongside your app;
 upgrades are explicit. See the example README for dependency and token handling.
+
+For hash-pinned library imports, use the [BendHub package](docs/bendhub.md) and
+[standalone hub client](examples/bendhub-client). Native build tooling remains
+separately pinned to GitHub; BendHub does not install the C dependencies.
 
 ## Bend API
 
