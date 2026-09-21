@@ -26,6 +26,7 @@ class ServerTests(unittest.TestCase):
         cls.directory = Path(cls.temporary.name)
         for source, name in [("test/fixtures/native-server.bend", "server"),
                              ("examples/server.bend", "example"),
+                             ("test/fixtures/manual-server.bend", "manual"),
                              ("test/fixtures/native-http.bend", "client")]:
             result = subprocess.run([str(ROOT / "scripts/build-native.sh"), source,
                                      str(cls.directory / name)], cwd=ROOT,
@@ -264,6 +265,103 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(self.request()[0], 503)
             self.assertEqual([f.result()[0] for f in pending], [200] * 4)
         self.assertEqual(self.request()[0], 200)
+
+    def test_expired_handlers_keep_their_budget_until_finished(self):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            pending = [pool.submit(self.request, "GET", "/hung") for _ in range(4)]
+            self.handling(4)
+            for result in pending:
+                with self.assertRaises((http.client.RemoteDisconnected, ConnectionResetError)):
+                    result.result(timeout=2)
+            # Network slots have expired, but the 1500 ms computations remain.
+            self.assertEqual(self.request(path="/hung")[0], 503)
+            self.assertTrue(self.lines.empty(), "expired handlers allowed extra work")
+            deadline = time.monotonic() + 2
+            while self.request()[0] == 503:
+                self.assertLess(time.monotonic(), deadline, "handler budget was never released")
+                time.sleep(0.03)
+            self.handling()
+
+    def test_cooperative_handler_stops_after_deadline(self):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            pending = pool.submit(self.request, "GET", "/cooperative")
+            self.handling()
+            self.assertEqual(self.lines.get(timeout=2), "CANCELLED")
+            try:
+                self.assertEqual(pending.result(timeout=1)[0], 499)
+            except (http.client.RemoteDisconnected, ConnectionResetError):
+                pass
+        self.assertEqual(self.request()[0], 200)
+        self.handling()
+        self.assertTrue(self.lines.empty(), "cancelled handler performed its final side effect")
+
+    def test_cooperative_handler_stops_after_client_reset(self):
+        peer = socket.create_connection(("127.0.0.1", self.port), timeout=2)
+        try:
+            peer.sendall(b"GET /cooperative HTTP/1.1\r\nHost: localhost\r\n\r\n")
+            self.handling()
+            peer.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+        finally:
+            peer.close()
+        # Detection may wait for I/O; the absolute handler deadline is the bound.
+        self.assertEqual(self.lines.get(timeout=2), "CANCELLED")
+        self.assertEqual(self.request()[0], 200)
+        self.handling()
+        self.assertTrue(self.lines.empty())
+
+    def test_cooperative_handler_stops_after_shutdown_grace(self):
+        with socket.create_connection(("127.0.0.1", self.port), timeout=2) as peer:
+            peer.sendall(b"GET /cooperative HTTP/1.1\r\nHost: localhost\r\n\r\n")
+            self.handling()
+            start = time.monotonic()
+            self.server.send_signal(signal.SIGTERM)
+            self.server.wait(timeout=2)
+            self.assertLess(time.monotonic() - start, 1.5)
+            lines = []
+            while True:
+                try:
+                    lines.append(self.lines.get(timeout=0.1))
+                except queue.Empty:
+                    break
+            self.assertIn("CANCELLED", lines)
+            self.assertNotIn("SIDE_EFFECT", lines)
+
+    def test_manual_dispatch_requires_finish_and_finish_is_idempotent(self):
+        with subprocess.Popen([str(self.directory / "manual")], cwd=self.directory,
+                              env={"PATH": "/nonexistent"}, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE, text=True) as server:
+            try:
+                self.assertEqual(server.stdout.readline().strip(), "RELEASED")
+                port = int(server.stdout.readline().split()[1])
+                def request(path):
+                    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=3)
+                    try:
+                        connection.request("GET", path)
+                        response = connection.getresponse()
+                        response.read()
+                        return response.status
+                    finally:
+                        connection.close()
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                    pending = pool.submit(request, "/hold")
+                    self.assertEqual(server.stdout.readline().strip(), "HANDLING")
+                    with self.assertRaises((http.client.RemoteDisconnected, ConnectionResetError)):
+                        pending.result(timeout=2)
+                    self.assertEqual(request("/health"), 503)
+                    self.assertEqual(server.stdout.readline().strip(), "RELEASED")
+                    self.assertEqual(request("/health"), 200)
+                    self.assertEqual(server.stdout.readline().strip(), "HANDLING")
+                    self.assertEqual(server.stdout.readline().strip(), "RELEASED")
+            finally:
+                server.send_signal(signal.SIGTERM)
+                try:
+                    server.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    server.kill()
+                    server.wait()
+                diagnostics = server.stderr.read()
+                self.assertEqual(server.returncode, 0, diagnostics)
+                self.assertEqual(diagnostics, "")
 
     def test_slow_handler_does_not_block_fast_request(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:

@@ -39,6 +39,11 @@ typedef struct SgConnection {
 } SgConnection;
 typedef struct {
   u32 id;
+  u64 deadline;
+  int claimed, closed;
+} SgWork;
+typedef struct {
+  u32 id;
   struct evhttp_request* request;
   u64 deadline;
   int closed, replying;
@@ -57,6 +62,7 @@ static struct {
   u32 port, max_body, max_pending, timeout, grace, next_id;
   u64 stop_deadline;
   SgSlot slots[SG_PENDING];
+  SgWork work[SG_PENDING]; // Protected by lock, including after network shutdown.
   SgInput *inputs, *inputs_tail;
   SgReply *replies, *replies_tail;
 } sg = {.lock = PTHREAD_MUTEX_INITIALIZER, .ready = PTHREAD_COND_INITIALIZER, .pipe = {-1, -1}};
@@ -206,8 +212,20 @@ static void sg_notify(void) {
     // The periodic tick also drains replies, covering an unexpected wake error.
   }
 }
+// Caller holds sg.lock. IDs are never reused during the listener lifetime.
+static SgWork* sg_work(u32 id) {
+  if (!id) return NULL;
+  for (u32 i = 0; i < sg.max_pending; i++)
+    if (sg.work[i].id == id) return &sg.work[i];
+  return NULL;
+}
 static void sg_forget(SgSlot* slot) {
   pthread_mutex_lock(&sg.lock);
+  SgWork* work = sg_work(slot->id);
+  if (work) {
+    if (work->claimed) work->closed = 1;
+    else memset(work, 0, sizeof(*work));
+  }
   SgInput** link = &sg.inputs;
   while (*link) {
     if ((*link)->id == slot->id) {
@@ -225,7 +243,12 @@ static void sg_forget(SgSlot* slot) {
 }
 static void sg_closed(struct evhttp_connection* connection, void* arg) {
   (void)connection;
-  ((SgSlot*)arg)->closed = 1;
+  SgSlot* slot = arg;
+  slot->closed = 1;
+  pthread_mutex_lock(&sg.lock);
+  SgWork* work = sg_work(slot->id);
+  if (work) work->closed = 1;
+  pthread_mutex_unlock(&sg.lock);
 }
 static void sg_complete(struct evhttp_request* request, void* arg) {
   SgSlot* slot = arg;
@@ -287,7 +310,17 @@ static void sg_incoming(struct evhttp_request* req, void* unused) {
   if (content_lengths > 1 || transfers > 1 || hosts > 1 || (content_lengths && transfers)) {
     sg_input_free(p); sg_error(req, 400); return;
   }
+  pthread_mutex_lock(&sg.lock);
+  SgWork* work = NULL;
+  for (u32 i = 0; i < sg.max_pending; i++)
+    if (!sg.work[i].id) { work = &sg.work[i]; break; }
+  if (!work) {
+    pthread_mutex_unlock(&sg.lock);
+    sg_input_free(p); sg_error(req, 503); return;
+  }
   p->id = ++sg.next_id;
+  *work = (SgWork){.id = p->id, .deadline = sg_now() + sg.timeout};
+  pthread_mutex_unlock(&sg.lock);
   slot->id = p->id; slot->request = req; slot->deadline = sg_now() + sg.timeout;
   evhttp_request_own(req);
   evhttp_request_set_on_complete_cb(req, sg_complete, slot);
@@ -471,7 +504,11 @@ static void server_next_call(IoWork* w) {
   pthread_mutex_lock(&sg.lock);
   while (sg.started && !sg.stopped && !sg.inputs) pthread_cond_wait(&sg.ready, &sg.lock);
   SgInput* p = sg.inputs;
-  if (p) { sg.inputs = p->next; if (!sg.inputs) sg.inputs_tail = NULL; }
+  if (p) {
+    sg.inputs = p->next; if (!sg.inputs) sg.inputs_tail = NULL;
+    SgWork* work = sg_work(p->id);
+    if (work) work->claimed = 1;
+  }
   w->data = (char*)p;
   pthread_mutex_unlock(&sg.lock);
 }
@@ -500,6 +537,26 @@ static Term server_next_pack(Env e, IoWork* w) {
 static Term server_next_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)f;
   return io_work(w, server_next_call, server_next_pack);
+}
+#endif
+#ifdef CID_SERVER_ACTIVE
+static Term server_active_run(Env e, Term* f, IoWork* w) {
+  (void)e; (void)w;
+  pthread_mutex_lock(&sg.lock);
+  SgWork* work = sg_work((u32)f[0]);
+  int active = work && work->claimed && !work->closed && !sg.stopped && sg_now() < work->deadline;
+  pthread_mutex_unlock(&sg.lock);
+  return term_pak(active ? CID_TRUE : CID_FALSE, 0);
+}
+#endif
+#ifdef CID_SERVER_FINISH
+static Term server_finish_run(Env e, Term* f, IoWork* w) {
+  (void)e; (void)w;
+  pthread_mutex_lock(&sg.lock);
+  SgWork* work = sg_work((u32)f[0]);
+  if (work && work->claimed) memset(work, 0, sizeof(*work));
+  pthread_mutex_unlock(&sg.lock);
+  return term_pak(CID_UNIT, 0);
 }
 #endif
 static void server_reply_call(IoWork* w) {
@@ -569,6 +626,12 @@ static Term server_stop_run(Env e, Term* f, IoWork* w) {
 }
 #endif
 static void __attribute__((constructor)) server_register(void) {
+#ifdef CID_SERVER_ACTIVE
+  io_eff(CID_SERVER_ACTIVE, server_active_run, 0);
+#endif
+#ifdef CID_SERVER_FINISH
+  io_eff(CID_SERVER_FINISH, server_finish_run, 0);
+#endif
 #ifdef CID_SERVER_LISTEN
   io_eff(CID_SERVER_LISTEN, server_listen_run, 0);
 #endif

@@ -63,12 +63,37 @@ def large_route(found: Bool, +path: String, headers: List<&2, Web.ServerHeader>,
     case True{}: IO.pure(Web.Reply, Web.Reply{200, Nil{}, large_body(16n)})
     case False{}: encode_failure(String.eq(path, "/encode-failure"), path, headers, method, body)
 
+def checkpoint(active: Bool, rest: Unit -> IO(Web.Reply)) -> IO(Web.Reply):
+  match active:
+    case True{}: rest(Unit{})
+    case False{}:
+      do IO<Web.Reply>:
+        IO.print("CANCELLED")
+        IO.pure(Web.Reply, Web.json(499, "{}"))
+
+def cooperative(+id: U32, ticks: Nat) -> IO(Web.Reply):
+  match ticks:
+    case 0n:
+      do IO<Web.Reply>:
+        IO.print("SIDE_EFFECT")
+        IO.pure(Web.Reply, Web.json(200, "{}"))
+    case 1n+rest:
+      do IO<Web.Reply>:
+        IO.sleep(50)
+        active : Bool <- Web.Server.active(id)
+        checkpoint(active, u => cooperative(id, rest))
+
+def cooperative_route(found: Bool, id: U32, +path: String, headers: List<&2, Web.ServerHeader>, method: String, body: String) -> IO(Web.Reply):
+  match found:
+    case True{}: cooperative(id, 100n)
+    case False{}: large_route(String.eq(path, "/large"), path, headers, method, body)
+
 def handler(request: Web.Incoming) -> IO(Web.Reply):
   match request:
     case Web.Incoming{id, method, +path, target, headers, body}:
       do IO<Web.Reply>:
         IO.print("HANDLING " ++ path)
-        large_route(String.eq(path, "/large"), path, headers, method, body)
+        cooperative_route(String.eq(path, "/cooperative"), id, path, headers, method, body)
 
 def start(result: Web.Started) -> IO(Unit):
   match result:

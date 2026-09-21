@@ -70,8 +70,8 @@ five-second I/O/dispatch timeouts and three-second network shutdown grace. Curre
 builds also use the default 256 accepted-connection cap and five-second absolute
 request-read deadline; the recorded baseline below predates those protections.
 The overload check concerns complete requests admitted for dispatch; separate
-server integration tests exercise slow/incomplete connections. Application
-cancellation, crash recovery and persistent state are not exercised here.
+server integration tests exercise slow/incomplete connections and cooperative
+cancellation. Crash recovery and persistent state are not exercised here.
 
 Before claiming production scalability, measure an independently driven arrival
 rate, longer repeated soaks, varied payloads/handlers, multiple hardware targets,

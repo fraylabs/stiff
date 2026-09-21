@@ -37,6 +37,8 @@ The handler template must refer to a top-level definition, as in
 | `Web.json(status, body)` | JSON content type with the supplied text; does not serialize or validate it |
 | `Web.with_header(name, value, reply)` | Latest same-name value wins, ignoring case |
 | `Web.header(lowercase_name, headers)` | First matching incoming header value, or `None` |
+| `Web.Server.active(id)` | Cooperative checkpoint: false for an expired, closed, finished or unknown request |
+| `Web.Server.finish(id)` | Release a manually dispatched handler budget after all its work finishes; idempotent |
 | `Web.Server.stop()` | Stop admissions and start the network grace period; idempotent |
 
 `Incoming` contains `id`, `method`, `path`, `target`, `headers`, and `body`.
@@ -61,15 +63,22 @@ for writing, or `ReplyError{code}`; it does not acknowledge delivery to the peer
 A request may be replied to once. Expired/disconnected IDs return `request_closed`.
 Codes also include `invalid_response`, `server_stopped` and `server_memory`.
 IDs are local handles, not authentication capabilities. A low-level consumer
-must keep reading and finish its handlers; `serve` does this for the common case.
+must keep reading and call `Server.finish(id)` after **all** work for each received
+request completes, including reply failures and cancellation. A reply alone does
+not release that handler budget. This is a new requirement for manual dispatch;
+`serve` handles it automatically. Do not call `finish` early or use detached work
+to bypass the budget.
 
 ## Limits and shutdown
 
 `Config{address, port, max_body, max_pending, timeout_ms, grace_ms}` defaults to:
 
 - 1 MiB incoming body limit; configurable from 1 byte through 16 MiB.
-- 128 dispatched/pending requests; configurable from 1 through 128. Excess
-  complete requests receive 503. This counts work until reply completion or expiry.
+- 128 pending network requests **and** 128 admitted handlers; configurable together
+  from 1 through 128 with `max_pending`. Excess complete requests receive 503.
+  Network slots last through reply completion or expiry. Handler budgets last
+  until the computation returns and `serve` finishes it, even after network expiry.
+  A queued request that expires before `Server.next` claims it releases its budget.
 - 16 KiB aggregate incoming headers and at most 128 application-visible headers.
 - 256 accepted connections, including incomplete requests and responses still
   being written. At this cap, socket acceptance pauses until capacity is freed.
@@ -111,10 +120,45 @@ server finishes draining. Deadline closure is a connection close, not a promised
 HTTP error response. Libevent can discover a disconnected peer only when I/O
 resumes; its handler continues to count against the pending limit meanwhile.
 
-Bend handlers can outlive the network grace period: stopping the server does not
-cancel timers, outbound effects or CPU work, or undo side effects. The Bend
-process exits after its remaining computations finish. Applications must bound
-those computations independently if they require a process-exit deadline.
+## Cooperative cancellation and application budgets
+
+`Server.active(id)` lets a handler check whether its request is still usable.
+It becomes false at the request deadline, when libevent observes the connection
+close, after response completion, after `finish`, or when the network server stops.
+Unknown IDs return false. A normal shutdown lets handlers run during network
+grace; remaining requests become inactive when grace expires. A peer reset may
+not be detected until libevent resumes I/O, so immediate disconnect cancellation
+is not promised. The request deadline remains an independent bound.
+
+Check before each bounded stage and after waits/outbound calls, then return
+without starting the next stage when inactive. For example, inside a handler:
+
+```bend
+active : Bool <- Web.Server.active(id)
+checkpoint(active, u => next_stage())
+```
+
+Here `checkpoint` matches the Bool, calls the supplied continuation only for
+`True{}`, and returns a reply for `False{}`. The reply may be discarded because
+the connection is already closed. The native fixture
+[`cooperative`](../test/fixtures/native-server.bend) demonstrates a structurally
+bounded loop, 50 ms checkpoints and skipping the final simulated side effect.
+`serve` also checks activity before starting a newly received handler.
+
+This is cooperative cancellation. The pinned Bend runtime exposes `IO.spawn`
+but no task cancellation handle. A checkpoint cannot preempt pure computation,
+interrupt `IO.sleep` or an already-running outbound effect, roll back a side
+effect, or atomically guard an external operation against a later disconnect.
+Bound individual effects independently, for example with HTTP client timeouts.
+
+Noncooperative handlers retain their budget after their sockets close. This
+prevents repeated network timeouts from admitting unbounded concurrent handlers;
+it deliberately returns 503 while the application is still occupied. A handler
+that never returns permanently consumes its budget. Spawned children are not
+tracked independently; join them before returning if they belong to the request.
+This is a handler-count budget, not CPU preemption, a byte quota or a process-wide
+memory limit. Bend computations can outlive network grace, and the process exits
+only after they finish. A strict process-exit deadline needs process isolation.
 
 One listener lifetime is supported per process. The server owns SIGINT/SIGTERM
 handling during that lifetime and restores handlers during cleanup. It cannot
@@ -130,7 +174,8 @@ Stiff-client JSON POST, routing/query separation, request/response headers,
 malformed and ambiguous framing, size/UTF-8 checks, concurrency/backpressure,
 TCP resets, absolute read deadlines for idle/header/body/chunked clients, accepted
 connection caps and recovery, large response delivery, 100-continue, invalid
-transport limits, signal/programmatic shutdown and grace expiry.
+transport limits, retained handler budgets after network expiry, cooperative
+cancellation after deadlines/resets/grace, signal/programmatic shutdown and grace expiry.
 The standalone client and existing pure-law checks remain in the same suite.
 
 This is experimental. Libevent, native effects and the Bend compiler are trusted

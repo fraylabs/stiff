@@ -75,6 +75,14 @@ def Server.next() -> IO(Next):
 def Server.reply(id: U32, reply: Reply) -> IO(Replied):
   import "./effects/server.c"
 
+# Cooperative checkpoint; does not preempt work or undo effects.
+def Server.active(id: U32) -> IO(Bool):
+  import "./effects/server.c"
+
+# Manual dispatch must release its handler budget after all work finishes.
+def Server.finish(id: U32) -> IO(Unit):
+  import "./effects/server.c"
+
 def Server.stop() -> IO(Unit):
   import "./effects/server.c"
 
@@ -87,13 +95,29 @@ def finish_reply(id: U32, result: Replied) -> IO(Unit):
         ignored : Replied <- Server.reply(id, json(500, "{\"error\":\"response rejected\"}"))
         IO.pure(Unit, Unit{})
 
-def dispatch(handler: Incoming -> IO(Reply), request: Incoming) -> IO(Unit):
+def dispatch_live(handler: Incoming -> IO(Reply), request: Incoming) -> IO(Unit):
   match request:
     case Incoming{+id, method, path, target, headers, body}:
       do IO<Unit>:
         reply : Reply <- handler(Incoming{id, method, path, target, headers, body})
         result : Replied <- Server.reply(id, reply)
         finish_reply(id, result)
+        Server.finish(id)
+
+def discard_request(request: Incoming) -> IO(Unit):
+  match request:
+    case Incoming{id, method, path, target, headers, body}: Server.finish(id)
+
+def dispatch_active(active: Bool, handler: Incoming -> IO(Reply), request: Incoming) -> IO(Unit):
+  match active:
+    case True{}: dispatch_live(handler, request)
+    case False{}: discard_request(request)
+
+def dispatch(handler: Incoming -> IO(Reply), request: Incoming) -> IO(Unit):
+  match request:
+    case Incoming{+id, method, path, target, headers, body}:
+      IO.bind(Bool, Unit, Server.active(id), active =>
+        dispatch_active(active, handler, Incoming{id, method, path, target, headers, body}))
 
 def serve_next(handler: Incoming -> IO(Reply), rest: Unit -> IO(Unit), next: Next) -> IO(Unit):
   match next:
