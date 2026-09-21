@@ -4,6 +4,20 @@ Stiff 0.2.0 release criteria, September 21, 2026. This is the
 current result/evidence record, not a claim that passing unit tests establishes
 production readiness. Unchecked requirements remain open.
 
+September 21 callback lifetime repair: the retained libevent chunk callback now
+uses stable slot storage instead of the freed effect reply, checks connection
+ownership, and waits for the HTTP-facing output buffer to drain. The deterministic
+regression in `test/fixtures/stream-callback-lifetime.c` covers repeated callbacks
+after reply reclamation, pending output, closed/cleared slots and slot reuse on a
+different connection. An isolated build of the original callback fails this
+regression with ASan `heap-use-after-free`; the repaired callback passes.
+Stiff Builder 2 verified **132 normal tests** and **135 compiler-profile combined
+ASan/UBSan tests** on local macOS arm64, including pure proof verdicts, native
+server/streaming journeys and sanitizer detector checks. Local logs are retained
+under ignored `.cache/stiff-builder-2-{normal-tests,sanitizer-tests,before-fix}.log`.
+This fixes the observed lifetime defect; platform CI and release completion
+remain open below. Existing sanitizer coverage limits still apply.
+
 - [x] Richer application APIs: path parameters; boolean/numeric/optional/nested
   schema validation; consistent application and transport errors.
 - [x] Streaming and persistent connections: bounded response and request streaming,
@@ -25,7 +39,8 @@ validation, correlation/logging/metrics. Baseline commit `6e1a3b0` passed 81 nor
 and 83 diagnostic-sanitizer tests on macOS arm64 and Linux CI. New work below must
 supply its own evidence; those results do not cover the pending changes.
 
-The full local compiler-profile ASan/UBSan suite passed **134 tests**. Dedicated
+Before the callback lifetime repair, the local compiler-profile ASan/UBSan suite
+passed **134 tests**. Dedicated
 transport checks passed 18 streaming and 27 existing server tests in both normal
 and combined-sanitizer builds. Independent QA additionally exercised blocked
 response writes through reset, deadline and shutdown grace. Storage covers

@@ -651,14 +651,23 @@ static int sg_add_reply_headers(SgReply* p, SgSlot* slot) {
   return 1;
 }
 static void sg_chunk_written(struct evhttp_connection* connection, void* arg) {
-  (void)connection;
-  SgReply* p = arg;
+  SgSlot* slot = arg;
+  struct bufferevent* bev = evhttp_connection_get_bufferevent(connection);
+  // libevent retains and can invoke a chunk callback more than once. The slot
+  // is stable storage, unlike the effect-owned reply. Our output filter keeps
+  // bytes in this HTTP-facing buffer until the socket-facing buffer drains.
+  // Do not let a deferred callback for an earlier chunk complete a newer one.
+  if (!bev || evbuffer_get_length(bufferevent_get_output(bev))) return;
   pthread_mutex_lock(&sg.lock);
-  for (u32 i = 0; i < sg.max_pending; i++)
-    if (sg.slots[i].id == p->id && sg.slots[i].write_waiter == p)
-      sg.slots[i].write_waiter = NULL;
-  p->done = 1;
-  pthread_cond_broadcast(&sg.ready);
+  SgReply* p = NULL;
+  if (slot->request && evhttp_request_get_connection(slot->request) == connection) {
+    p = slot->write_waiter;
+    slot->write_waiter = NULL;
+  }
+  if (p) {
+    p->done = 1;
+    pthread_cond_broadcast(&sg.ready);
+  }
   pthread_mutex_unlock(&sg.lock);
 }
 static void sg_handle_reply(SgReply* p) {
@@ -685,7 +694,7 @@ static void sg_handle_reply(SgReply* p) {
     if (p->size) {
       p->wait_write = 1;
       slot->write_waiter = p;
-      evhttp_send_reply_chunk_with_cb(slot->request, chunk, sg_chunk_written, p);
+      evhttp_send_reply_chunk_with_cb(slot->request, chunk, sg_chunk_written, slot);
     }
     evbuffer_free(chunk);
     slot->streamed += p->size;
