@@ -22,8 +22,13 @@ def greet(request: Web.Incoming) -> IO(Web.Reply):
   match request:
     case Web.Incoming{id, method, path, target, headers, body}: App.json_body(body, validated)
 
+def metrics(request: Web.Incoming) -> IO(Web.Reply):
+  do IO<Web.Reply>:
+    snapshot : Web.Metrics <- Web.Server.metrics()
+    Web.json_value(200, Web.metrics_json(snapshot))
+
 def routes() -> List<App.Route>:
-  [App.Route{"GET", "/health", health}, App.Route{"POST", "/greet", greet}]
+  [App.Route{"GET", "/health", health}, App.Route{"POST", "/greet", greet}, App.Route{"GET", "/metrics", metrics}]
 
 def router(request: Web.Incoming) -> IO(Web.Reply):
   App.route(routes(), request)
@@ -41,7 +46,7 @@ def gate(request: Web.Incoming) -> IO(Web.Reply):
         u => router(Web.Incoming{id, method, path, target, headers, body}))
 
 def handler(request: Web.Incoming) -> IO(Web.Reply):
-  App.with_header("X-Stiff", "app", gate, request)
+  App.with_header("X-Stiff", "app", r => App.observe(gate, r), request)
 
 def start(result: Web.Started) -> IO(Unit):
   match result:

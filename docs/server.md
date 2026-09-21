@@ -37,6 +37,7 @@ The handler template must refer to a top-level definition, as in
 | `Web.json(status, body)` | JSON content type with the supplied text; does not serialize or validate it |
 | `Web.with_header(name, value, reply)` | Latest same-name value wins, ignoring case |
 | `Web.header(lowercase_name, headers)` | First matching incoming header value, or `None` |
+| `Web.Server.metrics()` | Native lifecycle counter/gauge snapshot; see [observability](observability.md) |
 | `Web.Server.active(id)` | Cooperative checkpoint: false for an expired, closed, finished or unknown request |
 | `Web.Server.finish(id)` | Release a manually dispatched handler budget after all its work finishes; idempotent |
 | `Web.Server.stop()` | Stop admissions and start the network grace period; idempotent |

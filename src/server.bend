@@ -132,3 +132,20 @@ def serve_next(handler: Incoming -> IO(Reply), rest: Unit -> IO(Unit), next: Nex
 @unsafe
 def serve(~handler: Incoming -> IO(Reply)) -> IO(Unit):
   IO.bind(Next, Unit, Server.next(), serve_next(handler, u => serve(~handler)))
+
+# Process/listener lifetime counters and current bounded gauges. No reset API.
+type Metrics is Data:
+  Metrics{admitted: U32, completed: U32, failed: U32, rejected: U32, expired: U32, read_expired: U32, disconnected: U32, connections: U32, pending: U32, handlers: U32}
+
+def Server.metrics() -> IO(Metrics):
+  import "./effects/server.c"
+
+def metrics_json(metrics: Metrics) -> Json.Json:
+  match metrics:
+    case Metrics{admitted, completed, failed, rejected, expired, read_expired, disconnected, connections, pending, handlers}:
+      Json.object([
+        ("admitted", Json.u32(admitted)), ("completed", Json.u32(completed)),
+        ("failed", Json.u32(failed)), ("rejected", Json.u32(rejected)),
+        ("expired", Json.u32(expired)), ("read_expired", Json.u32(read_expired)),
+        ("disconnected", Json.u32(disconnected)), ("connections", Json.u32(connections)),
+        ("pending", Json.u32(pending)), ("handlers", Json.u32(handlers))])

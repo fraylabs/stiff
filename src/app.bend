@@ -128,3 +128,34 @@ def validation_error(field: String, code: String) -> IO(Web.Reply):
     ("code", Json.string("validation_failed")),
     ("message", Json.string("Request validation failed")),
     ("field", Json.string(field)), ("reason", Json.string(code))]))]))
+
+# One JSON line per completed handler invocation, before transport submission.
+# Intentionally omit user-controlled paths, targets, headers and bodies.
+def log_encoded(result: Json.EncodeResult) -> IO(Unit):
+  match result:
+    case Json.JsonEncoded{text}: IO.print_err(text)
+    case Json.JsonEncodeFailure{code, message}:
+      IO.print_err("{\"event\":\"log_encoding_failed\"}")
+
+def observed(+id: U32, method: String, start: Nat, reply: Web.Reply) -> IO(Web.Reply):
+  match reply:
+    case Web.Reply{+status, headers, body}:
+      do IO<Web.Reply>:
+        end : Nat <- IO.now()
+        active : Bool <- Web.Server.active(id)
+        record : Json.EncodeResult <- Json.Json.stringify(Json.object([
+          ("event", Json.string("handler_result")),
+          ("request_id", Json.string(U32.show(id))),
+          ("method", Json.string(method)), ("proposed_status", Json.u32(status)),
+          ("active", Json.boolean(active)),
+          ("duration_ms", Json.JsonNumber{Nat.show(Nat.sub(end, start))})]))
+        log_encoded(record)
+        IO.pure(Web.Reply, Web.with_header("X-Request-Id", U32.show(id), Web.Reply{status, headers, body}))
+
+def observe(next: Web.Incoming -> IO(Web.Reply), request: Web.Incoming) -> IO(Web.Reply):
+  match request:
+    case Web.Incoming{+id, +method, path, target, headers, body}:
+      do IO<Web.Reply>:
+        start : Nat <- IO.now()
+        reply : Web.Reply <- next(Web.Incoming{id, method, path, target, headers, body})
+        observed(id, method, start, reply)

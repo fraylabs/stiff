@@ -71,6 +71,10 @@ in a native health/greeting API:
 ./.cache/native/app 127.0.0.1 8080
 ```
 
+[Observability helpers](docs/observability.md) add server-generated response IDs,
+structured handler-result logs, and native lifecycle counters/gauges. The app
+example demonstrates them through stderr logs and its `/metrics` route.
+
 ## Use Stiff in your own project
 
 Copy [examples/auth-client](examples/auth-client) into a separate project and run

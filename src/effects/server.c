@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <limits.h>
+#include <stdatomic.h>
 
 #define SG_HEADERS 128
 #define SG_PENDING 128
@@ -47,6 +48,7 @@ typedef struct {
   struct evhttp_request* request;
   u64 deadline;
   int closed, replying;
+  u32 status;
 } SgSlot;
 static struct {
   pthread_mutex_t lock;
@@ -67,6 +69,20 @@ static struct {
   SgReply *replies, *replies_tail;
 } sg = {.lock = PTHREAD_MUTEX_INITIALIZER, .ready = PTHREAD_COND_INITIALIZER, .pipe = {-1, -1}};
 
+// Independent relaxed snapshots: counters saturate; bounded gauges do not wrap.
+enum { SM_ADMITTED, SM_COMPLETED, SM_FAILED, SM_REJECTED, SM_EXPIRED,
+       SM_READ_EXPIRED, SM_DISCONNECTED, SM_CONNECTIONS, SM_PENDING, SM_HANDLERS, SM_COUNT };
+static _Atomic u32 sg_metrics[SM_COUNT];
+// Cumulative counters have a single writer: the network event thread.
+static void sg_count(unsigned field) {
+  if (atomic_load_explicit(&sg_metrics[field], memory_order_relaxed) != UINT32_MAX)
+    atomic_fetch_add_explicit(&sg_metrics[field], 1, memory_order_relaxed);
+}
+static void sg_gauge(unsigned field, int delta) {
+  if (delta > 0) atomic_fetch_add_explicit(&sg_metrics[field], 1, memory_order_relaxed);
+  else atomic_fetch_sub_explicit(&sg_metrics[field], 1, memory_order_relaxed);
+}
+
 static u64 sg_now(void) {
   struct timespec t;
   clock_gettime(CLOCK_MONOTONIC, &t);
@@ -80,7 +96,7 @@ static void sg_connection_free(void* context) {
   SgConnection* p = context;
   SgConnection** link = &sg.connections;
   while (*link && *link != p) link = &(*link)->next;
-  if (*link) { *link = p->next; sg.connection_count--; }
+  if (*link) { *link = p->next; sg.connection_count--; sg_gauge(SM_CONNECTIONS, -1); }
   if (p->read_timer) event_free(p->read_timer);
   free(p);
   if (!sg.cleaning && !sg.stopping && sg.listener && sg.connection_count < sg.max_connections) {
@@ -92,6 +108,7 @@ static void sg_read_expired(evutil_socket_t fd, short events, void* context) {
   (void)fd; (void)events;
   SgConnection* p = context;
   p->expired = 1;
+  sg_count(SM_READ_EXPIRED);
   // Defer through evhttp's own error callback so it retains connection/request
   // ownership. The filter cancels this callback if freed in the meantime.
   bufferevent_trigger_event(p->bev, BEV_EVENT_TIMEOUT | BEV_EVENT_READING, BEV_TRIG_DEFER_CALLBACKS);
@@ -142,6 +159,7 @@ static struct bufferevent* sg_connection_new(struct event_base* base, void* unus
   struct timeval timeout = {sg.read_timeout / 1000, (sg.read_timeout % 1000) * 1000};
   if (!p->read_timer || event_add(p->read_timer, &timeout)) err_fail("server read deadline setup failed");
   p->next = sg.connections; sg.connections = p; sg.connection_count++;
+  sg_gauge(SM_CONNECTIONS, 1);
   if (sg.connection_count == sg.max_connections &&
       evconnlistener_disable(evhttp_bound_socket_get_listener(sg.listener)))
     err_fail("server listener disable failed");
@@ -224,7 +242,7 @@ static void sg_forget(SgSlot* slot) {
   SgWork* work = sg_work(slot->id);
   if (work) {
     if (work->claimed) work->closed = 1;
-    else memset(work, 0, sizeof(*work));
+    else { memset(work, 0, sizeof(*work)); sg_gauge(SM_HANDLERS, -1); }
   }
   SgInput** link = &sg.inputs;
   while (*link) {
@@ -239,6 +257,7 @@ static void sg_forget(SgSlot* slot) {
   sg.inputs_tail = sg.inputs;
   while (sg.inputs_tail && sg.inputs_tail->next) sg.inputs_tail = sg.inputs_tail->next;
   pthread_mutex_unlock(&sg.lock);
+  sg_gauge(SM_PENDING, -1);
   memset(slot, 0, sizeof(*slot));
 }
 static void sg_closed(struct evhttp_connection* connection, void* arg) {
@@ -254,6 +273,8 @@ static void sg_complete(struct evhttp_request* request, void* arg) {
   SgSlot* slot = arg;
   struct evhttp_connection* connection = evhttp_request_get_connection(request);
   if (connection) evhttp_connection_set_closecb(connection, NULL, NULL);
+  sg_count(SM_COMPLETED);
+  if (slot->status >= 400) sg_count(SM_FAILED);
   // libevent frees the request after this callback, including owned requests.
   sg_forget(slot);
 }
@@ -266,6 +287,7 @@ static const char* sg_method(enum evhttp_cmd_type m) {
   }
 }
 static void sg_error(struct evhttp_request* req, int code) {
+  sg_count(SM_REJECTED);
   evhttp_add_header(evhttp_request_get_output_headers(req), "Connection", "close");
   evhttp_send_error(req, code, NULL);
 }
@@ -320,8 +342,10 @@ static void sg_incoming(struct evhttp_request* req, void* unused) {
   }
   p->id = ++sg.next_id;
   *work = (SgWork){.id = p->id, .deadline = sg_now() + sg.timeout};
+  sg_gauge(SM_HANDLERS, 1);
   pthread_mutex_unlock(&sg.lock);
   slot->id = p->id; slot->request = req; slot->deadline = sg_now() + sg.timeout;
+  sg_count(SM_ADMITTED); sg_gauge(SM_PENDING, 1);
   evhttp_request_own(req);
   evhttp_request_set_on_complete_cb(req, sg_complete, slot);
   evhttp_connection_set_closecb(evhttp_request_get_connection(req), sg_closed, slot);
@@ -356,7 +380,7 @@ static void sg_handle_reply(SgReply* p) {
     if (body) evbuffer_free(body);
     p->error = "server_memory"; return;
   }
-  slot->replying = 1;
+  slot->replying = 1; slot->status = p->status;
   evhttp_send_reply(slot->request, (int)p->status, NULL, body);
   evbuffer_free(body);
 }
@@ -385,6 +409,7 @@ static void sg_tick(evutil_socket_t fd, short events, void* arg) {
     SgSlot* slot = &sg.slots[i];
     if (!slot->request) continue;
     if (slot->closed || now >= slot->deadline || (sg.stopping && now >= sg.stop_deadline)) {
+      sg_count(slot->closed ? SM_DISCONNECTED : SM_EXPIRED);
       if (!slot->closed) {
         struct evhttp_connection* connection = evhttp_request_get_connection(slot->request);
         if (connection) { evhttp_connection_set_closecb(connection, NULL, NULL); evhttp_connection_free(connection); }
@@ -539,6 +564,15 @@ static Term server_next_run(Env e, Term* f, IoWork* w) {
   return io_work(w, server_next_call, server_next_pack);
 }
 #endif
+#ifdef CID_SERVER_METRICS
+static Term server_metrics_run(Env e, Term* f, IoWork* w) {
+  (void)f; (void)w;
+  Loc loc = heap_alloc(e, cls_fit(SM_COUNT));
+  for (unsigned i = 0; i < SM_COUNT; i++)
+    e.mem[loc + i] = atomic_load_explicit(&sg_metrics[i], memory_order_relaxed);
+  return term_ctr(CID_METRICS, loc);
+}
+#endif
 #ifdef CID_SERVER_ACTIVE
 static Term server_active_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)w;
@@ -554,7 +588,7 @@ static Term server_finish_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)w;
   pthread_mutex_lock(&sg.lock);
   SgWork* work = sg_work((u32)f[0]);
-  if (work && work->claimed) memset(work, 0, sizeof(*work));
+  if (work && work->claimed) { memset(work, 0, sizeof(*work)); sg_gauge(SM_HANDLERS, -1); }
   pthread_mutex_unlock(&sg.lock);
   return term_pak(CID_UNIT, 0);
 }
@@ -626,6 +660,9 @@ static Term server_stop_run(Env e, Term* f, IoWork* w) {
 }
 #endif
 static void __attribute__((constructor)) server_register(void) {
+#ifdef CID_SERVER_METRICS
+  io_eff(CID_SERVER_METRICS, server_metrics_run, 0);
+#endif
 #ifdef CID_SERVER_ACTIVE
   io_eff(CID_SERVER_ACTIVE, server_active_run, 0);
 #endif

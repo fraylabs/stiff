@@ -62,8 +62,10 @@ allows authorization, maintenance or other application policy to run before
 routing, parsing or side effects. The caller supplies the policy; this helper
 does not implement authentication or constant-time secret comparison.
 
-The example wraps the gate with a response-header middleware, so both accepted
-and rejected requests receive `X-Stiff: app`. Keep middleware inside `Web.serve`
+The example wraps the gate with observation and response-header middleware, so
+application replies receive `X-Stiff: app` and a server-generated `X-Request-Id`.
+[Observation](observability.md) writes a JSON handler-result line to stderr and
+the example exposes native metrics at `GET /metrics`, behind the same demo gate. Keep middleware inside `Web.serve`
 to retain handler budgets and automatic completion. Long-running handlers still
 need cooperative checkpoints as described in [server lifetimes](server.md).
 
