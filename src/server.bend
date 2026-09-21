@@ -104,7 +104,7 @@ def Server.next() -> IO(Next):
 def Server.next_stream() -> IO(StreamNext):
   import "./effects/server.c"
 
-# At most one bounded chunk is retained per request while the consumer works.
+# Bounded pending text is retained per request while the consumer works.
 def Server.body_next(id: U32) -> IO(BodyNext):
   import "./effects/server.c"
 

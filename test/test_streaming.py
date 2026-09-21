@@ -321,7 +321,10 @@ class RequestStreamingTests(unittest.TestCase):
         body = b"z" * 70000
         with socket.create_connection(("127.0.0.1", self.port), timeout=5) as peer:
             peer.sendall(b"POST /upload HTTP/1.1\r\nHost: localhost\r\n"
-                         b"Transfer-Encoding: chunked\r\n\r\n11170\r\n" + body + b"\r\n")
+                         b"Transfer-Encoding: chunked\r\n\r\n11170\r\n" + body[:65536])
+            ready, _, _ = select.select([self.server.stdout], [], [], .15)
+            self.assertFalse(ready, "libevent exposed an incomplete HTTP wire chunk")
+            peer.sendall(body[65536:] + b"\r\n")
             self.next_marker(3)
             peer.sendall(b"0\r\n\r\n")
             self.assertEqual(self.receive(peer)[::2], (200, body))

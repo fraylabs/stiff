@@ -29,9 +29,9 @@ jobs:
       - name: Install macOS native dependencies
         if: runner.os == 'macOS'
         run: |
-          brew install cmake pkg-config curl json-c sqlite python@3.12
+          brew install cmake pkg-config curl json-c sqlite
           echo "PKG_CONFIG_PATH=$(brew --prefix curl)/lib/pkgconfig:$(brew --prefix sqlite)/lib/pkgconfig" >> "$GITHUB_ENV"
-          echo "$(brew --prefix python@3.12)/libexec/bin" >> "$GITHUB_PATH"
+          python3 -c 'import sys; assert sys.version_info >= (3, 11, 8), sys.version'
       - run: clang --version
       - run: make setup
       - run: make test
