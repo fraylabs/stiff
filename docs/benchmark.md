@@ -66,10 +66,11 @@ The server currently closes every response connection; this is not a keep-alive,
 TLS, HTTP/2 or streaming benchmark.
 
 The fixed benchmark configuration allows 32 pending handlers, 4 KiB bodies,
-five-second I/O/dispatch timeouts and three-second network shutdown grace. It
-does not impose a total accepted-connection cap or an absolute request-read
-deadline. The overload check concerns complete requests admitted for dispatch;
-slow/incomplete connections still require separate limits. Application
+five-second I/O/dispatch timeouts and three-second network shutdown grace. Current
+builds also use the default 256 accepted-connection cap and five-second absolute
+request-read deadline; the recorded baseline below predates those protections.
+The overload check concerns complete requests admitted for dispatch; separate
+server integration tests exercise slow/incomplete connections. Application
 cancellation, crash recovery and persistent state are not exercised here.
 
 Before claiming production scalability, measure an independently driven arrival

@@ -50,12 +50,25 @@ def encode_failure(found: Bool, +path: String, headers: List<&2, Web.ServerHeade
       Web.json_value(200, Json.object([("same", Json.string("private-value")), ("same", Json.null())]))
     case False{}: special(String.eq(path, "/bad-response"), path, headers, method, body)
 
+def doubled(+text: String) -> String:
+  text ++ text
+
+def large_body(depth: Nat) -> String:
+  match depth:
+    case 0n: "0123456789abcdef"
+    case 1n+rest: doubled(large_body(rest))
+
+def large_route(found: Bool, +path: String, headers: List<&2, Web.ServerHeader>, method: String, body: String) -> IO(Web.Reply):
+  match found:
+    case True{}: IO.pure(Web.Reply, Web.Reply{200, Nil{}, large_body(16n)})
+    case False{}: encode_failure(String.eq(path, "/encode-failure"), path, headers, method, body)
+
 def handler(request: Web.Incoming) -> IO(Web.Reply):
   match request:
     case Web.Incoming{id, method, +path, target, headers, body}:
       do IO<Web.Reply>:
         IO.print("HANDLING " ++ path)
-        encode_failure(String.eq(path, "/encode-failure"), path, headers, method, body)
+        large_route(String.eq(path, "/large"), path, headers, method, body)
 
 def start(result: Web.Started) -> IO(Unit):
   match result:
@@ -68,5 +81,15 @@ def start(result: Web.Started) -> IO(Unit):
     case Web.ListenError{code}:
       IO.die(Unit, 1, code)
 
+def limits(args: List<String>) -> Web.TransportLimits:
+  match args:
+    case Nil{}: Web.TransportLimits{8, 350}
+    case Con{connections, Con{deadline, Nil{}}}:
+      Web.TransportLimits{Example.port(U32.read(connections)), Example.port(U32.read(deadline))}
+    case other: Web.TransportLimits{0, 0}
+
 def main() -> IO(Unit):
-  IO.bind(Web.Started, Unit, Web.Server.listen(Web.Config{"127.0.0.1", 0, 1024, 4, 1000, 600}), start)
+  do IO<Unit>:
+    args : List<String> <- IO.args()
+    result : Web.Started <- Web.Server.listen_with_limits(Web.Config{"127.0.0.1", 0, 1024, 4, 1000, 600}, limits(args))
+    start(result)

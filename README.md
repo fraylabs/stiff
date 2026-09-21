@@ -53,6 +53,8 @@ and constructs JSON responses from Bend values. Handlers run concurrently; SIGIN
 drains dispatched requests. Build your handler as `Incoming -> IO(Reply)` and
 pass it to `Web.serve(~handler)` after listening.
 
+The server bounds accepted connections and uses an absolute request-read deadline
+that trickle traffic cannot extend.
 See [server API and limits](docs/server.md) for configuration, headers, deadlines
 and shutdown semantics. This version uses HTTP with TLS at a reverse proxy.
 

@@ -30,7 +30,8 @@ The handler template must refer to a top-level definition, as in
 | API | Meaning |
 | --- | --- |
 | `Web.config(address, port)` | Default configuration; address is an IPv4/IPv6 literal |
-| `Web.Server.listen(config)` | `Listening{actual_port}` or `ListenError{code}` |
+| `Web.Server.listen(config)` | `Listening{actual_port}` or `ListenError{code}`; default transport limits |
+| `Web.Server.listen_with_limits(config, TransportLimits{max_connections, read_timeout_ms})` | Explicit accepted-connection cap and absolute request-read deadline |
 | `Web.serve(~handler)` | Receive requests and spawn concurrent handler computations |
 | `Web.json_value(status, value)` | Encode a JSON value into `IO(Reply)`; encoding failures become a fixed HTTP 500 |
 | `Web.json(status, body)` | JSON content type with the supplied text; does not serialize or validate it |
@@ -70,14 +71,35 @@ must keep reading and finish its handlers; `serve` does this for the common case
 - 128 dispatched/pending requests; configurable from 1 through 128. Excess
   complete requests receive 503. This counts work until reply completion or expiry.
 - 16 KiB aggregate incoming headers and at most 128 application-visible headers.
+- 256 accepted connections, including incomplete requests and responses still
+  being written. At this cap, socket acceptance pauses until capacity is freed.
+- A 10-second absolute deadline from socket acceptance until the complete request
+  reaches HTTP dispatch. Trickle traffic does not extend this deadline.
 - A 10-second libevent I/O inactivity timeout while reading/writing, plus a
   10-second deadline from dispatch through response completion.
 - A 5-second shutdown grace period. Timeout/grace settings allow 1–600,000 ms;
   deadline enforcement uses a 10 ms timer.
 
-These are not a total connection cap or an absolute pre-dispatch read deadline.
-Many incomplete or slowly trickling requests can still consume connections;
-a public-facing reverse proxy needs its own connection and request-read limits.
+`Server.listen(config)` uses 256 connections and takes its absolute read deadline
+from `Config.timeout_ms`. `Server.listen_with_limits` preserves the six-field
+`Config` and accepts `TransportLimits{max_connections, read_timeout_ms}` to set
+these separately: 1–1,024 connections and 1–600,000 ms. Zero is invalid.
+
+The connection cap covers sockets accepted by Stiff, not the OS listen backlog.
+At capacity, new clients may connect and wait in that backlog; they are not
+promised a 503. Their read deadline starts when Stiff accepts them. In contrast,
+excess fully read work at the separate pending-request limit receives 503.
+Read expiry closes the connection; a 408 response is not guaranteed. These limits
+do not provide per-client fairness or network flood protection. A public-facing
+proxy still needs its own limits. Timers depend on the event loop being scheduled.
+
+The connection tracker uses libevent's public bufferevent filter/lifetime API.
+The output filter retains bytes until the underlying socket queue drains, so
+response completion cannot prematurely close a socket. This temporarily stores
+an additional copy of queued response bytes; the response size and connection
+limits remain distinct from a process-wide memory budget. Allocation/setup
+failure in this transport path terminates the process rather than accepting an
+untracked connection.
 Mixed Transfer-Encoding/Content-Length, repeated framing headers, repeated Host,
 invalid UTF-8, non-origin-form targets and URI fragments are rejected before
 Bend dispatch. Libevent may reject malformed HTTP earlier.
@@ -106,7 +128,9 @@ returns `invalid_config`. No service is installed or started by setup/build.
 the test directory and runs with an empty executable search path. Tests cover
 Stiff-client JSON POST, routing/query separation, request/response headers,
 malformed and ambiguous framing, size/UTF-8 checks, concurrency/backpressure,
-TCP resets, request deadlines, signal/programmatic shutdown and grace expiry.
+TCP resets, absolute read deadlines for idle/header/body/chunked clients, accepted
+connection caps and recovery, large response delivery, 100-continue, invalid
+transport limits, signal/programmatic shutdown and grace expiry.
 The standalone client and existing pure-law checks remain in the same suite.
 
 This is experimental. Libevent, native effects and the Bend compiler are trusted

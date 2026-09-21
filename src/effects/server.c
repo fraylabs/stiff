@@ -2,6 +2,8 @@
 #include <event2/event.h>
 #include <event2/http.h>
 #include <event2/buffer.h>
+#include <event2/bufferevent.h>
+#include <event2/listener.h>
 #include <event2/keyvalq_struct.h>
 #include <sys/queue.h>
 #include <arpa/inet.h>
@@ -27,6 +29,14 @@ typedef struct SgReply {
   int done;
   struct SgReply* next;
 } SgReply;
+typedef struct SgConnection {
+  struct bufferevent* bev;
+  struct event* read_timer;
+  u64 deadline;
+  int expired;
+  size_t forwarded;
+  struct SgConnection* next;
+} SgConnection;
 typedef struct {
   u32 id;
   struct evhttp_request* request;
@@ -41,7 +51,9 @@ static struct {
   struct evhttp* http;
   struct evhttp_bound_socket* listener;
   struct event *wake, *tick, *sigint, *sigterm;
-  int pipe[2], started, stopped, stopping, joined;
+  int pipe[2], started, stopped, stopping, joined, cleaning;
+  u32 max_connections, read_timeout, connection_count;
+  SgConnection* connections;
   u32 port, max_body, max_pending, timeout, grace, next_id;
   u64 stop_deadline;
   SgSlot slots[SG_PENDING];
@@ -53,6 +65,91 @@ static u64 sg_now(void) {
   struct timespec t;
   clock_gettime(CLOCK_MONOTONIC, &t);
   return (u64)t.tv_sec * 1000 + t.tv_nsec / 1000000;
+}
+// All connection tracking runs on the libevent thread. A filter context gives
+// a public-API lifetime callback, including connections that never reach HTTP
+// dispatch. Returning NULL from evhttp's bevcb would silently use a default
+// untracked socket, so allocation/setup failures fail closed instead.
+static void sg_connection_free(void* context) {
+  SgConnection* p = context;
+  SgConnection** link = &sg.connections;
+  while (*link && *link != p) link = &(*link)->next;
+  if (*link) { *link = p->next; sg.connection_count--; }
+  if (p->read_timer) event_free(p->read_timer);
+  free(p);
+  if (!sg.cleaning && !sg.stopping && sg.listener && sg.connection_count < sg.max_connections) {
+    if (evconnlistener_enable(evhttp_bound_socket_get_listener(sg.listener)))
+      err_fail("server listener enable failed");
+  }
+}
+static void sg_read_expired(evutil_socket_t fd, short events, void* context) {
+  (void)fd; (void)events;
+  SgConnection* p = context;
+  p->expired = 1;
+  // Defer through evhttp's own error callback so it retains connection/request
+  // ownership. The filter cancels this callback if freed in the meantime.
+  bufferevent_trigger_event(p->bev, BEV_EVENT_TIMEOUT | BEV_EVENT_READING, BEV_TRIG_DEFER_CALLBACKS);
+}
+// Keep bytes in the HTTP-facing output until the socket has actually drained.
+// A plain pass-through filter reports completion when bytes merely enter the
+// underlying queue; evhttp would then close the socket before they are sent.
+static enum bufferevent_filter_result sg_output(struct evbuffer* source,
+    struct evbuffer* destination, ev_ssize_t limit,
+    enum bufferevent_flush_mode mode, void* context) {
+  (void)limit; (void)mode;
+  SgConnection* p = context;
+  if (p->forwarded) {
+    if (evbuffer_get_length(destination)) return BEV_NEED_MORE;
+    evbuffer_drain(source, p->forwarded);
+    p->forwarded = 0;
+    return BEV_OK;
+  }
+  size_t size = evbuffer_get_length(source);
+  if (!size) return BEV_NEED_MORE;
+  const unsigned char* data = evbuffer_pullup(source, -1);
+  if (!data || evbuffer_add(destination, data, size)) return BEV_ERROR;
+  p->forwarded = size;
+  return BEV_NEED_MORE;
+}
+static void sg_output_added(struct evbuffer* buffer, const struct evbuffer_cb_info* info, void* context) {
+  (void)buffer;
+  if (!info->n_added) return;
+  SgConnection* p = context;
+  // evhttp adds output while writing is disabled. Filters do not flush that
+  // queue on enable, unlike socket bufferevents. Start the filter explicitly;
+  // its completion callback is deferred until evhttp finishes setting it up.
+  bufferevent_enable(p->bev, EV_WRITE);
+  bufferevent_flush(p->bev, EV_WRITE, BEV_NORMAL);
+}
+static struct bufferevent* sg_connection_new(struct event_base* base, void* unused) {
+  (void)unused;
+  if (sg.connection_count >= sg.max_connections) err_fail("server connection admission invariant");
+  SgConnection* p = io_mem(calloc(1, sizeof(*p)));
+  struct bufferevent* socket = bufferevent_socket_new(base, -1, BEV_OPT_CLOSE_ON_FREE);
+  if (!socket) err_fail("server connection allocation failed");
+  p->bev = bufferevent_filter_new(socket, NULL, sg_output, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_DEFER_CALLBACKS, sg_connection_free, p);
+  if (!p->bev) err_fail("server connection filter allocation failed");
+  if (!evbuffer_add_cb(bufferevent_get_output(p->bev), sg_output_added, p))
+    err_fail("server write callback setup failed");
+  p->deadline = sg_now() + sg.read_timeout;
+  p->read_timer = evtimer_new(base, sg_read_expired, p);
+  struct timeval timeout = {sg.read_timeout / 1000, (sg.read_timeout % 1000) * 1000};
+  if (!p->read_timer || event_add(p->read_timer, &timeout)) err_fail("server read deadline setup failed");
+  p->next = sg.connections; sg.connections = p; sg.connection_count++;
+  if (sg.connection_count == sg.max_connections &&
+      evconnlistener_disable(evhttp_bound_socket_get_listener(sg.listener)))
+    err_fail("server listener disable failed");
+  return p->bev;
+}
+static int sg_request_read_complete(struct evhttp_request* request) {
+  struct bufferevent* bev = evhttp_connection_get_bufferevent(evhttp_request_get_connection(request));
+  for (SgConnection* p = sg.connections; p; p = p->next) {
+    if (p->bev == bev) {
+      event_del(p->read_timer);
+      return !p->expired && sg_now() < p->deadline;
+    }
+  }
+  return 0;
 }
 static char* sg_copy(const void* p, size_t n) {
   char* s = io_mem(malloc(n + 1));
@@ -152,6 +249,7 @@ static void sg_error(struct evhttp_request* req, int code) {
 static void sg_incoming(struct evhttp_request* req, void* unused) {
   (void)unused;
   if (sg.stopping) { sg_error(req, 503); return; }
+  if (!sg_request_read_complete(req)) { sg_error(req, 408); return; }
   SgSlot* slot = NULL;
   for (u32 i = 0; i < sg.max_pending; i++) if (!sg.slots[i].request) { slot = &sg.slots[i]; break; }
   if (!slot || sg.next_id == UINT32_MAX) { sg_error(req, 503); return; }
@@ -266,6 +364,7 @@ static void sg_tick(evutil_socket_t fd, short events, void* arg) {
   if (sg.stopping && active == 0) event_base_loopexit(sg.base, NULL);
 }
 static void sg_cleanup(void) {
+  sg.cleaning = 1;
   if (sg.wake) event_free(sg.wake);
   if (sg.tick) event_free(sg.tick);
   if (sg.sigint) event_free(sg.sigint);
@@ -277,6 +376,7 @@ static void sg_cleanup(void) {
   sg.wake = sg.tick = sg.sigint = sg.sigterm = NULL;
   sg.http = NULL; sg.base = NULL; sg.listener = NULL;
   sg.pipe[0] = sg.pipe[1] = -1;
+  sg.cleaning = 0;
 }
 static void* sg_thread(void* unused) {
   (void)unused;
@@ -291,21 +391,23 @@ static void* sg_thread(void* unused) {
   pthread_mutex_unlock(&sg.lock);
   return NULL;
 }
-#ifdef CID_SERVER_LISTEN
-static Term server_listen_run(Env e, Term* f, IoWork* w) {
-  (void)w;
+#if defined(CID_SERVER_LISTEN) || defined(CID_SERVER_LISTEN_WITH_LIMITS)
+static Term sg_listen(Env e, Term config, u32 connections, u32 read_timeout) {
   Term fields[6];
-  spare_free(e, cls_fit(6), ctr_take(e, f[0], 6, fields));
+  spare_free(e, cls_fit(6), ctr_take(e, config, 6, fields));
   u64 length;
   char* address = io_cstr(e, fields[0], &length);
   u32 port = fields[1], body = fields[2], pending = fields[3], timeout = fields[4], grace = fields[5];
   unsigned char binary[16];
   const char* error = NULL;
+  if (!read_timeout) read_timeout = timeout;
   if (sg.started) error = "already_started";
   else if (io_nul(address, length) || (inet_pton(AF_INET, address, binary) != 1 && inet_pton(AF_INET6, address, binary) != 1)
     || port > 65535 || !body || body > 16 * 1024 * 1024 || !pending || pending > SG_PENDING
-    || !timeout || timeout > 600000 || !grace || grace > 600000) error = "invalid_config";
+    || !timeout || timeout > 600000 || !grace || grace > 600000
+    || !connections || connections > 1024 || !read_timeout || read_timeout > 600000) error = "invalid_config";
   if (!error) {
+    sg.max_connections = connections; sg.read_timeout = read_timeout;
     sg.max_body = body; sg.max_pending = pending; sg.timeout = timeout; sg.grace = grace;
     sg.base = event_base_new();
     if (sg.base) sg.http = evhttp_new(sg.base);
@@ -322,6 +424,7 @@ static Term server_listen_run(Env e, Term* f, IoWork* w) {
       evhttp_set_timeout_tv(sg.http, &t);
       evhttp_set_allowed_methods(sg.http, EVHTTP_REQ_GET | EVHTTP_REQ_POST | EVHTTP_REQ_PUT | EVHTTP_REQ_DELETE | EVHTTP_REQ_PATCH | EVHTTP_REQ_HEAD | EVHTTP_REQ_OPTIONS);
       evhttp_set_gencb(sg.http, sg_incoming, NULL);
+      evhttp_set_bevcb(sg.http, sg_connection_new, NULL);
       sg.listener = evhttp_bind_socket_with_handle(sg.http, address, (ev_uint16_t)port);
       sg.wake = event_new(sg.base, sg.pipe[0], EV_READ | EV_PERSIST, sg_wake, NULL);
       sg.tick = event_new(sg.base, -1, EV_PERSIST, sg_tick, NULL);
@@ -342,6 +445,25 @@ static Term server_listen_run(Env e, Term* f, IoWork* w) {
   }
   free(address);
   return error ? io_box(e, CID_LISTENERROR, io_str(e, error, strlen(error))) : term_pak(CID_LISTENING, sg.port);
+}
+#endif
+#ifdef CID_SERVER_LISTEN
+static Term server_listen_run(Env e, Term* f, IoWork* w) {
+  (void)w;
+  return sg_listen(e, f[0], 256, 0);
+}
+#endif
+#ifdef CID_SERVER_LISTEN_WITH_LIMITS
+static Term server_listen_with_limits_run(Env e, Term* f, IoWork* w) {
+  (void)w;
+  Term fields[2];
+  spare_free(e, cls_fit(2), ctr_take(e, f[1], 2, fields));
+  // Explicit zero is invalid; only the compatibility entry uses zero internally.
+  if (!(u32)fields[1]) {
+    term_sink(e, f[0]);
+    return io_box(e, CID_LISTENERROR, io_str(e, "invalid_config", 14));
+  }
+  return sg_listen(e, f[0], (u32)fields[0], (u32)fields[1]);
 }
 #endif
 #ifdef CID_SERVER_NEXT
@@ -449,6 +571,9 @@ static Term server_stop_run(Env e, Term* f, IoWork* w) {
 static void __attribute__((constructor)) server_register(void) {
 #ifdef CID_SERVER_LISTEN
   io_eff(CID_SERVER_LISTEN, server_listen_run, 0);
+#endif
+#ifdef CID_SERVER_LISTEN_WITH_LIMITS
+  io_eff(CID_SERVER_LISTEN_WITH_LIMITS, server_listen_with_limits_run, 0);
 #endif
 #ifdef CID_SERVER_NEXT
   io_eff(CID_SERVER_NEXT, server_next_run, 0);

@@ -11,6 +11,10 @@ type Config is Data:
 def config(address: String, port: U32) -> Config:
   Config{address, port, 1048576, 128, 10000, 5000}
 
+# Accepted socket budget and absolute time to receive the complete request.
+type TransportLimits is Data:
+  TransportLimits{max_connections: U32, read_timeout_ms: U32}
+
 type Started is Data:
   Listening{port: U32}
   ListenError{code: String}
@@ -60,6 +64,9 @@ def header(+name: String, headers: List<&2, ServerHeader>) -> Maybe<String>:
       header_step(String.eq(name, key), value, u => header(name, tail))
 
 def Server.listen(config: Config) -> IO(Started):
+  import "./effects/server.c"
+
+def Server.listen_with_limits(config: Config, limits: TransportLimits) -> IO(Started):
   import "./effects/server.c"
 
 def Server.next() -> IO(Next):

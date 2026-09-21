@@ -90,6 +90,116 @@ class ServerTests(unittest.TestCase):
         for _ in range(count):
             self.assertTrue(self.lines.get(timeout=3).startswith("HANDLING "))
 
+    def test_absolute_read_deadline_covers_idle_headers_and_bodies(self):
+        # Each trickle is much sooner than the 1000 ms inactivity timeout.
+        prefixes = [b"", b"GET /health HTTP/1.1\r\nX-Slow: ",
+                    b"POST /echo HTTP/1.1\r\nHost: localhost\r\nContent-Length: 900\r\n\r\n",
+                    b"POST /echo HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n384\r\n"]
+        for prefix in prefixes:
+            with self.subTest(prefix=prefix), socket.create_connection(("127.0.0.1", self.port), timeout=2) as peer:
+                peer.settimeout(0.05)
+                if prefix:
+                    peer.sendall(prefix)
+                start = time.monotonic()
+                closed = False
+                received = b""
+                while time.monotonic() - start < 1.5:
+                    try:
+                        if prefix:
+                            peer.sendall(b"x")
+                        data = peer.recv(4096)
+                        if not data:
+                            closed = True
+                            break
+                        received += data
+                    except socket.timeout:
+                        pass
+                    except (BrokenPipeError, ConnectionResetError):
+                        closed = True
+                        break
+                self.assertTrue(closed, "trickling request survived its absolute deadline")
+                self.assertLess(time.monotonic() - start, 0.9)
+                self.assertNotIn(b" 200 ", received)
+                self.assertTrue(self.lines.empty(), "incomplete request reached Bend")
+                self.assertEqual(self.request()[0], 200)
+                self.handling()
+
+    def test_connection_cap_and_recovery(self):
+        peers = []
+        try:
+            # Seven incomplete sockets leave capacity for a healthy request.
+            for _ in range(7):
+                peers.append(socket.create_connection(("127.0.0.1", self.port), timeout=2))
+            self.assertEqual(self.request()[0], 200)
+            self.handling()
+            peers.append(socket.create_connection(("127.0.0.1", self.port), timeout=2))
+            time.sleep(0.04)
+            with socket.create_connection(("127.0.0.1", self.port), timeout=2) as queued:
+                queued.sendall(b"GET /health HTTP/1.1\r\nHost: localhost\r\n\r\n")
+                queued.settimeout(0.1)
+                with self.assertRaises(socket.timeout):
+                    queued.recv(4096)
+                self.assertTrue(self.lines.empty(), "ninth socket bypassed connection cap")
+                queued.settimeout(2)
+                response = b""
+                while chunk := queued.recv(4096):
+                    response += chunk
+                self.assertIn(b" 200 ", response)
+                self.handling()
+        finally:
+            for peer in peers:
+                peer.close()
+        self.assertEqual(self.request()[0], 200)
+
+    def test_partial_connection_resets_release_capacity(self):
+        for _ in range(3):
+            for _ in range(8):
+                peer = socket.create_connection(("127.0.0.1", self.port), timeout=2)
+                peer.sendall(b"POST /echo HTTP/1.1\r\n")
+                peer.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+                peer.close()
+            self.assertEqual(self.request()[0], 200)
+            self.handling()
+
+    def test_large_response_is_fully_written(self):
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=3)
+        try:
+            connection.connect()
+            connection.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 65536)
+            connection.request("GET", "/large")
+            self.handling()
+            time.sleep(0.1)
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.read(), b"0123456789abcdef" * 65536)
+        finally:
+            connection.close()
+        self.assertEqual(self.request()[0], 200)
+
+    def test_expect_continue_then_complete_body(self):
+        with socket.create_connection(("127.0.0.1", self.port), timeout=2) as peer:
+            peer.sendall(b"POST /echo HTTP/1.1\r\nHost: localhost\r\n"
+                         b"Expect: 100-continue\r\nContent-Length: 2\r\n\r\n")
+            interim = b""
+            while b"\r\n\r\n" not in interim:
+                chunk = peer.recv(4096)
+                self.assertTrue(chunk)
+                interim += chunk
+            self.assertIn(b" 100 ", interim)
+            peer.sendall(b"{}")
+            response = b""
+            while chunk := peer.recv(4096):
+                response += chunk
+            self.assertIn(b" 200 ", response)
+            self.assertTrue(response.endswith(b"{}"))
+
+    def test_invalid_transport_limits(self):
+        for connections, deadline in ((0, 350), (1025, 350), (8, 0), (8, 600001)):
+            with self.subTest(connections=connections, deadline=deadline):
+                result = subprocess.run([str(self.directory / "server"), str(connections), str(deadline)],
+                                        capture_output=True, text=True, timeout=4)
+                self.assertEqual((result.returncode, result.stderr), (1, "invalid_config\n"))
+
     def test_native_stiff_client_to_server(self):
         result = subprocess.run([str(self.directory / "client"),
                                  f"http://127.0.0.1:{self.port}/echo", "POST", '{"native":true}',
