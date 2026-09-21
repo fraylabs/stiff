@@ -1,0 +1,29 @@
+# Install only after placing your native binaries/libraries and reviewing limits.
+# systemd on Linux; memory and CPU accounting cover the whole service cgroup.
+[Unit]
+Description=Stiff native application
+After=network.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+ExecStart=/opt/stiff/stiff-run --grace-ms 2000 -- /opt/stiff/app --threads 4 127.0.0.1 8080
+Restart=no
+KillMode=control-group
+TimeoutStopSec=5
+MemoryMax=512M
+MemorySwapMax=0
+CPUQuota=200%
+TasksMax=64
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+StateDirectory=stiff
+StateDirectoryMode=0700
+WorkingDirectory=/var/lib/stiff
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

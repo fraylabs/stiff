@@ -14,6 +14,7 @@ class SanitizerChecks(unittest.TestCase):
         cls.temporary = tempfile.TemporaryDirectory(prefix="stiff-sanitizers-")
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.binary = Path(cls.temporary.name) / "canary"
+        cls.generated = Path(str(cls.binary) + ".c")
         result = subprocess.run([str(ROOT / "scripts/build-native.sh"),
                                  "test/fixtures/sanitizer-canary.bend", str(cls.binary)],
                                 cwd=ROOT, text=True, capture_output=True, timeout=60)
@@ -31,6 +32,14 @@ class SanitizerChecks(unittest.TestCase):
 
     def test_undefined_checks_detect_signed_overflow(self):
         self.check_fault("1", "runtime error: signed integer overflow")
+
+    def test_default_instrumented_abi_only_removes_preserve_none(self):
+        if os.environ.get("STIFF_NATIVE_ABI", "compiler") != "compiler":
+            self.skipTest("layout assertion applies to the default compiler profile")
+        generated = self.generated.read_text()
+        self.assertIn("#define PRESERVE(A) __attribute__((A))", generated)
+        self.assertNotIn("PRESERVE(preserve_none)", generated)
+        self.assertEqual(generated.count("PRESERVE(preserve_most)"), 1)
 
 
 def load_tests(loader, tests, pattern):

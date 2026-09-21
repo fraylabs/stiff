@@ -97,7 +97,7 @@ numeric/nesting limits and SIGINT. CI runs this suite on Linux using shell steps
 
 The original macOS failure is isolated to an interaction between sanitizer
 instrumentation and Bend's generated calling conventions. Stiff now has an
-explicit standard-C-ABI diagnostic profile with combined ASan/UBSan enabled,
+checked default-profile mitigation for Clang preserve_none with combined ASan/UBSan enabled,
 fail-fast checks and deliberate-fault detector tests:
 
 ```sh
@@ -105,7 +105,7 @@ make diagnose-sanitizers
 make test-sanitize
 ```
 
-Default builds and the pinned compiler remain unchanged. The original
-instrumented ABI remains incompatible on the inspected toolchain; diagnostic
+Uninstrumented builds and the pinned compiler remain unchanged. Address-sanitized
+builds remove only preserve_none while retaining preserve_most. Instrumented
 coverage does not establish memory safety. See [the investigation and coverage
 limits](sanitizers.md).

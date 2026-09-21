@@ -1,6 +1,8 @@
 # Native HTTP server
 
-Stiff's server uses libevent 2.1.12+ for HTTP parsing and nonblocking network I/O.
+Stiff's server uses the scoped pinned libevent build for HTTP parsing and nonblocking network I/O.
+The 2.2 API is an explicit experimental dependency; `make setup` verifies and builds
+it under `.cache`, leaving system libevent untouched.
 Bend owns application routing and handlers. The native effect requires libevent
 in addition to the existing build prerequisites. Client-only builds do not link
 libevent. There is no JavaScript or Python application runtime.
@@ -180,6 +182,6 @@ cancellation after deadlines/resets/grace, signal/programmatic shutdown and grac
 The standalone client and existing pure-law checks remain in the same suite.
 
 This is experimental. Libevent, native effects and the Bend compiler are trusted
-implementation, not formally verified. Combined sanitizers run through an explicit standard-ABI diagnostic profile;
-the original ABI incompatibility remains. See [sanitizer notes](sanitizers.md). Native-only
+implementation, not formally verified. Combined sanitizers run through the default compiler profile with the checked
+preserve_none mitigation. See [sanitizer notes](sanitizers.md). Native-only
 execution and passing integration tests do not establish memory safety.

@@ -267,7 +267,9 @@ def main():
             report["environment"] = {
                 "platform": platform.platform(), "machine": platform.machine(), "logical_cpus": os.cpu_count(),
                 "python": platform.python_version(), "clang": command(os.environ.get("CC", "clang"), "--version").splitlines()[0],
-                "libraries": {name: command("pkg-config", "--modversion", name) for name in ("libcurl", "json-c", "libevent")},
+                "libraries": {**{name: command("pkg-config", "--modversion", name) for name in ("libcurl", "json-c")},
+                              "libevent": json.loads((ROOT / ".cache/libevent/.stiff-pin.json").read_text())["version"]},
+                "libevent_pin": json.loads((ROOT / ".cache/libevent/.stiff-pin.json").read_text()),
                 "bend": command(os.environ.get("BEND", str(ROOT / ".cache/toolchain/bin/bend")), "version"),
                 "git_revision": command("git", "rev-parse", "HEAD"),
                 "working_tree_dirty": bool(command("git", "status", "--porcelain")),

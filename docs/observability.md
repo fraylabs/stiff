@@ -89,3 +89,7 @@ The native test suite checks compiled Metrics layout, correlation against respon
 headers, rejection before admission, completed error responses, late handler
 results, read expiry, and gauges returning to zero after network and handler
 cleanup. Normal and diagnostic sanitizer profiles exercise the same journeys.
+
+For bounded, failure-isolated stderr handling, run the application under the
+[native process supervisor](execution.md). Its separate logger can drop records
+under pressure; observability logs are not a durable audit journal.

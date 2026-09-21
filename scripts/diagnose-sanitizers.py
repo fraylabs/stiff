@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare pinned Bend calling conventions with ordinary C under sanitizers."""
+"""Verify pinned Bend's sanitizer-compatible and standard calling conventions."""
 import json
 import os
 from pathlib import Path
@@ -7,7 +7,8 @@ import platform
 import subprocess
 
 ROOT = Path(__file__).resolve().parent.parent
-DIRECTORY = ROOT / ".cache/sanitizer-probe"
+DIRECTORY = Path(os.environ.get("STIFF_SANITIZER_PROBE_DIR",
+                                ROOT / ".cache/sanitizer-probe"))
 DIRECTORY.mkdir(parents=True, exist_ok=True)
 report = {
     "platform": platform.platform(),
@@ -26,6 +27,13 @@ for abi in ("compiler", "standard"):
         if build.returncode:
             result["stderr"] = build.stderr
         else:
+            generated = Path(str(output) + ".c").read_text()
+            result.update(
+                preserve_macro=("attribute" if
+                    "#define PRESERVE(A) __attribute__((A))" in generated else "empty"),
+                preserve_none_sites=generated.count("PRESERVE(preserve_none)"),
+                preserve_most_sites=generated.count("PRESERVE(preserve_most)"),
+            )
             run = subprocess.run([str(output)], cwd=ROOT, text=True, capture_output=True,
                                  timeout=15, env={"PATH": "/nonexistent"})
             result.update(exit=run.returncode, stdout=run.stdout, stderr=run.stderr)
@@ -34,8 +42,22 @@ for abi in ("compiler", "standard"):
 path = DIRECTORY / "report.json"
 path.write_text(json.dumps(report, indent=2) + "\n")
 print(f"Report: {path}")
-# Raw compiler-profile failures are diagnostic results, never hidden/suppressed.
-# The standard profile must actually run the smoke program without diagnostics.
-raise SystemExit(0 if all(r.get("exit") == 0 and r.get("stdout") == "runtime smoke\n"
-                         and not r.get("stderr") for r in report["results"]
-                         if r["abi"] == "standard") else 1)
+
+
+def expected_layout(result):
+    if result["abi"] == "standard":
+        return result.get("preserve_macro") == "empty"
+    if result["sanitizer"] in ("address", "combined"):
+        return (result.get("preserve_macro") == "attribute"
+                and result.get("preserve_none_sites") == 0
+                and result.get("preserve_most_sites") == 1)
+    return (result.get("preserve_macro") == "attribute"
+            and result.get("preserve_none_sites") == 2
+            and result.get("preserve_most_sites") == 1)
+
+
+raise SystemExit(0 if all(r.get("exit") == 0
+                         and r.get("stdout") == "runtime smoke\n"
+                         and not r.get("stderr")
+                         and expected_layout(r)
+                         for r in report["results"]) else 1)

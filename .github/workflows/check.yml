@@ -4,13 +4,15 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel]
         profile: [normal, sanitized]
     env:
-      STIFF_NATIVE_ABI: ${{ matrix.profile == 'sanitized' && 'standard' || 'compiler' }}
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      STIFF_NATIVE_ABI: compiler
       STIFF_NATIVE_SANITIZE: ${{ matrix.profile == 'sanitized' && 'combined' || '0' }}
     steps:
       - name: Check out the exact public commit
@@ -20,9 +22,21 @@ jobs:
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
       - name: Install native build and test tools
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang make pkg-config libcurl4-openssl-dev libjson-c-dev libevent-dev python3 openssl
+          sudo apt-get install -y clang make cmake patch pkg-config libcurl4-openssl-dev libjson-c-dev libsqlite3-dev python3 openssl
+      - name: Install macOS native dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew install cmake pkg-config curl json-c sqlite python@3.12
+          echo "PKG_CONFIG_PATH=$(brew --prefix curl)/lib/pkgconfig:$(brew --prefix sqlite)/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "$(brew --prefix python@3.12)/libexec/bin" >> "$GITHUB_PATH"
       - run: clang --version
       - run: make setup
       - run: make test
+      - name: Verify hard resident-memory isolation in a disposable unit
+        if: runner.os == 'Linux' && matrix.profile == 'normal'
+        run: |
+          clang -std=c11 -O0 test/fixtures/runner-child.c -o .cache/native/memory-fixture
+          ./scripts/check-linux-memory.sh .cache/native/memory-fixture

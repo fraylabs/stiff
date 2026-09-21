@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+import sys
 import tarfile
 import tempfile
 import urllib.request
@@ -40,30 +41,31 @@ def main():
             raise RuntimeError("Existing toolchain has a different pin; refusing to overwrite it")
         verify(DESTINATION)
         print(f"Bend {VERSION} already installed in .cache/toolchain")
-        return
-    CACHE.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="install-bend-", dir=CACHE) as temporary:
-        temporary = Path(temporary)
-        archive = temporary / "release.tar.gz"
-        url = f"https://github.com/bendlang/bend/releases/download/v{VERSION}/bend-{VERSION}-{target}.tar.gz"
-        with urllib.request.urlopen(url, timeout=60) as response, archive.open("wb") as output:
-            while chunk := response.read(1024 * 1024):
-                output.write(chunk)
-        with archive.open("rb") as source:
-            actual = hashlib.file_digest(source, "sha256").hexdigest()
-        if actual != digest:
-            raise RuntimeError(f"Bend archive checksum mismatch: {actual}")
-        extracted = temporary / "extracted"
-        with tarfile.open(archive) as bundle:
-            bundle.extractall(extracted, filter="data")
-        candidates = list(extracted.rglob("bin/bend"))
-        if len(candidates) != 1:
-            raise RuntimeError("Unexpected Bend release layout")
-        installation = candidates[0].parent.parent
-        verify(installation)
-        (installation / ".archive-sha256").write_text(digest + "\n")
-        installation.rename(DESTINATION)
-    print(f"Installed Bend {VERSION} in .cache/toolchain (SHA-256 verified)")
+    else:
+        CACHE.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="install-bend-", dir=CACHE) as temporary:
+            temporary = Path(temporary)
+            archive = temporary / "release.tar.gz"
+            url = f"https://github.com/bendlang/bend/releases/download/v{VERSION}/bend-{VERSION}-{target}.tar.gz"
+            with urllib.request.urlopen(url, timeout=60) as response, archive.open("wb") as output:
+                while chunk := response.read(1024 * 1024):
+                    output.write(chunk)
+            with archive.open("rb") as source:
+                actual = hashlib.file_digest(source, "sha256").hexdigest()
+            if actual != digest:
+                raise RuntimeError(f"Bend archive checksum mismatch: {actual}")
+            extracted = temporary / "extracted"
+            with tarfile.open(archive) as bundle:
+                bundle.extractall(extracted, filter="data")
+            candidates = list(extracted.rglob("bin/bend"))
+            if len(candidates) != 1:
+                raise RuntimeError("Unexpected Bend release layout")
+            installation = candidates[0].parent.parent
+            verify(installation)
+            (installation / ".archive-sha256").write_text(digest + "\n")
+            installation.rename(DESTINATION)
+        print(f"Installed Bend {VERSION} in .cache/toolchain (SHA-256 verified)")
+    subprocess.run([sys.executable, str(ROOT / "scripts/setup-libevent.py")], check=True)
 
 
 if __name__ == "__main__":

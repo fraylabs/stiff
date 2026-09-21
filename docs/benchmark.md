@@ -76,13 +76,14 @@ cancellation. Crash recovery and persistent state are not exercised here.
 Before claiming production scalability, measure an independently driven arrival
 rate, longer repeated soaks, varied payloads/handlers, multiple hardware targets,
 and incomplete/slow-client pressure. Investigate unexplained memory trends with
-allocator/runtime evidence. Keep the original Bend ABI sanitizer limitation
-separate from these normal-build measurements. Turnless migration is deferred.
+allocator/runtime evidence. Keep the documented sanitizer coverage limits separate from these normal-build
+measurements. The framework does not claim a universal production capacity.
 
 
 ## Initial observation — September 21, 2026
 
-One local run used the extended command above, the normal compiler ABI, Bend
+This historical observation predates the scoped libevent 2.2 pin and request
+streaming. One local run used the extended command above, the normal compiler ABI, Bend
 2.0.20, Apple Clang 21.0.0, macOS arm64 (10 logical CPUs), libevent 2.1.12,
 libcurl 8.7.1 and json-c 0.19. This was a shared development machine, not a
 dedicated performance host. The JSON request body was 1064 bytes.

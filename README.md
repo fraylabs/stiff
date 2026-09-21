@@ -1,15 +1,16 @@
 # Stiff
 
-Native HTTP(S) client, HTTP server and JSON building blocks for **Bend 2**. Write a Bend `IO`
-program, compile it to an executable, and run it with libcurl and json-c.
+Native HTTP, application and storage building blocks for **Bend 2**. Write a Bend
+`IO` program with routing, schemas, streaming and durable local state, then compile
+it to a native executable.
 
-**Status:** experimental, pinned to Bend **2.0.20**. No Node or npm dependency.
+**Status:** experimental 0.2.0 candidate, pinned to Bend **2.0.20**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
 ## Get started
 
 You need Clang, make, pkg-config, libcurl development files (7.85 or newer),
-json-c development files, libevent **2.1.12+** for server builds/tests, and OpenSSL
+json-c and SQLite development files, CMake and patch for the pinned libevent build, and OpenSSL
 for tests. Python **3.11.8+** is used only
 for setup and tests; it is not part of the application runtime. These Python
 tools use the standard library and require no packages or virtual environment.
@@ -26,11 +27,15 @@ make build
 ```
 
 `make setup` downloads the standalone Bend 2.0.20 release into `.cache/toolchain`,
-checks its pinned SHA-256 before extraction, and changes no global installation.
-It supports macOS/Linux release archives on arm64 and x64. The source revision
+checks its pinned SHA-256 before extraction, and builds the pinned libevent
+dependency under `.cache/libevent`. Setup changes no global installation.
+It supports macOS/Linux release archives on arm64 and x64. Server builds use
+libevent **2.2.2-alpha**, statically linked from the scoped build; its alpha status
+is explicit. See [native dependency pins](docs/dependencies.md). The source revision
 for this compiler release is `a5269a6b2c5ccd6752b66df4bc6f60678b4f49bc`.
 
-If you already have Bend 2.0.20, skip setup and set `BEND` to its executable.
+If you already have Bend 2.0.20, set `BEND` to its executable. Server builds
+still need `python3 scripts/setup-libevent.py` for the scoped dependency.
 `CC` can select Clang. To compile another program:
 
 ```sh
@@ -74,6 +79,19 @@ in a native health/greeting API:
 [Observability helpers](docs/observability.md) add server-generated response IDs,
 structured handler-result logs, and native lifecycle counters/gauges. The app
 example demonstrates them through stderr logs and its `/metrics` route.
+
+[Parameter routes and schemas](docs/schema.md) add `/items/:id` patterns,
+boolean/unsigned integer/optional/nullable/array/nested-object validation and
+structured validation paths. [Response streaming](docs/streaming.md) supports
+bounded chunked responses, SSE, explicit connection reuse and opt-in incremental
+request bodies. Ordinary handlers keep the bounded buffered-body API.
+
+[SQLite storage](docs/store.md) provides atomic conditional writes with durable
+idempotency receipts and restart reconciliation. [Execution boundaries](docs/execution.md)
+provide native process cancellation, CPU/address-space limits and bounded stderr
+handling. See [compatibility and upgrades](docs/compatibility.md), the
+[completion checklist](docs/checklist.md) and [deployment example](examples/deploy/stiff.service)
+for the precise contracts and verified boundaries.
 
 ## Use Stiff in your own project
 
@@ -314,10 +332,11 @@ this native workflow on Linux without JavaScript actions.
 
 The laws cover pure request policy. They do not verify libcurl, json-c, native
 memory safety, or the Bend compiler. Compiler layouts are pinned private ABI.
-The sanitizer failure was isolated to generated calling conventions on the
-inspected macOS toolchain. `make test-sanitize` exercises an explicit standard-C
-ABI with ASan/UBSan; normal builds remain unchanged. The original instrumented
-ABI is still incompatible. See [sanitizer findings and coverage limits](docs/sanitizers.md).
+The sanitizer failure was isolated to Clang's `preserve_none` calling convention.
+`make test-sanitize` now instruments the default compiler profile with a narrow,
+checked mitigation that removes only `preserve_none` under ASan; `preserve_most`
+and sanitizer checks remain enabled. Normal builds retain Bend's original ABI.
+See [sanitizer findings and coverage limits](docs/sanitizers.md).
 
 Contributions should include a runnable example or failing case, preserve the
 compiler pin unless deliberately upgrading it, and distinguish pure proofs from
@@ -330,7 +349,23 @@ latency percentiles, sampled memory, overload rejection, recovery and shutdown.
 See [the workload, report format and limits](docs/benchmark.md). A short version
 also runs in CI. Passing these checks is not a production-capacity claim.
 
+The [independent-arrival driver](docs/load.md) targets an already running server
+and reports offered load, drops, latency and semantic failures separately.
+
+## Package the runnable example
+
+```sh
+python3 scripts/package.py
+```
+
+This creates a platform-specific archive under `.cache/dist` with the native app,
+supervisor, license, revision/dependency manifest and SHA-256 checksums. Its API
+gate is synthetic, not authentication. System libraries are still required.
+`make test` verifies an extracted archive outside the checkout with no build tools
+on PATH. Only artifacts from a clean, tested release revision should be distributed.
+
 ## License
 
-MIT. Bend is an independent upstream project; its downloaded compiler retains
-its own license notices. No upstream source is vendored or relicensed here.
+Stiff source is MIT. Bend and libevent are independent upstream projects;
+[third-party notices](licenses/README.md) preserve their licenses, including in
+compiled example archives. No upstream source is relicensed as Stiff.

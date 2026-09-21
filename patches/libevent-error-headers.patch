@@ -1,0 +1,50 @@
+From: Stiff maintainers <local-patch@stiff.invalid>
+Subject: [PATCH] Preserve headers from successful HTTP error callbacks
+Upstream-Status: Local integration patch; not submitted upstream
+Source: libevent release-2.2.2-alpha, commit df3ecad3a040fd6d4fad4287defe113395de6fd7
+Reason: evhttp_send_page_ clears callback-provided response headers after a
+ successful evhttp_set_errorcb callback. Stiff needs its JSON Content-Type and
+ HEAD Content-Length to reach the wire. Default and failed callbacks retain the
+ upstream HTML path.
+
+--- a/http.c
++++ b/http.c
+@@ -217,6 +217,7 @@
+ static void evhttp_write_buffer(struct evhttp_connection *,
+     void (*)(struct evhttp_connection *, void *), void *);
+ static void evhttp_make_header(struct evhttp_connection *, struct evhttp_request *);
++static inline void evhttp_send(struct evhttp_request *, struct evbuffer *);
+ static int evhttp_method_may_have_body_(struct evhttp_connection *, enum evhttp_cmd_type);
+ 
+ /* callbacks for bufferevent */
+@@ -3273,19 +3274,24 @@
+ 
+ 	evhttp_response_code_(req, error, reason);
+ 
+-	/* Output error using callback for connection's evhttp, if available */
+-	if ((http->errorcb == NULL) ||
+-	    ((*http->errorcb)(req, buf, error, reason, http->errorcbarg) < 0))
+-	{
++	/* A successful callback owns both its body and response headers. */
++	if (http->errorcb != NULL &&
++	    (*http->errorcb)(req, buf, error, reason, http->errorcbarg) >= 0) {
++		if (!req->major || !req->minor) {
++			req->major = 1;
++			req->minor = 1;
++		}
++		evhttp_send(req, buf);
++	} else {
+ 		const char *heading = evhttp_response_phrase_internal(error);
+ 
+ 		evbuffer_drain(buf, evbuffer_get_length(buf));
+ 		evbuffer_add_printf(buf, ERR_FORMAT,
+ 		   error, heading, error, heading,
+ 		   (reason ? reason : ""));
+-	}
+ 
+-	evhttp_send_page_(req, buf);
++		evhttp_send_page_(req, buf);
++	}
+ 
+ 	evbuffer_free(buf);
+ #undef ERR_FORMAT

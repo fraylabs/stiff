@@ -26,12 +26,33 @@ type Next is Data:
   Received{request: Incoming}
   Stopped{}
 
+# Opt-in upload streaming exposes validated request metadata before the body.
+type IncomingHead is Data:
+  IncomingHead{id: U32, method: String, path: String, target: String, headers: List<&2, ServerHeader>}
+
+type StreamNext is Data:
+  StreamReceived{request: IncomingHead}
+  StreamStopped{}
+
+type BodyNext is Data:
+  BodyChunk{value: String}
+  BodyEnd{}
+  BodyFailure{code: String}
+
 type Reply is Data:
   Reply{status: U32, headers: List<&2, ServerHeader>, body: String}
 
 type Replied is Data:
   Sent{}
   ReplyError{code: String}
+
+# Streaming is opt-in. Ordinary Reply keeps its connection-closing behavior.
+type ConnectionMode is Data:
+  CloseAfter{}
+  KeepAlive{}
+
+type StreamHead is Data:
+  StreamHead{status: U32, headers: List<&2, ServerHeader>, connection: ConnectionMode}
 
 def json(status: U32, body: String) -> Reply:
   Reply{status, Con{ServerHeader{"Content-Type", "application/json"}, Nil{}}, body}
@@ -69,11 +90,53 @@ def Server.listen(config: Config) -> IO(Started):
 def Server.listen_with_limits(config: Config, limits: TransportLimits) -> IO(Started):
   import "./effects/server.c"
 
+# Request streaming is a listener-wide opt-in. Buffered listeners retain their
+# existing Incoming/next API and allocation behavior.
+def Server.listen_streaming(config: Config) -> IO(Started):
+  import "./effects/server.c"
+
+def Server.listen_streaming_with_limits(config: Config, limits: TransportLimits) -> IO(Started):
+  import "./effects/server.c"
+
 def Server.next() -> IO(Next):
+  import "./effects/server.c"
+
+def Server.next_stream() -> IO(StreamNext):
+  import "./effects/server.c"
+
+# At most one bounded chunk is retained per request while the consumer works.
+def Server.body_next(id: U32) -> IO(BodyNext):
   import "./effects/server.c"
 
 def Server.reply(id: U32, reply: Reply) -> IO(Replied):
   import "./effects/server.c"
+
+# Native boundary uses a numeric flag instead of relying on the compiler's
+# private representation of a nullary data constructor.
+def Server.stream_start_raw(id: U32, status: U32, headers: List<&2, ServerHeader>, keep_alive: U32) -> IO(Replied):
+  import "./effects/server.c"
+
+def stream_start_mode(id: U32, status: U32, headers: List<&2, ServerHeader>, connection: ConnectionMode) -> IO(Replied):
+  match connection:
+    case CloseAfter{}: Server.stream_start_raw(id, status, headers, 0)
+    case KeepAlive{}: Server.stream_start_raw(id, status, headers, 1)
+
+# Begin one bounded chunked response. Statuses that forbid bodies are rejected.
+def Server.stream_start(id: U32, head: StreamHead) -> IO(Replied):
+  match head:
+    case StreamHead{status, headers, connection}: stream_start_mode(id, status, headers, connection)
+
+# The aggregate body across writes is limited to 16 MiB.
+def Server.stream_write(id: U32, chunk: String) -> IO(Replied):
+  import "./effects/server.c"
+
+def Server.stream_end(id: U32) -> IO(Replied):
+  import "./effects/server.c"
+
+def sse_head(connection: ConnectionMode) -> StreamHead:
+  StreamHead{200, [
+    ServerHeader{"Content-Type", "text/event-stream"},
+    ServerHeader{"Cache-Control", "no-cache"}], connection}
 
 # Cooperative checkpoint; does not preempt work or undo effects.
 def Server.active(id: U32) -> IO(Bool):

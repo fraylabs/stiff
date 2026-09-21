@@ -12,9 +12,10 @@ test:
 server:
 	./scripts/build-native.sh examples/server.bend .cache/native/server
 
-# Instrument all generated Bend and Stiff C using standard C calling conventions.
+# Instrument all generated Bend and Stiff C. The compiler profile retains
+# preserve_most and removes only ASan-incompatible preserve_none sites.
 test-sanitize:
-	STIFF_NATIVE_ABI=standard STIFF_NATIVE_SANITIZE=combined $(MAKE) test
+	STIFF_NATIVE_ABI=compiler STIFF_NATIVE_SANITIZE=combined $(MAKE) test
 
 diagnose-sanitizers:
 	python3 scripts/diagnose-sanitizers.py
@@ -22,3 +23,9 @@ diagnose-sanitizers:
 # Local loopback only. Raw reports and binaries stay ignored.
 benchmark:
 	python3 scripts/benchmark.py
+
+# Native process supervisor; no interpreter is needed at deployment.
+.PHONY: runner
+runner:
+	mkdir -p .cache/native
+	$(CC) -std=c11 -Wall -Wextra -Werror -O2 native/stiff-run.c -o .cache/native/stiff-run
