@@ -93,7 +93,9 @@ to your `.bend` file. The example includes these imports and `show`.
 | `Http.with_bearer(token, request)` | Set `Authorization: Bearer <token>` |
 | `Http.with_timeout(ms, request)` | Request with a whole-transfer deadline |
 | `Http.with_max_bytes(bytes, request)` | Request with a response-size limit |
-| `Net.Stiff.send(request)` | `HttpOk{Response{status, body}}` or `HttpError{code, message}` |
+| `Net.Stiff.send(request)` | `HttpOk{Response{status, body, headers}}` or `HttpError{code, message}` |
+| `Net.header(name, headers)` | First matching value or `None{}`; use a lowercase name |
+| `Net.header_values(name, headers)` | All matching values in wire order |
 | `Net.Stiff.send_json(request)` | `JsonOk{status, value}` or `JsonError{code, message}` |
 | `Json.Json.parse(text)` | `JsonDone{value}` or `JsonFailure{code, message}` |
 | `Json.Json.stringify(value)` | `JsonEncoded{text}` or `JsonEncodeFailure{code, message}` |
@@ -153,8 +155,47 @@ methods are supported, including when using the `Request` constructor directly.
 Use `Stiff.send(Http.head(url))` for a status-only check. HEAD returns an empty
 body even when the server advertises a nonzero representation length.
 `send_json` still requires a JSON response, so use `send` for HEAD and responses
-such as HTTP 204. Response headers are not yet exposed.
+such as HTTP 204. Response headers are available even for HEAD and HTTP error statuses.
 Stiff adds no retries for any method; a timeout does not prove that a write failed.
+
+## Read response headers
+
+`Net.Response{status, body, headers}` exposes a list of
+`Net.ResponseHeader{name, value}`. Names are lowercase; values have leading and
+trailing spaces/tabs removed. Duplicate fields remain separate and retain wire
+order. For example, use `Net.header("etag", headers)` for the first ETag or
+`Net.header_values("set-cookie", headers)` for every cookie without comma-joining.
+
+The [response headers example](examples/response-headers.bend) demonstrates both
+helpers and iteration over all fields:
+
+```sh
+./scripts/build-native.sh examples/response-headers.bend .cache/native/response-headers
+./.cache/native/response-headers https://your-api.example/resource HEAD
+```
+
+Only the final response's initial headers are returned. Informational responses,
+proxy CONNECT headers and trailers are not exposed; trailers cannot replace
+initial metadata. Headers describe the wire response: for example, Content-Length
+may differ from the decoded body's size after decompression.
+
+Header handling accepts UTF-8 values, including empty values. Invalid UTF-8,
+invalid field names and forbidden controls fail with `invalid_response_header`.
+This is a text API; arbitrary non-UTF-8 header bytes are not supported.
+Limits are 8 KiB per callback line, 64 KiB total callback bytes including status
+and separator lines, and 128 field lines. Totals include informational responses
+and trailers (proxy CONNECT headers are suppressed). Exceeding a callback limit returns
+`headers_too_large`, with no partial response or echoed field values. libcurl can
+reject malformed or oversized protocol data earlier, reported as `network`.
+Folded legacy fields follow libcurl's normalization when available; an unnormalized
+continuation line is rejected.
+
+**API change:** `Response` now has a third field. Update raw-response patterns
+from `Response{status, body}` to `Response{status, body, headers}`.
+`send_json` retains its existing status/value result and discards headers.
+When JSON and metadata are both needed, call `send`, retain its headers and
+parse the body with `Json.Json.parse`. Stiff does not interpret caching,
+pagination, cookies or rate-limit policy for the application.
 
 ## Behavior
 
@@ -171,7 +212,7 @@ Stiff adds no retries for any method; a timeout does not prove that a write fail
   no per-request cancellation token.
 - Failure codes include `invalid_request`, `invalid_header`, `invalid_json_request`, `network`,
   `timeout`, `body_too_large`, `invalid_utf8`, `invalid_json_response`,
-  `json_number_range`, and `json_too_deep`.
+  `json_number_range`, `json_too_deep`, `headers_too_large`, and `invalid_response_header`.
 
 Header names must be ASCII HTTP tokens. Values reject NUL, CR/LF and other
 control characters except horizontal tabs. Empty values are sent explicitly.

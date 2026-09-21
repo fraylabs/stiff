@@ -31,6 +31,7 @@ class NativeTests(unittest.TestCase):
         for source, name in [("examples/get-json.bend", "get-json"),
                              ("test/fixtures/native-http.bend", "http"),
                              ("examples/methods.bend", "methods"),
+                             ("examples/response-headers.bend", "response-headers"),
                              ("test/fixtures/native-json.bend", "json"),
                              ("test/fixtures/native-policy.bend", "policy"),
                              ("test/fixtures/native-headers.bend", "headers"),
@@ -66,6 +67,65 @@ class NativeTests(unittest.TestCase):
                 with cls.lock:
                     cls.visits[self.path] = cls.visits.get(self.path, 0) + 1
                     cls.methods[self.path] = self.command
+                if self.path.startswith("/response-"):
+                    fields = b'ETag:  "version-1" \t\r\nSet-Cookie: a=1\r\nset-cookie: b=2\r\nX-Empty:\r\nX-Unicode: ' + "🌱".encode() + b"\r\n"
+                    prefix = b""
+                    body = b"{}"
+                    framing = b"Content-Length: 2\r\n"
+                    status = b"200 OK"
+                    if self.path == "/response-interim":
+                        prefix = b"HTTP/1.1 103 Early Hints\r\nETag: interim\r\nX-Interim: yes\r\n\r\n"
+                    elif self.path == "/response-trailers":
+                        framing = b"Transfer-Encoding: chunked\r\nTrailer: ETag, X-Trailer\r\n"
+                        body = b"2\r\n{}\r\n0\r\nETag: trailer\r\nX-Trailer: yes\r\n\r\n"
+                    elif self.path == "/response-fake-status-trailer":
+                        framing = b"Transfer-Encoding: chunked\r\n"
+                        body = b"2\r\n{}\r\n0\r\nHTTP/1.1 200 OK\r\nETag: forged\r\n\r\n"
+                    elif self.path == "/response-large-line":
+                        fields = b"X-Large: " + b"x" * 8192 + b"\r\n"
+                    elif self.path == "/response-many":
+                        fields = b"X-Field: x\r\n" * 129
+                    elif self.path == "/response-large-total":
+                        fields = (b"X-Field: " + b"x" * 8000 + b"\r\n") * 9
+                    elif self.path == "/response-many-interim":
+                        prefix = (b"HTTP/1.1 103 Early Hints\r\n" + b"X-Field: x\r\n" * 65 + b"\r\n") * 2
+                    elif self.path == "/response-large-trailer":
+                        framing = b"Transfer-Encoding: chunked\r\n"
+                        body = b"2\r\n{}\r\n0\r\nX-Large: " + b"x" * 8192 + b"\r\n\r\n"
+                    elif self.path == "/response-boundary-count":
+                        fields = b"X-Field: x\r\n" * 126
+                    elif self.path == "/response-boundary-line":
+                        fields = b"X-Field: " + b"x" * 8181 + b"\r\n"
+                    elif self.path == "/response-many-trailers":
+                        framing = b"Transfer-Encoding: chunked\r\n"
+                        body = b"2\r\n{}\r\n0\r\n" + b"X-Trailer: x\r\n" * 129 + b"\r\n"
+                    elif self.path == "/response-no-fields":
+                        self.close_connection = True
+                        self.connection.sendall(b"HTTP/1.0 200 OK\r\n\r\n{}")
+                        return
+                    elif self.path == "/response-invalid-utf8":
+                        fields = b"X-Bad: \xff\r\n"
+                    elif self.path == "/response-invalid-name":
+                        fields = b"Bad Name: secret\r\n"
+                    elif self.path == "/response-control":
+                        fields = b"X-Bad: secret\x01suffix\r\n"
+                    elif self.path == "/response-status":
+                        status = b"429 Too Many Requests"
+                        fields += b"Retry-After: 10\r\n"
+                    elif self.path == "/response-redirect":
+                        status = b"302 Found"
+                        fields += b"Location: /destination\r\n"
+                    elif self.path == "/response-empty":
+                        fields = b""
+                    response = prefix + b"HTTP/1.1 " + status + b"\r\n" + fields + framing + b"Connection: close\r\n\r\n"
+                    if self.command != "HEAD":
+                        response += body
+                    self.close_connection = True
+                    try:
+                        self.connection.sendall(response)
+                    except (BrokenPipeError, ConnectionResetError):
+                        pass
+                    return
                 if self.path in ("/slow", "/slow-body", "/interrupt"):
                     if self.path == "/slow-body":
                         self.send_response(200)
@@ -247,6 +307,79 @@ class NativeTests(unittest.TestCase):
         for method in ("put", "OPTIONS", "CONNECT", "TRACE", "PUT ", "PATCH\r\nX-Bad: yes"):
             self.assertEqual(self.http("/invalid-method", method).stderr, "invalid_request\n")
         self.assertNotIn("/invalid-method", self.visits)
+
+    def response_headers(self, route, method="GET", secure=False):
+        return self.execute("response-headers", (self.tls_url if secure else self.base) + route, method)
+
+    def test_response_headers_native_layout_duplicates_and_lookup(self):
+        for secure in (False, True):
+            result = self.response_headers("/response-basic", secure=secure)
+            self.assertEqual((result.returncode, result.stderr), (0, ""))
+            self.assertEqual(result.stdout.splitlines(), [
+                "200:{}", 'etag-first:"version-1"', "missing:(absent)",
+                "set-cookie:a=1", "set-cookie:b=2",
+                'etag:"version-1"', "set-cookie:a=1", "set-cookie:b=2",
+                "x-empty:", "x-unicode:🌱", "content-length:2", "connection:close",
+            ])
+        result = self.response_headers("/response-empty")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("etag-first:(absent)", result.stdout)
+        self.assertNotIn("set-cookie:", result.stdout)
+        result = self.response_headers("/response-no-fields")
+        self.assertEqual((result.returncode, result.stdout, result.stderr),
+                         (0, "200:{}\netag-first:(absent)\nmissing:(absent)\n", ""))
+
+    def test_response_headers_ignore_interim_and_trailer_fields(self):
+        for route in ("/response-interim", "/response-trailers"):
+            result = self.response_headers(route)
+            self.assertEqual((result.returncode, result.stderr), (0, ""))
+            self.assertTrue(result.stdout.startswith('200:{}\netag-first:"version-1"\n'))
+            self.assertNotIn("x-interim:", result.stdout)
+            self.assertNotIn("x-trailer:", result.stdout)
+            self.assertNotIn("etag:interim", result.stdout)
+            self.assertNotIn("etag:trailer", result.stdout)
+
+    def test_response_metadata_on_head_errors_and_redirects(self):
+        result = self.response_headers("/response-basic", "HEAD", secure=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.startswith('200:\netag-first:"version-1"\n'))
+        self.assertIn("content-length:2", result.stdout)
+        result = self.response_headers("/response-status")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.startswith("429:{}"))
+        self.assertIn("retry-after:10", result.stdout)
+        self.assertEqual(self.visits["/response-status"], 1)
+        result = self.response_headers("/response-redirect")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.startswith("302:{}"))
+        self.assertIn("location:/destination", result.stdout)
+        self.assertNotIn("/destination", self.visits)
+
+    def test_response_header_limits_include_interim_and_trailers(self):
+        for route in ("large-line", "many", "large-total", "many-interim", "many-trailers"):
+            with self.subTest(route=route):
+                result = self.response_headers("/response-" + route)
+                self.assertEqual((result.returncode, result.stdout, result.stderr),
+                                 (1, "", "headers_too_large\n"))
+
+    def test_response_header_limit_boundaries(self):
+        for route in ("boundary-count", "boundary-line"):
+            result = self.response_headers("/response-" + route)
+            self.assertEqual((result.returncode, result.stderr), (0, ""))
+        # Some libcurl versions reject an oversized trailer before the callback.
+        result = self.response_headers("/response-large-trailer")
+        self.assertEqual((result.returncode, result.stdout), (1, ""))
+        self.assertIn(result.stderr, ("network\n", "headers_too_large\n"))
+        result = self.response_headers("/response-fake-status-trailer")
+        self.assertEqual((result.returncode, result.stdout), (1, ""))
+        self.assertIn(result.stderr, ("network\n", "invalid_response_header\n"))
+
+    def test_invalid_response_headers_fail_without_exposing_values(self):
+        for route in ("invalid-utf8", "invalid-name", "control"):
+            with self.subTest(route=route):
+                result = self.response_headers("/response-" + route)
+                self.assertEqual((result.returncode, result.stdout, result.stderr),
+                                 (1, "", "invalid_response_header\n"))
 
     def test_invalid_requests_before_sending(self):
         for url in ("file:///tmp/anything", "ftp://example.com", "http://user:pass@127.0.0.1"):

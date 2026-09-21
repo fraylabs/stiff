@@ -9,6 +9,9 @@ typedef struct { char *name, *value; } StiffHeader;
 typedef struct {
   StiffHeader headers[STIFF_MAX_HEADERS];
   size_t header_count;
+  StiffHeader response_headers[STIFF_MAX_HEADERS];
+  size_t response_count, response_header_bytes, response_field_count;
+  int response_started, response_headers_done, response_interim;
   char *method, *url, *body, *response;
   size_t body_size, used, capacity, limit;
   long timeout, status;
@@ -71,6 +74,86 @@ static int stiff_utf8(const unsigned char* p, size_t n) {
     while (--count) if (p[i] < 0x80 || p[i++] > 0xbf) return 0;
   }
   return 1;
+}
+
+static void stiff_clear_response_headers(StiffRequest* request) {
+  for (size_t i = 0; i < request->response_count; i++) {
+    free(request->response_headers[i].name);
+    free(request->response_headers[i].value);
+  }
+  request->response_count = 0;
+}
+
+// Bound all callback data, including informational responses and trailers.
+// Only the final response's initial fields are exposed.
+static size_t stiff_receive_header(char* data, size_t size, size_t count, void* context) {
+  StiffRequest* request = context;
+  if (size && count > SIZE_MAX / size) goto too_large;
+  size_t n = size * count;
+  if (n > 8192 || n > 65536 - request->response_header_bytes) goto too_large;
+  request->response_header_bytes += n;
+  size_t end = n;
+  if (end && data[end - 1] == '\n') end--;
+  if (end && data[end - 1] == '\r') end--;
+  for (size_t i = 0; i < end; i++) {
+    unsigned c = (unsigned char)data[i];
+    if ((c < 32 && c != '\t') || c == 127) goto invalid;
+  }
+  if (end >= 5 && !memcmp(data, "HTTP/", 5)) {
+    // Only informational responses may precede another status line. In
+    // particular, a malformed trailer must not reset final response metadata.
+    if (request->response_started && (!request->response_headers_done || !request->response_interim)) goto invalid;
+    size_t code = 5;
+    while (code < end && data[code] != ' ') code++;
+    while (code < end && data[code] == ' ') code++;
+    if (end - code < 3 || data[code] < '1' || data[code] > '9'
+      || data[code + 1] < '0' || data[code + 1] > '9'
+      || data[code + 2] < '0' || data[code + 2] > '9') goto invalid;
+    request->response_interim = data[code] == '1';
+    stiff_clear_response_headers(request);
+    request->response_started = 1;
+    request->response_headers_done = 0;
+    return n;
+  }
+  if (!request->response_started) goto invalid;
+  if (!end) { request->response_headers_done = 1; return n; }
+  if (++request->response_field_count > STIFF_MAX_HEADERS) goto too_large;
+  size_t colon = 0;
+  while (colon < end && data[colon] != ':') {
+    unsigned c = (unsigned char)data[colon];
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+      || (c && strchr("!#$%&'*+-.^_`|~", c)))) goto invalid;
+    colon++;
+  }
+  if (!colon || colon == end) goto invalid;
+  size_t start = colon + 1;
+  while (start < end && (data[start] == ' ' || data[start] == '\t')) start++;
+  while (end > start && (data[end - 1] == ' ' || data[end - 1] == '\t')) end--;
+  if (!stiff_utf8((unsigned char*)data + start, end - start)) goto invalid;
+  if (request->response_headers_done) return n; // Trailer: never override initial metadata.
+  StiffHeader* header = &request->response_headers[request->response_count];
+  header->name = malloc(colon + 1);
+  header->value = malloc(end - start + 1);
+  if (!header->name || !header->value) {
+    free(header->name); free(header->value);
+    request->error = "network";
+    return 0;
+  }
+  for (size_t i = 0; i < colon; i++) {
+    unsigned c = (unsigned char)data[i];
+    header->name[i] = c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c;
+  }
+  header->name[colon] = 0;
+  memcpy(header->value, data + start, end - start);
+  header->value[end - start] = 0;
+  request->response_count++;
+  return n;
+too_large:
+  request->error = "headers_too_large";
+  return 0;
+invalid:
+  request->error = "invalid_response_header";
+  return 0;
 }
 
 static int stiff_json_finite(struct json_object* value) {
@@ -179,6 +262,9 @@ static void stiff_send_call(IoWork* work) {
   STIFF_SET(CURLOPT_HEADEROPT, (long)CURLHEADER_SEPARATE);
   STIFF_SET(CURLOPT_WRITEFUNCTION, stiff_receive);
   STIFF_SET(CURLOPT_WRITEDATA, request);
+  STIFF_SET(CURLOPT_HEADERFUNCTION, stiff_receive_header);
+  STIFF_SET(CURLOPT_HEADERDATA, request);
+  STIFF_SET(CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
   const char* ca = getenv("STIFF_CA_BUNDLE");
   if (ca && *ca) { STIFF_SET(CURLOPT_CAINFO, ca); }
   if (stiff_json_method(request->method)) {
@@ -216,12 +302,23 @@ static Term stiff_send_pack(Env e, IoWork* work) {
     const char* message = "Native HTTP request failed.";
     result = io_node(e, CID_HTTPERROR, io_str(e, request->error, strlen(request->error)), io_str(e, message, strlen(message)));
   } else {
-    // Bend 2.0.20 flattens HttpOk{Response{status, body}} into two fields.
-    result = io_node(e, CID_HTTPOK, request->status, io_str(e, request->response, request->used));
+    Term headers = term_pak(CID_NIL, 0);
+    for (size_t i = request->response_count; i > 0; i--) {
+      StiffHeader* h = &request->response_headers[i - 1];
+      Term header = io_node(e, CID_RESPONSEHEADER, io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
+      headers = io_node(e, CID_CON, header, headers);
+    }
+    // Bend 2.0.20 flattens HttpOk{Response{status, body, headers}} into three fields.
+    Loc loc = heap_alloc(e, cls_fit(3));
+    e.mem[loc] = request->status;
+    e.mem[loc + 1] = io_str(e, request->response, request->used);
+    e.mem[loc + 2] = headers;
+    result = term_ctr(CID_HTTPOK, loc);
   }
   for (size_t i = 0; i < request->header_count; i++) {
     free(request->headers[i].name); free(request->headers[i].value);
   }
+  stiff_clear_response_headers(request);
   free(request->method); free(request->url); free(request->body); free(request->response); free(request);
   work->data = NULL;
   return result;

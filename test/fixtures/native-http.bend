@@ -16,7 +16,7 @@ def request(args: List<String>) -> Http.Request:
 
 def show(result: Net.HttpResult) -> IO(Unit):
   match result:
-    case Net.HttpOk{Net.Response{status, body}}:
+    case Net.HttpOk{Net.Response{status, body, headers}}:
       IO.print(U32.show(status) ++ ":" ++ body)
     case Net.HttpError{code, message}:
       IO.die(Unit, 1, code)

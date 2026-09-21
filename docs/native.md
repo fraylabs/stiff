@@ -37,6 +37,13 @@ HEAD uses [NOBODY](https://curl.se/libcurl/c/CURLOPT_NOBODY.html), so an adverti
 representation length does not make the client wait for a body.
 Method validation runs before network access.
 
+The [header callback](https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html)
+collects bounded final-response metadata, preserving repeated fields. New status
+lines clear prior collected fields, while the byte/field budgets remain cumulative.
+After the header separator, trailer fields consume those budgets but are not
+returned. All collected buffers are freed on success or error; values must be
+valid UTF-8 before conversion to Bend strings. See the README for exact limits.
+
 JSON decoding uses [json-c's strict parser](https://json-c.github.io/json-c/json-c-current-release/doc/html/json__tokener_8h.html).
 JSON encoding consumes the native Bend value with a depth/output-byte bound,
 escapes string controls and validates Unicode scalars and number tokens. Builders
@@ -61,7 +68,8 @@ No native effect calls Node or shells out to the curl command.
   Unicode surrogate pairs are supported. JSON values deeper than 128 levels are
   rejected; native POST/PUT/PATCH validation also imposes the parser's nesting bound.
 - Constructor layouts are private Bend 2.0.20 ABI. In particular, HttpOk's nested
-  Response is flattened and JsonBool packs its scalar in the constructor word.
+  Response is flattened into three fields (status, body, response-header list),
+  and JsonBool packs its scalar in the constructor word.
   Request now carries six fields; its header list contains boxed two-field Header
   values. Real native tests cover these layouts; every compiler upgrade needs a
   rebuild and re-verification. Neither the compiler nor foreign effects are formally
