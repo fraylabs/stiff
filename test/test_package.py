@@ -17,7 +17,7 @@ class PackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='stiff-package-test-') as directory:
             root = Path(directory)
             p = subprocess.run(['python3',str(ROOT/'scripts/package.py'),'--output',str(root)],
-                               cwd=ROOT,capture_output=True,text=True,timeout=120,
+                               cwd=ROOT,capture_output=True,text=True,timeout=600,
                                env={**os.environ,'STIFF_NATIVE_SANITIZE':'0','STIFF_NATIVE_ABI':'compiler'})
             self.assertEqual(p.returncode,0,p.stdout+p.stderr)
             archive, = root.glob('*.tar.gz')
@@ -30,7 +30,7 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(hashlib.sha256((stage/name).read_bytes()).hexdigest(),digest)
             manifest = json.loads((stage/'manifest.json').read_text())
             self.assertEqual(manifest['bend'],'2.0.20')
-            self.assertEqual(set(manifest['runtime_libraries']),{'libcurl','json-c'})
+            self.assertEqual(set(manifest['runtime_libraries']),{'libcurl','json-c','sqlite3'})
             self.assertEqual(manifest['static_libraries']['libevent']['version'],'2.2.2-alpha')
             self.assertTrue(all(binary['sanitizer']=='none' for binary in manifest['binaries'].values()))
             server = subprocess.Popen([str(stage/'stiff-run'),'--grace-ms','500','--',str(stage/'app'),
@@ -55,6 +55,42 @@ class PackageTests(unittest.TestCase):
             finally:
                 if server.poll() is None: server.kill(); server.wait()
                 server.stdout.close(); server.stderr.close()
+
+            # Run the packaged persistent app without its source or build tools,
+            # then reopen the same database with a new native process.
+            database = root / 'notes.db'
+            for iteration in range(2):
+                notes = subprocess.Popen([str(stage/'notes'), '--threads', '2', str(database), '0'],
+                                         cwd=stage, env={**os.environ, 'PATH':'/nonexistent'},
+                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                try:
+                    lines = queue.Queue()
+                    threading.Thread(target=lambda: lines.put(notes.stdout.readline()), daemon=True).start()
+                    port = int(lines.get(timeout=8).split()[1])
+                    conn = http.client.HTTPConnection('127.0.0.1', port, timeout=5)
+                    try:
+                        if iteration == 0:
+                            conn.request('PUT', '/notes/packaged', body=json.dumps({
+                                'operation_id':'packaged-create', 'expected_version':0,
+                                'note':{'title':'Packaged note', 'done':False}}),
+                                headers={'Content-Type':'application/json'})
+                            response = conn.getresponse()
+                            self.assertEqual((response.status, json.loads(response.read())),
+                                             (200, {'version':1, 'replayed':False}))
+                        else:
+                            conn.request('GET', '/notes/packaged')
+                            response = conn.getresponse()
+                            self.assertEqual(response.status, 200)
+                            self.assertEqual(json.loads(response.read()), {
+                                'version':1, 'note':{'title':'Packaged note', 'done':False}})
+                    finally:
+                        conn.close()
+                    notes.send_signal(signal.SIGTERM)
+                    out, err = notes.communicate(timeout=6)
+                    self.assertEqual(notes.returncode, 0, out+err)
+                finally:
+                    if notes.poll() is None: notes.kill(); notes.wait()
+                    notes.stdout.close(); notes.stderr.close()
 
     def test_release_packaging_rejects_sanitizer_runtime_dependencies(self):
         with tempfile.TemporaryDirectory(prefix='stiff-no-sanitizer-package-') as directory:

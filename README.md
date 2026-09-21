@@ -93,6 +93,12 @@ handling. See [compatibility and upgrades](docs/compatibility.md), the
 [completion checklist](docs/checklist.md) and [deployment example](examples/deploy/stiff.service)
 for the precise contracts and verified boundaries.
 
+The [persistent notes application](docs/notes.md) combines parameter routes,
+nested validation, observable HTTP handlers and SQLite versioned writes. It
+demonstrates concurrent updates, idempotent retries and reconciliation after a
+lost response and process restart, with a native packaged executable and Linux
+deployment example.
+
 ## Use Stiff in your own project
 
 Copy [examples/auth-client](examples/auth-client) into a separate project and run
