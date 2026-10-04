@@ -145,8 +145,7 @@ deployment example.
 
 ## Use Stiff in your own project
 
-The published Git-pinned consumer example still uses its historical Bend 2.0.20
-dependency. Copy [examples/auth-client](examples/auth-client) into a separate project and run
+The Git-pinned consumer example uses Bend 2.0.35. Copy [examples/auth-client](examples/auth-client) into a separate project and run
 `make setup build` there. It fetches Stiff directly from GitHub at the exact
 revision in `stiff.rev`, installs the pinned compiler, and builds a native client.
 Set `STIFF_TOKEN` in the environment, then run
@@ -155,8 +154,8 @@ This Git-based option requires no registry. Commit the revision file alongside y
 upgrades are explicit. See the example README for dependency and token handling.
 
 The published [BendHub package](docs/bendhub.md) and
-[standalone hub client](examples/bendhub-client) still target Bend 2.0.20.
-Use this Git checkout for Bend 2.0.35. BendHub does not install C dependencies.
+[standalone hub client](examples/bendhub-client) target Bend 2.0.35.
+BendHub does not install C dependencies.
 
 ## Bend API
 

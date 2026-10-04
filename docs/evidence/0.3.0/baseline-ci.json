@@ -1,0 +1,82 @@
+{
+  "scope": "Pre-release runtime baseline; final tagged-commit CI is recorded separately.",
+  "pinned": {
+    "conclusion": "success",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04-arm, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591581"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (macos-15-intel, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591651"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591671"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591694"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04-arm, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591695"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (macos-15, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591696"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (macos-15, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591713"
+      },
+      {
+        "conclusion": "success",
+        "name": "test (macos-15-intel, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690/job/111434591814"
+      }
+    ],
+    "revision": "63a0ca1635c3d834e6d6aa52f9b5f346828354ff",
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37201714690"
+  },
+  "latest_bend": {
+    "conclusion": "success",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "resolve",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201729044/job/111434638193"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / macos-15 / sanitized",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201729044/job/111434655468"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / macos-15 / normal",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201729044/job/111434655476"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / ubuntu-24.04 / sanitized",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201729044/job/111434655491"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / ubuntu-24.04 / normal",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37201729044/job/111434655506"
+      }
+    ],
+    "revision": "63a0ca1635c3d834e6d6aa52f9b5f346828354ff",
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37201729044"
+  }
+}

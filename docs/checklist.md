@@ -1,5 +1,21 @@
 # Framework completion checklist
 
+## Current release: 0.3.0
+
+Stiff **0.3.0** supports Bend **2.0.35** and retains the bounded framework
+contracts below. The release adds daily latest-Bend compatibility CI, startup
+constructor ABI checks, a server-first quickstart and load-test timing robustness.
+The [BendHub package](bendhub.md) and both standalone clients use 2.0.35.
+[Experimental release](https://github.com/fraylabs/stiff/releases/tag/v0.3.0).
+
+Current verification is recorded in [0.3.0 evidence](evidence/0.3.0/).
+The compiler migration and latest-Bend checks have distinct scope; see
+[the upgrade report](bend-2.0.35.md) and [release tracking](release-tracking.md).
+Historical workload and independent QA results below remain attributed to their
+original revisions; they are not new 0.3.0 measurements.
+
+## Historical 0.2.0 completion
+
 Stiff **0.2.0** completes this bounded framework release checklist. Source revision
 `4b20f169249b601d807b2d6aaeddda07a59532a2` is the verified release target.
 [Published experimental release](https://github.com/fraylabs/stiff/releases/tag/v0.2.0).
@@ -120,4 +136,5 @@ receipts cover local transactions, not exactly-once external operations.
 
 The historical 0.2.0 evidence above retains its Bend 2.0.20 pin. The current
 checkout targets 2.0.35; see [the upgrade report](bend-2.0.35.md) for local
-verification. The old release archives and BendHub hash have not been replaced.
+verification. The old release archives and BendHub hash remain immutable. The 0.3.0 release
+provides a separate 2.0.35 package and archive; see the current evidence above.

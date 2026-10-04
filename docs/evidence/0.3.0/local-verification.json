@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-04",
+  "platform": "macOS arm64",
+  "bend": "2.0.35",
+  "preparation_base_revision": "3295bf9180f6844fc9d2ed7ca94ad6109ed9045b",
+  "scope": "Release-preparation working tree before the consumer/evidence commit. Final tagged commit is checked separately in CI.",
+  "setup": "passed",
+  "normal_suite": {
+    "tests": 147,
+    "seconds": 148.086,
+    "result": "passed",
+    "log_sha256": "3c219e5f2bea3346c256a6a8993b5346a04e4c08a65d48dde4d46c5e3c81e913"
+  },
+  "standalone_git_client": {
+    "copied_outside_repository": true,
+    "public_git_revision": "3295bf9180f6844fc9d2ed7ca94ad6109ed9045b",
+    "compiler": "2.0.35",
+    "setup_build_authenticated_https_and_wrong_token": "passed",
+    "changed_pin_rejected": true
+  },
+  "changed_verified_sources": {
+    "examples/auth-client/main.bend": "f0da1b2c0efec59c5a674c7b64711894fe753e2b7e45eb1053ffdc7b7f735a4a",
+    "examples/auth-client/stiff.rev": "dff89af439977cf53f0d7f9125dab23a85a3cfa86422f9c101f7bd59a7083288",
+    "examples/bendhub-client/main.bend": "29018ccde44adc65b38fbccb3ae8db5be5346418c323a47678cca9faef2d2d7b",
+    "examples/bendhub-client/Makefile": "ab947025aacf8ac58cf90c5a762b4709168acb608fadb953fac42671b971d066",
+    "examples/bendhub-client/stiff.rev": "dff89af439977cf53f0d7f9125dab23a85a3cfa86422f9c101f7bd59a7083288",
+    "examples/bendhub-client/package.manifest": "2731c2a5d4185b57cf5353061639642e14f92fcc34e1bb6ada3e6ef11431ec5e",
+    "scripts/verify-bendhub.py": "ebcaa6ef564b3e9e1ba5a85ff8f2eeca34362b6708d8be525a90e49b046ddfd8"
+  },
+  "heavy_work": "One local Stiff job at a time under stiff-worktrees/.heavy.lock; libevent build cap five."
+}

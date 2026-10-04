@@ -1,17 +1,17 @@
 # BendHub package
 
-Stiff's experimental 0.2.0 library is available as an immutable BendHub package:
+Stiff's experimental 0.3.0 library is available as an immutable BendHub package:
 
 ```text
-0xf5a52e743a7f75c5d624c27c9e0ec81f
+0x2731c2a5d4185b57cf5353061639642e
 ```
 
-This published hash requires **Bend 2.0.20**. The current Git checkout targets
-**Bend 2.0.35**; no replacement package has been published. The published
-package's native effects depend on 2.0.20's private ABI;
-a newer compiler is not automatically compatible. The GitHub
-[v0.2.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.2.0) remains
-the source for native archives and pinned build tooling.
+This published hash requires **Bend 2.0.35**, matching the current Git checkout.
+The native effects depend on its private compiler ABI; a newer compiler is not
+automatically compatible. The GitHub
+[v0.3.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.3.0) provides
+native archives and pinned build tooling. The historical 0.2.0 package remains
+immutable and requires Bend 2.0.20.
 
 ## Use it
 
@@ -27,9 +27,9 @@ make setup build
 The example uses these imports:
 
 ```python
-import 0xf5a52e743a7f75c5d624c27c9e0ec81f/src/http.bend as Http
-import 0xf5a52e743a7f75c5d624c27c9e0ec81f/src/io.bend as Net
-import 0xf5a52e743a7f75c5d624c27c9e0ec81f/src/json.bend as Json
+import 0x2731c2a5d4185b57cf5353061639642e/src/http.bend as Http
+import 0x2731c2a5d4185b57cf5353061639642e/src/io.bend as Net
+import 0x2731c2a5d4185b57cf5353061639642e/src/json.bend as Json
 ```
 
 The same package contains `url`, `server`, `app`, `router`, `schema` and `store`
@@ -40,10 +40,12 @@ checking. Native effects and external dependencies remain trusted code.
 
 BendHub stores Bend and referenced C sources. It does **not** install the native
 libraries, compiler or build scripts. The example separately fetches build tools
-from GitHub revision `4b20f169249b601d807b2d6aaeddda07a59532a2`, verifies that
+from GitHub revision `3295bf9180f6844fc9d2ed7ca94ad6109ed9045b`, verifies that
 revision before building, and keeps the downloaded hub package in `.bend/lib`
 using `BEND_LIB`. It does not change your global compiler or package cache.
-The library sources match that release; only the package anchor is additive.
+The library, compiler pin and native build scripts match the tagged release;
+subsequent release commits add consumer pins, verification tooling, documentation
+and evidence.
 
 Server applications still need the scoped, patched libevent 2.2.2-alpha build;
 storage needs SQLite. Client binaries use libcurl and json-c. Runtime has no
@@ -57,8 +59,9 @@ resolver. Keep the full hash in your imports and the build-tool Git revision in
 Never assume that an unchanged native toolchain supports a different package,
 or that updating Bend is safe for an existing package.
 
-The 17-file package contains the public modules, five C effect files, laws/proofs
-and `stiff.bend`, whose comments carry the full MIT license. Examples, test
+The 18-file package contains the public modules, five C effect files, laws/proofs
+and `stiff.bend`, whose comments carry the full MIT license. Bend 2.0.35 also
+includes the standalone `LICENSE` file in the manifest. Examples, test
 fixtures, generated binaries, dependency caches and private workspace files are
 excluded. The compiler verifies the package hash and each file digest on download, but
 trusts existing cached files. The example additionally checks every cached
@@ -71,12 +74,13 @@ The hash identifies bytes; it is not a proof of native safety or an author ident
 Run from this checkout after `make setup`:
 
 ```sh
-python3 scripts/verify-bendhub.py 0xf5a52e743a7f75c5d624c27c9e0ec81f
+python3 scripts/verify-bendhub.py 0x2731c2a5d4185b57cf5353061639642e
 ```
 
 This network-dependent release check creates an empty temporary `BEND_LIB`,
-fetches the published package through Bend's loader, verifies the manifest and
-all source bytes against this checkout, checks the proof verdict, and compiles
+fetches the published package through Bend's loader during C emission (without
+executing it), verifies the manifest and all source bytes against this checkout,
+checks the pure `src/PROOF.bend` verdict with `--check-only`, and compiles
 independent HTTPS and notes consumers. It exercises authenticated HTTPS against
 a local trusted test certificate and all six persistent application journeys,
 including restart, conflicting/concurrent writes, lost acknowledgements,
@@ -85,10 +89,10 @@ The temporary consumers and their synthetic state are removed afterwards.
 It requires the exact package sources, so use the corresponding source revision
 when checking an older package after library changes.
 
-[Publication and download evidence](evidence/0.2.0/bendhub.json) records the
+[Publication and download evidence](evidence/0.3.0/bendhub.json) records the
 verified hash, compiler and local platform. This package verification adds
-macOS arm64 evidence; the existing release's broader platform checks remain
-in [the checklist](checklist.md).
+macOS arm64 evidence; the broader platform checks are linked
+from [the checklist](checklist.md).
 
 To reproduce the package from this source, use the pinned compiler:
 

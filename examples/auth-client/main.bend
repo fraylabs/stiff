@@ -37,7 +37,14 @@ def run(args: List<String>) -> IO(Unit):
     case other:
       IO.die(Unit, 2, "Usage: auth-client https://your-api.example/resource (set STIFF_TOKEN)")
 
+def run_cli(args: List<String>) -> IO(Unit):
+  match args:
+    case Con{executable, rest}:
+      run(rest)
+    case Nil{}:
+      run(Nil{})
+
 def main() -> IO(Unit):
   do IO<Unit>:
     args : List<String> <- IO.args()
-    run(args)
+    run_cli(args)

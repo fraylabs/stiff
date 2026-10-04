@@ -1,7 +1,7 @@
 import Base
-import 0xf5a52e743a7f75c5d624c27c9e0ec81f/src/http.bend as Http
-import 0xf5a52e743a7f75c5d624c27c9e0ec81f/src/io.bend as Net
-import 0xf5a52e743a7f75c5d624c27c9e0ec81f/src/json.bend as Json
+import 0x2731c2a5d4185b57cf5353061639642e/src/http.bend as Http
+import 0x2731c2a5d4185b57cf5353061639642e/src/io.bend as Net
+import 0x2731c2a5d4185b57cf5353061639642e/src/json.bend as Json
 
 def print_message(value: Maybe<Json.Json>) -> IO(Unit):
   match value:
@@ -37,7 +37,14 @@ def run(args: List<String>) -> IO(Unit):
     case other:
       IO.die(Unit, 2, "Usage: auth-client https://your-api.example/resource (set STIFF_TOKEN)")
 
+def run_cli(args: List<String>) -> IO(Unit):
+  match args:
+    case Con{executable, rest}:
+      run(rest)
+    case Nil{}:
+      run(Nil{})
+
 def main() -> IO(Unit):
   do IO<Unit>:
     args : List<String> <- IO.args()
-    run(args)
+    run_cli(args)

@@ -1,0 +1,43 @@
+{
+  "package": "0x2731c2a5d4185b57cf5353061639642e",
+  "hub": "https://hub.bend-lang.com",
+  "files": 18,
+  "manifest_sha256": "2731c2a5d4185b57cf5353061639642e14f92fcc34e1bb6ada3e6ef11431ec5e",
+  "compiler": "bend 2.0.35",
+  "empty_cache_download": true,
+  "source_bytes_match": true,
+  "proof_verdict": "ALL PROOFS CHECK",
+  "native_https": "passed",
+  "independently_built_example_https": true,
+  "persistent_application_tests": 6,
+  "date": "2026-10-04",
+  "platform": "macOS arm64",
+  "status": "published and verified",
+  "library_release": "v0.3.0 experimental",
+  "library_and_build_tool_revision": "3295bf9180f6844fc9d2ed7ca94ad6109ed9045b",
+  "package_bytes": 154285,
+  "publication_response": [
+    "Publishing to BendHub: public and permanent, under https://bend-lang.com/bender/terms#s18",
+    "License: see LICENSE",
+    "publishing 18 files, 154285 bytes, as 0x2731c2a5d4185b57cf5353061639642e (mining its proof of work)",
+    "0x2731c2a5d4185b57cf5353061639642e",
+    "import 0x2731c2a5d4185b57cf5353061639642e/stiff.bend as Stiff"
+  ],
+  "standalone_example": {
+    "copied_outside_repository": true,
+    "setup_from_exact_public_git_revision": true,
+    "make_setup_build": "passed",
+    "cached_native_file_tamper": "rejected",
+    "restored_cache_build": "passed"
+  },
+  "compiler_changes_addressed": [
+    "Bend 2.0.35 includes LICENSE in package inventory.",
+    "Foreign-effect modules are type-checked through C emission; only pure PROOF uses the safe-proof verdict.",
+    "Standalone consumers skip executable-name CLI argument."
+  ],
+  "limits": [
+    "Native C/compiler/dependencies remain trusted.",
+    "Hub-consumption verification covers macOS arm64.",
+    "ALL PROOFS CHECK is compiler checking, not independent Lean/BendTT kernel verification."
+  ]
+}

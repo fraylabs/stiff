@@ -40,8 +40,9 @@ package still describe the older release; no publication is part of this upgrade
   test budget is now 600 seconds rather than 120 seconds, matching the dependency
   builder's own allowance. A combined-sanitizer run exceeded the old budget and
   raced temporary-directory cleanup while the build child was still writing.
-  The consumer's published Git pin and Bend 2.0.20 dependency remain intact; this
-  check is a historical integration check, distinct from current-checkout tests.
+  At upgrade time, the consumer's published Git pin and Bend 2.0.20 dependency
+  remained intact, making that check historical. The 0.3.0 release updates the
+  consumer pins; see [release evidence](evidence/0.3.0/).
 
 Upstream references: [2.0.35 release](https://github.com/bendlang/bend/releases/tag/v2.0.35),
 [changelog](https://github.com/bendlang/bend/blob/v2.0.35/CHANGELOG.md),
@@ -148,10 +149,10 @@ libevent 2.2.2-alpha. Tested implementation revision: `7c651bc` (following
 
 The ordinary suite includes the proof verdict and false-proof rejection;
 the sanitizer suite adds deliberate ASan/UBSan fault detectors and the checked
-convention-layout assertion. One standalone consumer journey intentionally
-fetches its historical public Git revision and Bend 2.0.20; all current-checkout
-compiled cases use 2.0.35. The published consumer and BendHub pins must change
-only with a corresponding publication, which is outside this task.
+convention-layout assertion. At the time of these upgrade checks, one standalone consumer journey fetched
+its historical public Git revision and Bend 2.0.20; all current-checkout compiled
+cases used 2.0.35. The 0.3.0 release subsequently updates both consumers and
+publishes a matching [BendHub package](bendhub.md).
 
 All build outputs and raw logs stay under ignored `.cache`; no global install,
 push, tag, release or BendHub publication is involved.

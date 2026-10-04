@@ -44,11 +44,16 @@ def main():
                 raise RuntimeError(result.stdout + result.stderr)
             return result
 
-        # Loading the anchor fetches every published source and checks its terms.
+        # Type-check/code-generate the foreign-effect anchor without executing it.
+        # --check-only is a safe-proof verdict in Bend 2.0.35, so check the
+        # separate pure PROOF module with that flag instead.
         (project / 'check.bend').write_text(
-            f'import {args.package}/stiff.bend as Stiff\n')
+            f'import Base\nimport {args.package}/stiff.bend as Stiff\n'
+            'def main() -> String:\n  Stiff.version()\n')
         bend = os.environ.get('BEND', str(ROOT / '.cache/toolchain/bin/bend'))
-        checked = run([bend, 'check.bend', '--check-only'])
+        run([bend, 'check.bend', '-o', str(project / 'check.c')])
+        (project / 'proof.bend').write_text(f'import {args.package}/src/PROOF.bend as Proof\n')
+        checked = run([bend, 'proof.bend', '--check-only'])
         if 'ALL PROOFS CHECK' not in checked.stdout + checked.stderr:
             raise RuntimeError('package proof/type check did not report success')
         with urllib.request.urlopen(f'{hub}/{args.package}/manifest', timeout=30) as response:
@@ -56,7 +61,7 @@ def main():
         if '0x' + hashlib.sha256(manifest).hexdigest()[:32] != args.package:
             raise RuntimeError('manifest hash mismatch')
         entries = [line.split(' ', 1) for line in manifest.decode().splitlines()]
-        expected = {'stiff.bend'} | {str(p.relative_to(ROOT)) for p in (ROOT / 'src').glob('*.bend')} | {
+        expected = {'stiff.bend', 'LICENSE'} | {str(p.relative_to(ROOT)) for p in (ROOT / 'src').glob('*.bend')} | {
             str(p.relative_to(ROOT)) for p in (ROOT / 'src/effects').glob('*.c')}
         if {path for _, path in entries} != expected:
             raise RuntimeError('published file inventory differs from the library source set')
@@ -117,6 +122,7 @@ def main():
             thread.join(timeout=5)
 
         # Reuse the application journey assertions against the hub-built binary.
+        sys.path.insert(0, str(ROOT))
         sys.path.insert(0, str(ROOT / 'test'))
         from test_notes import NotesTests
 

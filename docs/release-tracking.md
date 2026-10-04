@@ -1,7 +1,7 @@
 # Tracking Bend releases and first use
 
 The supported compiler remains Bend 2.0.35. `.github/workflows/check.yml` is
-unchanged. `bend-latest.yml` resolves GitHub's newest non-prerelease Bend release
+unchanged by the tracking work. `bend-latest.yml` resolves GitHub's newest non-prerelease Bend release
 once per daily run (03:23 UTC) or manual dispatch, then tests Linux x64 and macOS
 arm64 with normal and combined sanitizer profiles. Both use the complete suite,
 including `src/PROOF.bend` verdict checking and false-proof rejection.
@@ -10,7 +10,7 @@ The tracking job checks out the exact Stiff commit in a disposable runner.
 `scripts/prepare-bend-candidate.py` changes only exact-version expectations in
 that copy's native build, package manifest/test and diagnostic script. It does
 not change the supported pin, production layouts, published consumer revision
-or historical BendHub package. Do not run this helper in your working checkout.
+or BendHub package. Do not run this helper in your working checkout.
 
 `python3 scripts/setup.py --release-tracking-version X.Y.Z` opts into candidate
 installation. Ordinary `make setup` still uses the four repository-pinned
@@ -27,9 +27,11 @@ A source commitish may be a branch rather than an immutable source revision;
 it is labeled accordingly. Every test job's summary names the Bend version,
 platform/profile and final status, includes this metadata when available, and
 shows the end of the suite log. Full setup/test logs remain in Actions step
-logs. No automatic pin upgrade or publication is performed. Scheduled workflows
-run from GitHub's default branch, so this local-only change must eventually be
-merged there before daily runs start.
+logs. No automatic pin upgrade or publication is performed. Scheduled workflows run from GitHub's default branch. This workflow is now on
+`main`; pinned Check run [37201714690](https://github.com/fraylabs/stiff/actions/runs/37201714690)
+and latest-Bend run [37201729044](https://github.com/fraylabs/stiff/actions/runs/37201729044)
+passed on `63a0ca1` with Bend 2.0.35 (eight pinned jobs and four candidate test
+jobs plus resolution). Final release evidence is in [0.3.0](evidence/0.3.0/).
 
 ## ABI checks
 
@@ -49,7 +51,7 @@ hot flag separately and requires an explicit Stiff ABI error before HTTP IO.
 The candidate integrity tests cover checksum preference, GitHub digests,
 unpinned warnings and rejection of malformed checksum metadata.
 
-## Local verification and quickstart
+## Historical local verification and quickstart
 
 Platform: macOS 27 arm64, Apple Clang 21.0.0. No global installs, pushes, tags,
 releases or BendHub publication were performed. Raw logs stay in ignored

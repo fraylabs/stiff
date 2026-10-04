@@ -14,7 +14,8 @@ check-dependency: deps/stiff/.git
 	@git -C deps/stiff diff --quiet HEAD -- || { echo 'Dependency has tracked edits.' >&2; exit 1; }
 
 check-hub: check-dependency
-	BEND_NO_TELEMETRY=1 ./deps/stiff/.cache/toolchain/bin/bend main.bend --check-only
+	@mkdir -p .bend
+	BEND_NO_TELEMETRY=1 ./deps/stiff/.cache/toolchain/bin/bend main.bend -o .bend/check.c
 	python3 check-hub.py
 
 build: check-hub
