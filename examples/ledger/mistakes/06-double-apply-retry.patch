@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -56 +56 @@
+-    case True{}: Outcome{Replayed{}, state}
++    case True{}: fresh(state, key, direction, amount)

@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -30 +30 @@
+-        case 1n+balance: move(rest, balance, 1n+destination)
++        case 1n+balance: move(rest, 1n+balance, 1n+destination)

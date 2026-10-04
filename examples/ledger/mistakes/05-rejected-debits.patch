@@ -1,0 +1,7 @@
+--- engine.bend
++++ engine.bend
+@@ -39 +39,3 @@
+-    case NoFunds{}: Outcome{Rejected{}, original}
++    case NoFunds{}:
++      match original:
++        case State{alice, bob, keys}: Outcome{Rejected{}, State{Nat.sub(alice, 1n), bob, keys}}

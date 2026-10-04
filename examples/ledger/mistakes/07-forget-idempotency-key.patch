@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -44 +44 @@
+-            case AliceToBob{}: Outcome{Applied{}, State{source, destination, key <> keys}}
++            case AliceToBob{}: Outcome{Applied{}, State{source, destination, keys}}

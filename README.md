@@ -143,6 +143,12 @@ demonstrates concurrent updates, idempotent retries and reconciliation after a
 lost response and process restart, with a native packaged executable and Linux
 deployment example.
 
+The [proven ledger example](examples/ledger) is a native two-account money API:
+its pure Bend engine has checked conservation, overdraft rejection, unchanged
+rejection and idempotency laws. `make -C examples/ledger mistakes` demonstrates
+eight caught accounting bugs and one honest proof-coverage gap before building a
+binary. HTTP/SQLite integration is tested and remains outside those proofs.
+
 ## Use Stiff in your own project
 
 The Git-pinned consumer example uses Bend 2.0.35. Copy [examples/auth-client](examples/auth-client) into a separate project and run

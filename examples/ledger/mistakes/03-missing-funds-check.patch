@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -29 +29 @@
+-        case 0n: NoFunds{}
++        case 0n: Moved{0n, 1n+destination}
