@@ -1,6 +1,6 @@
 # Compatibility and upgrades
 
-Stiff 0.2.0 is an experimental native framework release. The supported compiler
+Stiff 0.3.0 is an experimental native framework release. The supported compiler
 is Bend 2.0.35, source `79df8d9c40722ee9507a1e253f283b51025f9d6c`.
 Server builds also pin the experimental libevent 2.2.2-alpha source; see
 [dependency policy](dependencies.md). The public API consists of the documented Bend modules and `stiff-run` CLI;

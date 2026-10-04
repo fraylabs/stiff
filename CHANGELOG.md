@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 — October 4, 2026
+
+- Support Bend 2.0.35 native effects, constructor packing and executable-name CLI arguments.
+- Add daily latest-Bend CI with isolated candidate downloads and recorded integrity metadata.
+- Check reachable native constructor arities at startup and reject corrupted HttpOk ABI descriptors.
+- Make the quickstart server-first, with explicit native prerequisites and a local health check.
+- Make load-test timing assertions tolerate runner stalls while retaining independent-arrival and accounting checks.
+
+Experimental release; compiler/native dependencies remain trusted. See
+docs/compatibility.md, docs/bend-2.0.35.md and docs/release-tracking.md for
+verified coverage and limits.
+
 ## 0.2.0 — September 21, 2026
 
 - Add raw path parameters and nested typed request-schema validation.
