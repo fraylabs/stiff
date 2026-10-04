@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import threading
 import unittest
+from scripts.test_env import sanitizer_env
 import urllib.parse
 import random
 
@@ -231,7 +232,7 @@ class NativeTests(unittest.TestCase):
         self.interrupted.clear()
 
     def environment(self, trust=True):
-        env = {"PATH": "/nonexistent", "NO_PROXY": "*"}
+        env = {**sanitizer_env(), "PATH": "/nonexistent", "NO_PROXY": "*"}
         if trust:
             env["STIFF_CA_BUNDLE"] = str(self.cert)
         return env
@@ -694,7 +695,7 @@ class NativeTests(unittest.TestCase):
                                 capture_output=True, text=True, timeout=15,
                                 env={**os.environ, "BEND_NO_TELEMETRY": "1"})
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("All terms check", result.stdout)
+        self.assertIn("ALL PROOFS CHECK", result.stdout)
         self.assertNotIn("unsafe", result.stdout + result.stderr)
 
     def test_false_proof_is_rejected(self):

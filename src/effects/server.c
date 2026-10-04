@@ -828,7 +828,7 @@ static void* sg_thread(void* unused) {
   pthread_mutex_unlock(&sg.lock);
   return NULL;
 }
-#if defined(CID_SERVER_LISTEN) || defined(CID_SERVER_LISTEN_WITH_LIMITS) || defined(CID_SERVER_LISTEN_STREAMING) || defined(CID_SERVER_LISTEN_STREAMING_WITH_LIMITS)
+#if defined(CID(Server.listen)) || defined(CID(Server.listen_with_limits)) || defined(CID(Server.listen_streaming)) || defined(CID(Server.listen_streaming_with_limits))
 static Term sg_listen(Env e, Term config, u32 connections, u32 read_timeout, int streaming) {
   Term fields[6];
   spare_free(e, cls_fit(6), ctr_take(e, config, 6, fields));
@@ -886,16 +886,16 @@ static Term sg_listen(Env e, Term config, u32 connections, u32 read_timeout, int
     if (error) sg_cleanup(); else sg.started = 1;
   }
   free(address);
-  return error ? io_box(e, CID_LISTENERROR, io_str(e, error, strlen(error))) : term_pak(CID_LISTENING, sg.port);
+  return error ? io_box(e, CID(ListenError), io_str(e, error, strlen(error))) : term_pak(CID(Listening), sg.port);
 }
 #endif
-#ifdef CID_SERVER_LISTEN
+#ifdef CID(Server.listen)
 static Term server_listen_run(Env e, Term* f, IoWork* w) {
   (void)w;
   return sg_listen(e, f[0], 256, 0, 0);
 }
 #endif
-#ifdef CID_SERVER_LISTEN_WITH_LIMITS
+#ifdef CID(Server.listen_with_limits)
 static Term server_listen_with_limits_run(Env e, Term* f, IoWork* w) {
   (void)w;
   Term fields[2];
@@ -903,30 +903,30 @@ static Term server_listen_with_limits_run(Env e, Term* f, IoWork* w) {
   // Explicit zero is invalid; only the compatibility entry uses zero internally.
   if (!(u32)fields[1]) {
     term_sink(e, f[0]);
-    return io_box(e, CID_LISTENERROR, io_str(e, "invalid_config", 14));
+    return io_box(e, CID(ListenError), io_str(e, "invalid_config", 14));
   }
   return sg_listen(e, f[0], (u32)fields[0], (u32)fields[1], 0);
 }
 #endif
-#ifdef CID_SERVER_LISTEN_STREAMING
+#ifdef CID(Server.listen_streaming)
 static Term server_listen_streaming_run(Env e, Term* f, IoWork* w) {
   (void)w;
   return sg_listen(e, f[0], UINT32_MAX, 0, 1);
 }
 #endif
-#ifdef CID_SERVER_LISTEN_STREAMING_WITH_LIMITS
+#ifdef CID(Server.listen_streaming_with_limits)
 static Term server_listen_streaming_with_limits_run(Env e, Term* f, IoWork* w) {
   (void)w;
   Term fields[2];
   spare_free(e, cls_fit(2), ctr_take(e, f[1], 2, fields));
   if (!(u32)fields[1]) {
     term_sink(e, f[0]);
-    return io_box(e, CID_LISTENERROR, io_str(e, "invalid_config", 14));
+    return io_box(e, CID(ListenError), io_str(e, "invalid_config", 14));
   }
   return sg_listen(e, f[0], (u32)fields[0], (u32)fields[1], 1);
 }
 #endif
-#if defined(CID_SERVER_NEXT) || defined(CID_SERVER_NEXT_STREAM)
+#if defined(CID(Server.next)) || defined(CID(Server.next_stream))
 static void server_next_call(IoWork* w) {
   pthread_mutex_lock(&sg.lock);
   while (sg.started && !sg.stopped && !sg.inputs) pthread_cond_wait(&sg.ready, &sg.lock);
@@ -940,35 +940,35 @@ static void server_next_call(IoWork* w) {
   pthread_mutex_unlock(&sg.lock);
 }
 #endif
-#ifdef CID_SERVER_NEXT
+#ifdef CID(Server.next)
 static Term server_next_pack(Env e, IoWork* w) {
   SgInput* p = (SgInput*)w->data;
   if (!p) {
     if (sg.started && !sg.joined) { pthread_join(sg.thread, NULL); sg.joined = 1; }
-    return term_pak(CID_STOPPED, 0);
+    return term_pak(CID(Stopped), 0);
   }
-  Term headers = term_pak(CID_NIL, 0);
+  Term headers = term_pak(CID(Nil), 0);
   for (size_t i = p->count; i > 0; i--) {
     SgHeader* h = &p->headers[i - 1];
-    Term header = io_node(e, CID_SERVERHEADER, io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
-    headers = io_node(e, CID_CON, header, headers);
+    Term header = io_node(e, CID(ServerHeader), io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
+    headers = io_node(e, CID(Con), header, headers);
   }
   // Received flattens its Incoming value into six fields.
-  Loc loc = heap_alloc(e, cls_fit(6));
+  u64 loc = heap_alloc(e, cls_fit(6));
   e.mem[loc] = p->id;
   e.mem[loc + 1] = io_str(e, p->method, strlen(p->method));
   e.mem[loc + 2] = io_str(e, p->path, strlen(p->path));
   e.mem[loc + 3] = io_str(e, p->target, strlen(p->target));
   e.mem[loc + 4] = headers; e.mem[loc + 5] = io_str(e, p->body, p->size);
   sg_input_free(p); w->data = NULL;
-  return term_ctr(CID_RECEIVED, loc);
+  return term_ctr(CID(Received), loc);
 }
 static Term server_next_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)f;
   return io_work(w, server_next_call, server_next_pack);
 }
 #endif
-#ifdef CID_SERVER_NEXT_STREAM
+#ifdef CID(Server.next_stream)
 static void server_next_stream_call(IoWork* w) {
   server_next_call(w);
 }
@@ -976,29 +976,29 @@ static Term server_next_stream_pack(Env e, IoWork* w) {
   SgInput* p = (SgInput*)w->data;
   if (!p) {
     if (sg.started && !sg.joined) { pthread_join(sg.thread, NULL); sg.joined = 1; }
-    return term_pak(CID_STREAMSTOPPED, 0);
+    return term_pak(CID(StreamStopped), 0);
   }
-  Term headers = term_pak(CID_NIL, 0);
+  Term headers = term_pak(CID(Nil), 0);
   for (size_t i = p->count; i > 0; i--) {
     SgHeader* h = &p->headers[i - 1];
-    Term header = io_node(e, CID_SERVERHEADER, io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
-    headers = io_node(e, CID_CON, header, headers);
+    Term header = io_node(e, CID(ServerHeader), io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
+    headers = io_node(e, CID(Con), header, headers);
   }
-  Loc loc = heap_alloc(e, cls_fit(5));
+  u64 loc = heap_alloc(e, cls_fit(5));
   e.mem[loc] = p->id;
   e.mem[loc + 1] = io_str(e, p->method, strlen(p->method));
   e.mem[loc + 2] = io_str(e, p->path, strlen(p->path));
   e.mem[loc + 3] = io_str(e, p->target, strlen(p->target));
   e.mem[loc + 4] = headers;
   sg_input_free(p); w->data = NULL;
-  return term_ctr(CID_STREAMRECEIVED, loc);
+  return term_ctr(CID(StreamReceived), loc);
 }
 static Term server_next_stream_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)f;
   return io_work(w, server_next_stream_call, server_next_stream_pack);
 }
 #endif
-#ifdef CID_SERVER_BODY_NEXT
+#ifdef CID(Server.body_next)
 typedef struct {
   SgBody* body;
   const char* error;
@@ -1035,41 +1035,41 @@ static Term server_body_next_pack(Env e, IoWork* w) {
   SgBodyResult* result = (SgBodyResult*)w->data;
   Term value;
   if (result->body) {
-    value = io_box(e, CID_BODYCHUNK, io_str(e, result->body->data, result->body->size));
+    value = io_box(e, CID(BodyChunk), io_str(e, result->body->data, result->body->size));
     free(result->body->data); free(result->body);
   } else if (result->error) {
-    value = io_box(e, CID_BODYFAILURE, io_str(e, result->error, strlen(result->error)));
-  } else value = term_pak(CID_BODYEND, 0);
+    value = io_box(e, CID(BodyFailure), io_str(e, result->error, strlen(result->error)));
+  } else value = term_pak(CID(BodyEnd), 0);
   free(result); w->data = NULL;
   return value;
 }
 static Term server_body_next_run(Env e, Term* f, IoWork* w) {
   (void)e;
-  if (!(u32)f[0]) return io_box(e, CID_BODYFAILURE, io_str(e, "request_closed", 14));
+  if (!(u32)f[0]) return io_box(e, CID(BodyFailure), io_str(e, "request_closed", 14));
   w->data = (char*)(uintptr_t)(u32)f[0];
   return io_work(w, server_body_next_call, server_body_next_pack);
 }
 #endif
-#ifdef CID_SERVER_METRICS
+#ifdef CID(Server.metrics)
 static Term server_metrics_run(Env e, Term* f, IoWork* w) {
   (void)f; (void)w;
-  Loc loc = heap_alloc(e, cls_fit(SM_COUNT));
+  u64 loc = heap_alloc(e, cls_fit(SM_COUNT));
   for (unsigned i = 0; i < SM_COUNT; i++)
     e.mem[loc + i] = atomic_load_explicit(&sg_metrics[i], memory_order_relaxed);
-  return term_ctr(CID_METRICS, loc);
+  return term_ctr(CID(Metrics), loc);
 }
 #endif
-#ifdef CID_SERVER_ACTIVE
+#ifdef CID(Server.active)
 static Term server_active_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)w;
   pthread_mutex_lock(&sg.lock);
   SgWork* work = sg_work((u32)f[0]);
   int active = work && work->claimed && !work->closed && !sg.stopped && sg_now() < work->deadline;
   pthread_mutex_unlock(&sg.lock);
-  return term_pak(active ? CID_TRUE : CID_FALSE, 0);
+  return term_pak(active ? CID(True) : CID(False), 0);
 }
 #endif
-#ifdef CID_SERVER_FINISH
+#ifdef CID(Server.finish)
 static Term server_finish_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)w;
   pthread_mutex_lock(&sg.lock);
@@ -1084,7 +1084,7 @@ static Term server_finish_run(Env e, Term* f, IoWork* w) {
     pthread_cond_broadcast(&sg.ready);
   }
   pthread_mutex_unlock(&sg.lock);
-  return term_pak(CID_UNIT, 0);
+  return term_pak(CID(Unit), 0);
 }
 #endif
 static void server_reply_call(IoWork* w) {
@@ -1101,14 +1101,14 @@ static void server_reply_call(IoWork* w) {
 }
 static Term server_reply_pack(Env e, IoWork* w) {
   SgReply* p = (SgReply*)w->data;
-  Term result = p->error ? io_box(e, CID_REPLYERROR, io_str(e, p->error, strlen(p->error))) : term_pak(CID_SENT, 0);
+  Term result = p->error ? io_box(e, CID(ReplyError), io_str(e, p->error, strlen(p->error))) : term_pak(CID(Sent), 0);
   for (size_t i = 0; i < p->count; i++) { free(p->headers[i].name); free(p->headers[i].value); }
   free(p->body); free(p); w->data = NULL;
   return result;
 }
 static int sg_reply_headers(Env e, SgReply* p, Term items) {
   size_t total = 0;
-  while (term_aux(items) != CID_NIL) {
+  while (term_aux(items) != CID(Nil)) {
     if (p->count == SG_HEADERS) { term_sink(e, items); p->error = "invalid_response"; return 0; }
     Term pair[2], header[2];
     spare_free(e, cls_fit(2), ctr_take(e, items, 2, pair));
@@ -1132,7 +1132,7 @@ static Term sg_reply_effect(Env e, IoWork* w, SgReply* p) {
   if (p->error) return server_reply_pack(e, w);
   return io_work(w, server_reply_call, server_reply_pack);
 }
-#ifdef CID_SERVER_REPLY
+#ifdef CID(Server.reply)
 static Term server_reply_run(Env e, Term* f, IoWork* w) {
   SgReply* p = io_mem(calloc(1, sizeof(*p)));
   p->id = f[0]; p->operation = SG_REPLY;
@@ -1147,7 +1147,7 @@ static Term server_reply_run(Env e, Term* f, IoWork* w) {
   return sg_reply_effect(e, w, p);
 }
 #endif
-#ifdef CID_SERVER_STREAM_START_RAW
+#ifdef CID(Server.stream_start_raw)
 static Term server_stream_start_raw_run(Env e, Term* f, IoWork* w) {
   SgReply* p = io_mem(calloc(1, sizeof(*p)));
   p->id = f[0]; p->operation = SG_STREAM_START;
@@ -1159,7 +1159,7 @@ static Term server_stream_start_raw_run(Env e, Term* f, IoWork* w) {
   return sg_reply_effect(e, w, p);
 }
 #endif
-#ifdef CID_SERVER_STREAM_WRITE
+#ifdef CID(Server.stream_write)
 static Term server_stream_write_run(Env e, Term* f, IoWork* w) {
   SgReply* p = io_mem(calloc(1, sizeof(*p)));
   p->id = f[0]; p->operation = SG_STREAM_WRITE;
@@ -1169,7 +1169,7 @@ static Term server_stream_write_run(Env e, Term* f, IoWork* w) {
   return sg_reply_effect(e, w, p);
 }
 #endif
-#ifdef CID_SERVER_STREAM_END
+#ifdef CID(Server.stream_end)
 static Term server_stream_end_run(Env e, Term* f, IoWork* w) {
   SgReply* p = io_mem(calloc(1, sizeof(*p)));
   p->id = f[0]; p->operation = SG_STREAM_END;
@@ -1177,11 +1177,11 @@ static Term server_stream_end_run(Env e, Term* f, IoWork* w) {
   return sg_reply_effect(e, w, p);
 }
 #endif
-#ifdef CID_SERVER_STOP
+#ifdef CID(Server.stop)
 static Term server_stop_pack(Env e, IoWork* w) {
   (void)e;
   free(w->data); w->data = NULL;
-  return term_pak(CID_UNIT, 0);
+  return term_pak(CID(Unit), 0);
 }
 static Term server_stop_run(Env e, Term* f, IoWork* w) {
   (void)e; (void)f;
@@ -1190,49 +1190,49 @@ static Term server_stop_run(Env e, Term* f, IoWork* w) {
 }
 #endif
 static void __attribute__((constructor)) server_register(void) {
-#ifdef CID_SERVER_METRICS
-  io_eff(CID_SERVER_METRICS, server_metrics_run, 0);
+#ifdef CID(Server.metrics)
+  io_eff(CID(Server.metrics), server_metrics_run, 0);
 #endif
-#ifdef CID_SERVER_ACTIVE
-  io_eff(CID_SERVER_ACTIVE, server_active_run, 0);
+#ifdef CID(Server.active)
+  io_eff(CID(Server.active), server_active_run, 0);
 #endif
-#ifdef CID_SERVER_FINISH
-  io_eff(CID_SERVER_FINISH, server_finish_run, 0);
+#ifdef CID(Server.finish)
+  io_eff(CID(Server.finish), server_finish_run, 0);
 #endif
-#ifdef CID_SERVER_LISTEN
-  io_eff(CID_SERVER_LISTEN, server_listen_run, 0);
+#ifdef CID(Server.listen)
+  io_eff(CID(Server.listen), server_listen_run, 0);
 #endif
-#ifdef CID_SERVER_LISTEN_WITH_LIMITS
-  io_eff(CID_SERVER_LISTEN_WITH_LIMITS, server_listen_with_limits_run, 0);
+#ifdef CID(Server.listen_with_limits)
+  io_eff(CID(Server.listen_with_limits), server_listen_with_limits_run, 0);
 #endif
-#ifdef CID_SERVER_LISTEN_STREAMING
-  io_eff(CID_SERVER_LISTEN_STREAMING, server_listen_streaming_run, 0);
+#ifdef CID(Server.listen_streaming)
+  io_eff(CID(Server.listen_streaming), server_listen_streaming_run, 0);
 #endif
-#ifdef CID_SERVER_LISTEN_STREAMING_WITH_LIMITS
-  io_eff(CID_SERVER_LISTEN_STREAMING_WITH_LIMITS, server_listen_streaming_with_limits_run, 0);
+#ifdef CID(Server.listen_streaming_with_limits)
+  io_eff(CID(Server.listen_streaming_with_limits), server_listen_streaming_with_limits_run, 0);
 #endif
-#ifdef CID_SERVER_NEXT
-  io_eff(CID_SERVER_NEXT, server_next_run, 0);
+#ifdef CID(Server.next)
+  io_eff(CID(Server.next), server_next_run, 0);
 #endif
-#ifdef CID_SERVER_NEXT_STREAM
-  io_eff(CID_SERVER_NEXT_STREAM, server_next_stream_run, 0);
+#ifdef CID(Server.next_stream)
+  io_eff(CID(Server.next_stream), server_next_stream_run, 0);
 #endif
-#ifdef CID_SERVER_BODY_NEXT
-  io_eff(CID_SERVER_BODY_NEXT, server_body_next_run, 0);
+#ifdef CID(Server.body_next)
+  io_eff(CID(Server.body_next), server_body_next_run, 0);
 #endif
-#ifdef CID_SERVER_REPLY
-  io_eff(CID_SERVER_REPLY, server_reply_run, 0);
+#ifdef CID(Server.reply)
+  io_eff(CID(Server.reply), server_reply_run, 0);
 #endif
-#ifdef CID_SERVER_STREAM_START_RAW
-  io_eff(CID_SERVER_STREAM_START_RAW, server_stream_start_raw_run, 0);
+#ifdef CID(Server.stream_start_raw)
+  io_eff(CID(Server.stream_start_raw), server_stream_start_raw_run, 0);
 #endif
-#ifdef CID_SERVER_STREAM_WRITE
-  io_eff(CID_SERVER_STREAM_WRITE, server_stream_write_run, 0);
+#ifdef CID(Server.stream_write)
+  io_eff(CID(Server.stream_write), server_stream_write_run, 0);
 #endif
-#ifdef CID_SERVER_STREAM_END
-  io_eff(CID_SERVER_STREAM_END, server_stream_end_run, 0);
+#ifdef CID(Server.stream_end)
+  io_eff(CID(Server.stream_end), server_stream_end_run, 0);
 #endif
-#ifdef CID_SERVER_STOP
-  io_eff(CID_SERVER_STOP, server_stop_run, 0);
+#ifdef CID(Server.stop)
+  io_eff(CID(Server.stop), server_stop_run, 0);
 #endif
 }

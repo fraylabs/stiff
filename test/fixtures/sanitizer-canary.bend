@@ -15,5 +15,6 @@ def run(args: List<String>) -> IO(Unit):
 
 def main() -> IO(Unit):
   do IO<Unit>:
-    args : List<String> <- IO.args()
+    raw_args : List<String> <- IO.args()
+    args : List<String> = List.tail(&1, String, raw_args)
     run(args)

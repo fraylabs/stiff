@@ -8,7 +8,12 @@ binary="$build_dir/kingdom"
 tests="$build_dir/tests"
 
 mkdir -p "$build_dir"
-"$stiff_root/.cache/toolchain/bin/bend" "$source_dir/PROOF.bend" --check-only
+verdict=$("$stiff_root/.cache/toolchain/bin/bend" "$source_dir/PROOF.bend" --check-only)
+echo "$verdict"
+case "$verdict" in
+  *"ALL PROOFS CHECK"*) ;;
+  *) echo "Expected passing Bend proof verdict." >&2; exit 1 ;;
+esac
 "$stiff_root/scripts/build-native.sh" "$source_dir/tests.bend" "$tests"
 "$tests"
 "$stiff_root/scripts/build-native.sh" "$source_dir/main.bend" "$binary"

@@ -92,43 +92,43 @@ static const char* stiff_json_check(struct json_object* value, unsigned depth) {
   return NULL;
 }
 
-#ifdef CID_JSON_PARSE
+#ifdef CID(Json.parse)
 static Term stiff_json_value(Env e, struct json_object* value, unsigned depth, const char** error) {
   if (depth > 128) { *error = "json_too_deep"; return 0; }
   switch (json_object_get_type(value)) {
-    case json_type_null: return term_pak(CID_JSONNULL, 0);
+    case json_type_null: return term_pak(CID(JsonNull), 0);
     case json_type_boolean:
       // The single scalar field is packed into the constructor word, not the heap.
-      return term_pak(CID_JSONBOOL, json_object_get_boolean(value) != 0);
+      return term_pak(CID(JsonBool), json_object_get_boolean(value) != 0);
     case json_type_int:
     case json_type_double: {
       double n = json_object_get_double(value);
       if (!isfinite(n)) { *error = "json_number_range"; return 0; }
       const char* text = json_object_get_string(value);
-      return io_box(e, CID_JSONNUMBER, io_str(e, text, strlen(text)));
+      return io_box(e, CID(JsonNumber), io_str(e, text, strlen(text)));
     }
     case json_type_string:
-      return io_box(e, CID_JSONSTRING, io_str(e, json_object_get_string(value), json_object_get_string_len(value)));
+      return io_box(e, CID(JsonString), io_str(e, json_object_get_string(value), json_object_get_string_len(value)));
     case json_type_array: {
-      Term items = term_pak(CID_NIL, 0);
+      Term items = term_pak(CID(Nil), 0);
       size_t n = json_object_array_length(value);
       while (n > 0) {
         Term item = stiff_json_value(e, json_object_array_get_idx(value, --n), depth + 1, error);
         if (*error) return 0;
-        items = io_node(e, CID_CON, item, items);
+        items = io_node(e, CID(Con), item, items);
       }
-      return io_box(e, CID_JSONARRAY, items);
+      return io_box(e, CID(JsonArray), items);
     }
     case json_type_object: {
-      Term entries = term_pak(CID_NIL, 0);
+      Term entries = term_pak(CID(Nil), 0);
       // Object fields are unique after json-c decoding; lookup does not depend on order.
       json_object_object_foreach(value, key, child) {
         Term item = stiff_json_value(e, child, depth + 1, error);
         if (*error) return 0;
-        Term pair = io_node(e, CID_TUPLE, io_str(e, key, strlen(key)), item);
-        entries = io_node(e, CID_CON, pair, entries);
+        Term pair = io_node(e, CID(Tuple), io_str(e, key, strlen(key)), item);
+        entries = io_node(e, CID(Con), pair, entries);
       }
-      return io_box(e, CID_JSONOBJECT, entries);
+      return io_box(e, CID(JsonObject), entries);
     }
   }
   *error = "invalid_json_response";
@@ -155,14 +155,14 @@ static Term json_parse_run(Env e, Term* f, IoWork* w) {
   json_object_put(value);
   json_tokener_free(parser);
   free(text);
-  if (error) return io_node(e, CID_JSONFAILURE, io_str(e, error, strlen(error)),
+  if (error) return io_node(e, CID(JsonFailure), io_str(e, error, strlen(error)),
     io_str(e, "Native JSON decoding failed.", strlen("Native JSON decoding failed.")));
-  return io_box(e, CID_JSONDONE, result);
+  return io_box(e, CID(JsonDone), result);
 }
 
 #endif
 
-#ifdef CID_JSON_STRINGIFY_WITH_LIMIT
+#ifdef CID(Json.stringify_with_limit)
 typedef struct {
   char* text;
   size_t used, capacity, limit;
@@ -187,7 +187,7 @@ static void stiff_json_append(StiffJsonOutput* out, const char* text, size_t n) 
 // Input extraction is bounded too, rather than allocating an unbounded C string.
 static char* stiff_json_text(Env e, Term text, size_t* size, StiffJsonOutput* out) {
   StiffJsonOutput raw = {.limit = out->limit};
-  while (term_aux(text) == CID_SCON) {
+  while (term_aux(text) == CID(SCon)) {
     Term fields[2];
     spare_free(e, cls_fit(2), ctr_take(e, text, 2, fields));
     text = fields[1];
@@ -241,27 +241,27 @@ static void stiff_json_encode(Env e, Term value, unsigned depth, StiffJsonOutput
     term_sink(e, value); return;
   }
   u32 tag = term_aux(value);
-  if (tag == CID_JSONNULL) { stiff_json_append(out, "null", 4); return; }
-  if (tag == CID_JSONBOOL) {
+  if (tag == CID(JsonNull)) { stiff_json_append(out, "null", 4); return; }
+  if (tag == CID(JsonBool)) {
     int yes = term_loc(value) != 0;
     stiff_json_append(out, yes ? "true" : "false", yes ? 4 : 5); return;
   }
   Term fields[1];
   spare_free(e, cls_fit(1), ctr_take(e, value, 1, fields));
-  if (tag == CID_JSONSTRING || tag == CID_JSONNUMBER) {
+  if (tag == CID(JsonString) || tag == CID(JsonNumber)) {
     size_t n;
     char* text = stiff_json_text(e, fields[0], &n, out);
-    if (tag == CID_JSONSTRING) stiff_json_quote(out, text, n);
+    if (tag == CID(JsonString)) stiff_json_quote(out, text, n);
     else stiff_json_number(out, text, n);
     free(text); return;
   }
-  int object = tag == CID_JSONOBJECT;
+  int object = tag == CID(JsonObject);
   struct json_object* seen = object ? json_object_new_object() : NULL;
   if (object && !seen) err_fail("json-c allocation failed");
   stiff_json_append(out, object ? "{" : "[", 1);
   Term items = fields[0];
   int first = 1;
-  while (term_aux(items) != CID_NIL && !out->error) {
+  while (term_aux(items) != CID(Nil) && !out->error) {
     Term pair[2];
     spare_free(e, cls_fit(2), ctr_take(e, items, 2, pair));
     items = pair[1];
@@ -293,19 +293,19 @@ static Term json_stringify_with_limit_run(Env e, Term* f, IoWork* w) {
   if (!out.limit || out.limit > 16777216) out.error = "invalid_json_limit";
   stiff_json_encode(e, f[0], 0, &out);
   Term result;
-  if (out.error) result = io_node(e, CID_JSONENCODEFAILURE,
+  if (out.error) result = io_node(e, CID(JsonEncodeFailure),
     io_str(e, out.error, strlen(out.error)), io_str(e, "Native JSON encoding failed.", strlen("Native JSON encoding failed.")));
-  else result = io_box(e, CID_JSONENCODED, io_str(e, out.text, out.used));
+  else result = io_box(e, CID(JsonEncoded), io_str(e, out.text, out.used));
   free(out.text);
   return result;
 }
 #endif
 
 static void __attribute__((constructor)) stiff_json_register(void) {
-#ifdef CID_JSON_PARSE
-  io_eff(CID_JSON_PARSE, json_parse_run, 0);
+#ifdef CID(Json.parse)
+  io_eff(CID(Json.parse), json_parse_run, 0);
 #endif
-#ifdef CID_JSON_STRINGIFY_WITH_LIMIT
-  io_eff(CID_JSON_STRINGIFY_WITH_LIMIT, json_stringify_with_limit_run, 0);
+#ifdef CID(Json.stringify_with_limit)
+  io_eff(CID(Json.stringify_with_limit), json_stringify_with_limit_run, 0);
 #endif
 }

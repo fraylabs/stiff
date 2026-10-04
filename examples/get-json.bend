@@ -35,6 +35,7 @@ def url(args: List<String>) -> String:
 
 def main() -> IO(Unit):
   do IO<Unit>:
-    args : List<String> <- IO.args()
+    raw_args : List<String> <- IO.args()
+    args : List<String> = List.tail(&1, String, raw_args)
     response : Net.JsonResult <- Net.Stiff.send_json(Http.get(url(args)))
     show(response)

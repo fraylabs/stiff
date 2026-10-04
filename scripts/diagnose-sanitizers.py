@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+from test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 DIRECTORY = Path(os.environ.get("STIFF_SANITIZER_PROBE_DIR",
@@ -13,7 +14,7 @@ DIRECTORY.mkdir(parents=True, exist_ok=True)
 report = {
     "platform": platform.platform(),
     "compiler": subprocess.check_output([os.environ.get("CC", "clang"), "--version"], text=True),
-    "bend_pin": "2.0.20",
+    "bend_pin": "2.0.35",
     "results": [],
 }
 for abi in ("compiler", "standard"):
@@ -35,7 +36,7 @@ for abi in ("compiler", "standard"):
                 preserve_most_sites=generated.count("PRESERVE(preserve_most)"),
             )
             run = subprocess.run([str(output)], cwd=ROOT, text=True, capture_output=True,
-                                 timeout=15, env={"PATH": "/nonexistent"})
+                                 timeout=15, env={**sanitizer_env(), "PATH": "/nonexistent"})
             result.update(exit=run.returncode, stdout=run.stdout, stderr=run.stderr)
         report["results"].append(result)
         print(json.dumps(result), flush=True)

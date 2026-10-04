@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from scripts.test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -23,7 +24,7 @@ class SanitizerChecks(unittest.TestCase):
 
     def check_fault(self, mode, diagnostic):
         result = subprocess.run([str(self.binary), mode], capture_output=True, text=True,
-                                env={"PATH": "/nonexistent"}, timeout=10)
+                                env={**sanitizer_env(), "PATH": "/nonexistent"}, timeout=10)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(diagnostic, result.stderr)
 

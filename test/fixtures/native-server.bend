@@ -115,6 +115,7 @@ def limits(args: List<String>) -> Web.TransportLimits:
 
 def main() -> IO(Unit):
   do IO<Unit>:
-    args : List<String> <- IO.args()
+    raw_args : List<String> <- IO.args()
+    args : List<String> = List.tail(&1, String, raw_args)
     result : Web.Started <- Web.Server.listen_with_limits(Web.Config{"127.0.0.1", 0, 1024, 4, 1000, 600}, limits(args))
     start(result)

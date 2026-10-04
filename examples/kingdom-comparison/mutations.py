@@ -64,7 +64,7 @@ def main():
                 if language == 'bend':
                     proof = run([ROOT / '.cache/toolchain/bin/bend', target / 'PROOF.bend', '--check-only'])
                     record['proof_exit'] = proof['exit']
-                    record['proof_accepted'] = proof['exit'] == 0 and 'All terms check' in proof['stdout'] + proof['stderr']
+                    record['proof_accepted'] = proof['exit'] == 0 and 'ALL PROOFS CHECK' in proof['stdout'] + proof['stderr']
                     record['proof_verdict'] = (proof['stdout'] + proof['stderr']).replace(str(workspace), '<temporary>').replace(str(ROOT), '<stiff>').strip()
                     compiled = run([ROOT / 'scripts/build-native.sh', target / 'main.bend', target / 'kingdom'])
                     test_build = run([ROOT / 'scripts/build-native.sh', target / 'tests.bend', target / 'test-binary'])

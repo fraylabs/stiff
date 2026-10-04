@@ -11,8 +11,8 @@ if [ -x "$stiff_root/.cache/toolchain/bin/bend" ]; then
 fi
 stiff_bend=${BEND:-$stiff_default}
 stiff_cc=${CC:-clang}
-if [ "$("$stiff_bend" version)" != 'bend 2.0.20' ]; then
-  echo 'Stiff native effects require Bend 2.0.20.' >&2
+if [ "$("$stiff_bend" version)" != 'bend 2.0.35' ]; then
+  echo 'Stiff native effects require Bend 2.0.35.' >&2
   exit 1
 fi
 case "$2" in *.bend|*.c|*.js|*.mjs|*.json|*.md)

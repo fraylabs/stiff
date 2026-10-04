@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 import threading
 import unittest
+from scripts.test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -23,7 +24,7 @@ class SchemaTests(unittest.TestCase):
 
     def setUp(self):
         self.server = subprocess.Popen([str(self.binary), '127.0.0.1', '0'], cwd=self.temp.name,
-                                       env={**os.environ, 'PATH': '/nonexistent'}, stdout=subprocess.PIPE,
+                                       env={**os.environ, **sanitizer_env(), 'PATH': '/nonexistent'}, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, text=True)
         self.addCleanup(self.stop)
         lines = queue.Queue()

@@ -14,6 +14,7 @@ import tempfile
 import threading
 import time
 import unittest
+from scripts.test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -38,7 +39,7 @@ class ServerTests(unittest.TestCase):
     def setUp(self):
         self.lines = queue.Queue()
         self.server = subprocess.Popen([str(self.directory / "server")], cwd=self.directory,
-                                       env={"PATH": "/nonexistent"}, stdout=subprocess.PIPE,
+                                       env={**sanitizer_env(), "PATH": "/nonexistent"}, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, text=True)
         self.addCleanup(self.cleanup_server)
         def read():
@@ -205,7 +206,7 @@ class ServerTests(unittest.TestCase):
         result = subprocess.run([str(self.directory / "client"),
                                  f"http://127.0.0.1:{self.port}/echo", "POST", '{"native":true}',
                                  "2000", "1024"], cwd=self.directory,
-                                env={"PATH": "/nonexistent", "NO_PROXY": "*"},
+                                env={**sanitizer_env(), "PATH": "/nonexistent", "NO_PROXY": "*"},
                                 capture_output=True, text=True, timeout=4)
         self.assertEqual((result.returncode, result.stdout, result.stderr),
                          (0, '200:{"native":true}\n', ""))
@@ -328,7 +329,7 @@ class ServerTests(unittest.TestCase):
 
     def test_manual_dispatch_requires_finish_and_finish_is_idempotent(self):
         with subprocess.Popen([str(self.directory / "manual")], cwd=self.directory,
-                              env={"PATH": "/nonexistent"}, stdout=subprocess.PIPE,
+                              env={**sanitizer_env(), "PATH": "/nonexistent"}, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE, text=True) as server:
             try:
                 self.assertEqual(server.stdout.readline().strip(), "RELEASED")

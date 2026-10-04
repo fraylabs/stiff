@@ -25,7 +25,7 @@ static StiffStoreText stiff_store_text(Env e, Term text, size_t limit) {
   StiffStoreText out = {0};
   size_t capacity = limit < 64 ? limit + 1 : 64;
   out.data = io_mem(malloc(capacity));
-  while (term_aux(text) == CID_SCON) {
+  while (term_aux(text) == CID(SCon)) {
     Term fields[2];
     spare_free(e, cls_fit(2), ctr_take(e, text, 2, fields));
     text = fields[1];
@@ -241,13 +241,13 @@ static int stiff_store_path(Env e, Term value, StiffStoreText* path) {
   return 1;
 }
 
-#ifdef CID_STORE_OPEN
+#ifdef CID(Store.open)
 static Term stiff_store_open_run(Env e, Term* f, IoWork* work) {
   (void)work;
   StiffStoreText path = stiff_store_text(e, f[0], STIFF_STORE_PATH_MAX);
   if (path.error || !path.size || strlen(path.data) != path.size || !strcmp(path.data, ":memory:")) {
     free(path.data);
-    return stiff_store_error(e, CID_STOREOPENERROR, path.error ? path.error : "invalid_store_path",
+    return stiff_store_error(e, CID(StoreOpenError), path.error ? path.error : "invalid_store_path",
       "Store path must name a bounded filesystem database.");
   }
   sqlite3* db = NULL;
@@ -255,30 +255,30 @@ static Term stiff_store_open_run(Env e, Term* f, IoWork* work) {
   if (db) sqlite3_close(db);
   if (status != SQLITE_OK) {
     free(path.data);
-    return stiff_store_error(e, CID_STOREOPENERROR, stiff_store_sqlite_code(status),
+    return stiff_store_error(e, CID(StoreOpenError), stiff_store_sqlite_code(status),
       "Store initialization failed.");
   }
   // StoreReady{Store{path}} is flattened by the pinned compiler because Store
   // has one constructor. Native layout tests cover this private ABI choice.
   Term store = io_str(e, path.data, path.size);
   free(path.data);
-  return io_box(e, CID_STOREREADY, store);
+  return io_box(e, CID(StoreReady), store);
 }
 #endif
 
-#ifdef CID_STORE_READ
+#ifdef CID(Store.read)
 static Term stiff_store_read_run(Env e, Term* f, IoWork* work) {
   (void)work;
   StiffStoreText path = {0}, key = {0};
   if (!stiff_store_path(e, f[0], &path)) {
     free(path.data);
     term_sink(e, f[1]);
-    return stiff_store_error(e, CID_STOREREADERROR, "invalid_store_path", "Store path is invalid.");
+    return stiff_store_error(e, CID(StoreReadError), "invalid_store_path", "Store path is invalid.");
   }
   key = stiff_store_text(e, f[1], STIFF_STORE_KEY_MAX);
   if (key.error || !key.size) {
     free(path.data); free(key.data);
-    return stiff_store_error(e, CID_STOREREADERROR, key.error ? key.error : "invalid_store_input",
+    return stiff_store_error(e, CID(StoreReadError), key.error ? key.error : "invalid_store_input",
       "Store key is invalid.");
   }
   sqlite3* db = NULL;
@@ -294,17 +294,17 @@ static Term stiff_store_read_run(Env e, Term* f, IoWork* work) {
     const char* value = (const char*)sqlite3_column_text(statement, 1);
     int bytes = sqlite3_column_bytes(statement, 1);
     if (version < 1 || version > UINT32_MAX || bytes < 0) status = SQLITE_CORRUPT;
-    else result = io_node(e, CID_STOREFOUND, (u32)version, io_str(e, value, (size_t)bytes));
-  } else if (status == SQLITE_DONE) result = term_pak(CID_STOREMISSING, 0);
+    else result = io_node(e, CID(StoreFound), (u32)version, io_str(e, value, (size_t)bytes));
+  } else if (status == SQLITE_DONE) result = term_pak(CID(StoreMissing), 0);
   sqlite3_finalize(statement);
   if (db) sqlite3_close(db);
   free(path.data); free(key.data);
   if (result) return result;
-  return stiff_store_error(e, CID_STOREREADERROR, stiff_store_sqlite_code(status), "Store read failed.");
+  return stiff_store_error(e, CID(StoreReadError), stiff_store_sqlite_code(status), "Store read failed.");
 }
 #endif
 
-#if defined(CID_STORE_COMPARE_WRITE) || defined(CID_STORE_OPERATION)
+#if defined(CID(Store.compare_write)) || defined(CID(Store.operation))
 static int stiff_store_begin(sqlite3* db) {
   return stiff_store_exec(db, "BEGIN IMMEDIATE;");
 }
@@ -314,14 +314,14 @@ static void stiff_store_rollback(sqlite3* db) {
 }
 #endif
 
-#ifdef CID_STORE_COMPARE_WRITE
+#ifdef CID(Store.compare_write)
 static Term stiff_store_write_result(Env e, int outcome, uint32_t version,
                                      const char* value, size_t value_size, int replayed) {
   if (outcome == STIFF_STORE_APPLIED)
-    return term_pak(replayed ? CID_STOREREPLAYED : CID_STOREAPPLIED, version);
+    return term_pak(replayed ? CID(StoreReplayed) : CID(StoreApplied), version);
   if (outcome == STIFF_STORE_MISSING_CONFLICT)
-    return term_pak(replayed ? CID_STOREREPLAYEDMISSINGCONFLICT : CID_STOREMISSINGCONFLICT, 0);
-  return io_node(e, replayed ? CID_STOREREPLAYEDVERSIONCONFLICT : CID_STOREVERSIONCONFLICT,
+    return term_pak(replayed ? CID(StoreReplayedMissingConflict) : CID(StoreMissingConflict), 0);
+  return io_node(e, replayed ? CID(StoreReplayedVersionConflict) : CID(StoreVersionConflict),
     version, io_str(e, value, value_size));
 }
 
@@ -331,7 +331,7 @@ static Term stiff_store_compare_write_run(Env e, Term* f, IoWork* work) {
   uint32_t expected = (uint32_t)f[3];
   if (!stiff_store_path(e, f[0], &path)) {
     free(path.data); term_sink(e, f[1]); term_sink(e, f[2]); term_sink(e, f[4]);
-    return stiff_store_error(e, CID_STOREWRITEERROR, "invalid_store_path", "Store path is invalid.");
+    return stiff_store_error(e, CID(StoreWriteError), "invalid_store_path", "Store path is invalid.");
   }
   operation = stiff_store_text(e, f[1], STIFF_STORE_OPERATION_MAX);
   key = stiff_store_text(e, f[2], STIFF_STORE_KEY_MAX);
@@ -339,7 +339,7 @@ static Term stiff_store_compare_write_run(Env e, Term* f, IoWork* work) {
   if (operation.error || key.error || value.error || !operation.size || !key.size || expected == UINT32_MAX) {
     const char* code = operation.error ? operation.error : key.error ? key.error : value.error ? value.error : "invalid_store_input";
     free(path.data); free(operation.data); free(key.data); free(value.data);
-    return stiff_store_error(e, CID_STOREWRITEERROR, code, "Store write input is invalid.");
+    return stiff_store_error(e, CID(StoreWriteError), code, "Store write input is invalid.");
   }
 
   sqlite3* db = NULL;
@@ -370,7 +370,7 @@ static Term stiff_store_compare_write_run(Env e, Term* f, IoWork* work) {
       status = stiff_store_exec(db, "COMMIT;");
       if (status == SQLITE_OK) {
         sqlite3_close(db); free(path.data); free(operation.data); free(key.data); free(value.data);
-        return term_pak(CID_STOREIDEMPOTENCYCONFLICT, 0);
+        return term_pak(CID(StoreIdempotencyConflict), 0);
       }
     } else if (outcome >= STIFF_STORE_APPLIED && outcome <= STIFF_STORE_MISSING_CONFLICT &&
                stored_version >= 0 && stored_version <= UINT32_MAX && stored_value_size >= 0) {
@@ -462,7 +462,7 @@ static Term stiff_store_compare_write_run(Env e, Term* f, IoWork* work) {
   stiff_store_rollback(db);
   if (db) sqlite3_close(db);
   free(path.data); free(operation.data); free(key.data); free(value.data);
-  return stiff_store_error(e, CID_STOREWRITEERROR,
+  return stiff_store_error(e, CID(StoreWriteError),
     commit_uncertain ? "store_commit_uncertain" : stiff_store_sqlite_code(status),
     commit_uncertain
       ? "Commit acknowledgement failed; reconcile the operation ID before retrying."
@@ -470,18 +470,18 @@ static Term stiff_store_compare_write_run(Env e, Term* f, IoWork* work) {
 }
 #endif
 
-#ifdef CID_STORE_OPERATION
+#ifdef CID(Store.operation)
 static Term stiff_store_operation_run(Env e, Term* f, IoWork* work) {
   (void)work;
   StiffStoreText path = {0}, operation = {0};
   if (!stiff_store_path(e, f[0], &path)) {
     free(path.data); term_sink(e, f[1]);
-    return stiff_store_error(e, CID_STOREOPERATIONERROR, "invalid_store_path", "Store path is invalid.");
+    return stiff_store_error(e, CID(StoreOperationError), "invalid_store_path", "Store path is invalid.");
   }
   operation = stiff_store_text(e, f[1], STIFF_STORE_OPERATION_MAX);
   if (operation.error || !operation.size) {
     free(path.data); free(operation.data);
-    return stiff_store_error(e, CID_STOREOPERATIONERROR,
+    return stiff_store_error(e, CID(StoreOperationError),
       operation.error ? operation.error : "invalid_store_input", "Operation ID is invalid.");
   }
   sqlite3* db = NULL;
@@ -499,32 +499,32 @@ static Term stiff_store_operation_run(Env e, Term* f, IoWork* work) {
     sqlite3_int64 version = sqlite3_column_type(statement, 2) == SQLITE_NULL ? 0 : sqlite3_column_int64(statement, 2);
     if (key_size < 0 || version < 0 || version > UINT32_MAX) status = SQLITE_CORRUPT;
     else if (outcome == STIFF_STORE_APPLIED)
-      result = io_node(e, CID_STOREOPERATIONAPPLIED, io_str(e, key, (size_t)key_size), (u32)version);
+      result = io_node(e, CID(StoreOperationApplied), io_str(e, key, (size_t)key_size), (u32)version);
     else if (outcome == STIFF_STORE_VERSION_CONFLICT)
-      result = io_node(e, CID_STOREOPERATIONVERSIONCONFLICT, io_str(e, key, (size_t)key_size), (u32)version);
+      result = io_node(e, CID(StoreOperationVersionConflict), io_str(e, key, (size_t)key_size), (u32)version);
     else if (outcome == STIFF_STORE_MISSING_CONFLICT)
-      result = io_box(e, CID_STOREOPERATIONMISSINGCONFLICT, io_str(e, key, (size_t)key_size));
+      result = io_box(e, CID(StoreOperationMissingConflict), io_str(e, key, (size_t)key_size));
     else status = SQLITE_CORRUPT;
-  } else if (status == SQLITE_DONE) result = term_pak(CID_STOREOPERATIONUNKNOWN, 0);
+  } else if (status == SQLITE_DONE) result = term_pak(CID(StoreOperationUnknown), 0);
   sqlite3_finalize(statement);
   if (db) sqlite3_close(db);
   free(path.data); free(operation.data);
   if (result) return result;
-  return stiff_store_error(e, CID_STOREOPERATIONERROR, stiff_store_sqlite_code(status), "Operation lookup failed.");
+  return stiff_store_error(e, CID(StoreOperationError), stiff_store_sqlite_code(status), "Operation lookup failed.");
 }
 #endif
 
 static void __attribute__((constructor)) stiff_store_register(void) {
-#ifdef CID_STORE_OPEN
-  io_eff(CID_STORE_OPEN, stiff_store_open_run, 0);
+#ifdef CID(Store.open)
+  io_eff(CID(Store.open), stiff_store_open_run, 0);
 #endif
-#ifdef CID_STORE_READ
-  io_eff(CID_STORE_READ, stiff_store_read_run, 0);
+#ifdef CID(Store.read)
+  io_eff(CID(Store.read), stiff_store_read_run, 0);
 #endif
-#ifdef CID_STORE_COMPARE_WRITE
-  io_eff(CID_STORE_COMPARE_WRITE, stiff_store_compare_write_run, 0);
+#ifdef CID(Store.compare_write)
+  io_eff(CID(Store.compare_write), stiff_store_compare_write_run, 0);
 #endif
-#ifdef CID_STORE_OPERATION
-  io_eff(CID_STORE_OPERATION, stiff_store_operation_run, 0);
+#ifdef CID(Store.operation)
+  io_eff(CID(Store.operation), stiff_store_operation_run, 0);
 #endif
 }

@@ -25,7 +25,7 @@ static void stiff_url_append(StiffUrlOutput* out, const char* text, size_t size)
 
 static void stiff_url_text(Env e, Term text, StiffUrlOutput* out, int encode) {
   const char* hex = "0123456789ABCDEF";
-  while (term_aux(text) != CID_SNIL && !out->error) {
+  while (term_aux(text) != CID(SNil) && !out->error) {
     Term parts[2];
     spare_free(e, cls_fit(2), ctr_take(e, text, 2, parts));
     u64 scalar = parts[0];
@@ -60,13 +60,13 @@ static void stiff_url_text(Env e, Term text, StiffUrlOutput* out, int encode) {
 
 static Term stiff_url_result(Env e, StiffUrlOutput* out) {
   Term result = out->error
-    ? io_box(e, CID_URLERROR, io_str(e, out->error, strlen(out->error)))
-    : io_box(e, CID_URLREADY, io_str(e, out->text, out->used));
+    ? io_box(e, CID(UrlError), io_str(e, out->error, strlen(out->error)))
+    : io_box(e, CID(UrlReady), io_str(e, out->text, out->used));
   free(out);
   return result;
 }
 
-#ifdef CID_URL_ENCODE_COMPONENT
+#ifdef CID(Url.encode_component)
 static Term stiff_url_encode_run(Env e, Term* f, IoWork* w) {
   (void)w;
   StiffUrlOutput* out = io_mem(calloc(1, sizeof(*out)));
@@ -75,7 +75,7 @@ static Term stiff_url_encode_run(Env e, Term* f, IoWork* w) {
 }
 #endif
 
-#ifdef CID_URL_WITH_QUERY
+#ifdef CID(Url.with_query)
 static int stiff_url_hex(unsigned c) {
   return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
@@ -115,7 +115,7 @@ static Term stiff_url_query_run(Env e, Term* f, IoWork* w) {
   stiff_url_append(out, base->text, fragment);
   Term items = f[1];
   size_t count = 0;
-  while (term_aux(items) != CID_NIL && !out->error) {
+  while (term_aux(items) != CID(Nil) && !out->error) {
     if (++count > 128) { out->error = "too_many_query_params"; break; }
     Term pair[2], param[2];
     spare_free(e, cls_fit(2), ctr_take(e, items, 2, pair));
@@ -137,10 +137,10 @@ static Term stiff_url_query_run(Env e, Term* f, IoWork* w) {
 #endif
 
 static void __attribute__((constructor)) stiff_url_register(void) {
-#ifdef CID_URL_ENCODE_COMPONENT
-  io_eff(CID_URL_ENCODE_COMPONENT, stiff_url_encode_run, 0);
+#ifdef CID(Url.encode_component)
+  io_eff(CID(Url.encode_component), stiff_url_encode_run, 0);
 #endif
-#ifdef CID_URL_WITH_QUERY
-  io_eff(CID_URL_WITH_QUERY, stiff_url_query_run, 0);
+#ifdef CID(Url.with_query)
+  io_eff(CID(Url.with_query), stiff_url_query_run, 0);
 #endif
 }

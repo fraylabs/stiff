@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import time
 import unittest
+from scripts.test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -33,7 +34,7 @@ class StoreTests(unittest.TestCase):
     def run_store(self, *args, check=True, timeout=15):
         result = subprocess.run(
             [str(self.binary), *map(str, args)], capture_output=True, text=True,
-            env={"PATH": "/nonexistent"}, timeout=timeout)
+            env={**sanitizer_env(), "PATH": "/nonexistent"}, timeout=timeout)
         if check and result.returncode:
             self.fail(f"store failed ({result.returncode}): {result.stdout!r} {result.stderr!r}")
         return result
@@ -90,7 +91,7 @@ class StoreTests(unittest.TestCase):
             for index, value in enumerate(("left", "right"))
         ]
         processes = [subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                      text=True, env={"PATH": "/nonexistent"})
+                                      text=True, env={**sanitizer_env(), "PATH": "/nonexistent"})
                      for command in commands]
         outputs = [process.communicate(timeout=15) for process in processes]
         self.assertEqual([process.returncode for process in processes], [0, 0], outputs)
@@ -107,7 +108,7 @@ class StoreTests(unittest.TestCase):
             [str(self.binary), "uncertain", str(self.database), "uncertain-1",
              "charge-state", "0", "prepared"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-            env={"PATH": "/nonexistent"})
+            env={**sanitizer_env(), "PATH": "/nonexistent"})
         try:
             deadline = time.monotonic() + 10
             receipt = ""
@@ -135,7 +136,7 @@ class StoreTests(unittest.TestCase):
     def test_kill_between_operations_preserves_first_and_does_not_start_second(self):
         process = subprocess.Popen(
             [str(self.binary), "between", str(self.database)], stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, bufsize=1, env={"PATH": "/nonexistent"})
+            stderr=subprocess.PIPE, text=True, bufsize=1, env={**sanitizer_env(), "PATH": "/nonexistent"})
         self.assertEqual(process.stdout.readline(), "applied:1\n")
         process.send_signal(signal.SIGKILL)
         process.communicate(timeout=5)

@@ -11,6 +11,7 @@ import tarfile
 import tempfile
 import threading
 import unittest
+from scripts.test_env import sanitizer_env
 ROOT = Path(__file__).resolve().parent.parent
 class PackageTests(unittest.TestCase):
     def test_archive_checksums_and_native_journey(self):
@@ -29,12 +30,12 @@ class PackageTests(unittest.TestCase):
                 digest, name = line.split()
                 self.assertEqual(hashlib.sha256((stage/name).read_bytes()).hexdigest(),digest)
             manifest = json.loads((stage/'manifest.json').read_text())
-            self.assertEqual(manifest['bend'],'2.0.20')
+            self.assertEqual(manifest['bend'],'2.0.35')
             self.assertEqual(set(manifest['runtime_libraries']),{'libcurl','json-c','sqlite3'})
             self.assertEqual(manifest['static_libraries']['libevent']['version'],'2.2.2-alpha')
             self.assertTrue(all(binary['sanitizer']=='none' for binary in manifest['binaries'].values()))
             server = subprocess.Popen([str(stage/'stiff-run'),'--grace-ms','500','--',str(stage/'app'),
-                                       '--threads','2','127.0.0.1','0'],cwd=stage,env={**os.environ,'PATH':'/nonexistent'},
+                                       '--threads','2','127.0.0.1','0'],cwd=stage,env={**os.environ, **sanitizer_env(),'PATH':'/nonexistent'},
                                       stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             try:
                 lines = queue.Queue()
@@ -61,7 +62,7 @@ class PackageTests(unittest.TestCase):
             database = root / 'notes.db'
             for iteration in range(2):
                 notes = subprocess.Popen([str(stage/'notes'), '--threads', '2', str(database), '0'],
-                                         cwd=stage, env={**os.environ, 'PATH':'/nonexistent'},
+                                         cwd=stage, env={**os.environ, **sanitizer_env(), 'PATH':'/nonexistent'},
                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 try:
                     lines = queue.Queue()

@@ -11,8 +11,8 @@ static Term probe_check_run(Env e, Term* fields, IoWork* work) {
     value[1] = 42;
     free((void*)value);
   }
-  return term_pak(CID_UNIT, 0);
+  return term_pak(CID(Unit), 0);
 }
 static void __attribute__((constructor)) probe_check_register(void) {
-  io_eff(CID_PROBE_CHECK, probe_check_run, 0);
+  io_eff(CID(Probe.check), probe_check_run, 0);
 }

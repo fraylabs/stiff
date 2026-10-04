@@ -10,12 +10,12 @@ import tarfile
 import tempfile
 import urllib.request
 
-VERSION = "2.0.20"
+VERSION = "2.0.35"
 DIGESTS = {
-    "darwin-arm64": "e8da8e28ea963e4d3956b4ab80f1c1df9a8c5208dbd6ef1e3e49bb913ed0f374",
-    "darwin-x64": "89b95a5de78cf3c9e76ab649ca62ee66b3e2e6e168b2baf862a0ad4e7e57f2e7",
-    "linux-arm64": "0ca9183003ea2d5d52834fe4fbe36577f13254739cf32b1455888518914e8df4",
-    "linux-x64": "dca589832e1645500ad258d27171ed6b5a30812bcc3088c9aedf437059be41e1",
+    "darwin-arm64": "2582f25057a519c330e6875798b784b727d4201f1c1f6944a105348f0eb8972e",
+    "darwin-x64": "7e59da4513e32ea7526464b342344a992a56372cdf62e0c55a30e9ce26baaeef",
+    "linux-arm64": "09b813073241628f590f2c2fe420299ec25e4dddd6cf3fdc49c9486339989564",
+    "linux-x64": "63039d1a119f716767ac5a7d8fe0717cfacf219c6c253c35192148e0dade722f",
 }
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / ".cache"

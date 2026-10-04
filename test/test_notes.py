@@ -12,6 +12,7 @@ import tempfile
 import threading
 import time
 import unittest
+from scripts.test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -40,7 +41,7 @@ class NotesTests(unittest.TestCase):
     def start(self):
         self.server = subprocess.Popen(
             [str(self.binary), '--threads', '2', str(self.database), '0'],
-            cwd=self.state.name, env={**os.environ, 'PATH': '/nonexistent'},
+            cwd=self.state.name, env={**os.environ, **sanitizer_env(), 'PATH': '/nonexistent'},
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = queue.Queue()
         threading.Thread(target=lambda: lines.put(self.server.stdout.readline()), daemon=True).start()

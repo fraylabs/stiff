@@ -48,7 +48,7 @@ def main():
         if hashlib.sha256((stage/'licenses/Libevent.txt').read_bytes()).hexdigest() != libevent_pin['license_sha256']:
             raise RuntimeError('Packaged libevent license differs from the pinned dependency')
         metadata = {'schema_version':1, 'static_libraries':{'libevent':libevent_pin}, 'version':version,'revision':revision,'dirty':dirty,'platform':target,
-                    'bend':'2.0.20','runtime_libraries':libraries,
+                    'bend':'2.0.35','runtime_libraries':libraries,
                     'binaries':{'app':{'sanitizer':'none','bend_abi':os.environ.get('STIFF_NATIVE_ABI','compiler')},
                                 'notes':{'sanitizer':'none','bend_abi':os.environ.get('STIFF_NATIVE_ABI','compiler')},
                                 'stiff-run':{'sanitizer':'none','language':'C11'}},

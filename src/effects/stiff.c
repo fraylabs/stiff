@@ -304,20 +304,20 @@ static Term stiff_send_pack(Env e, IoWork* work) {
   Term result;
   if (request->error) {
     const char* message = "Native HTTP request failed.";
-    result = io_node(e, CID_HTTPERROR, io_str(e, request->error, strlen(request->error)), io_str(e, message, strlen(message)));
+    result = io_node(e, CID(HttpError), io_str(e, request->error, strlen(request->error)), io_str(e, message, strlen(message)));
   } else {
-    Term headers = term_pak(CID_NIL, 0);
+    Term headers = term_pak(CID(Nil), 0);
     for (size_t i = request->response_count; i > 0; i--) {
       StiffHeader* h = &request->response_headers[i - 1];
-      Term header = io_node(e, CID_RESPONSEHEADER, io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
-      headers = io_node(e, CID_CON, header, headers);
+      Term header = io_node(e, CID(ResponseHeader), io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
+      headers = io_node(e, CID(Con), header, headers);
     }
-    // Bend 2.0.20 flattens HttpOk{Response{status, body, headers}} into three fields.
-    Loc loc = heap_alloc(e, cls_fit(3));
+    // Bend 2.0.35 flattens HttpOk{Response{status, body, headers}} into three fields.
+    u64 loc = heap_alloc(e, cls_fit(3));
     e.mem[loc] = request->status;
     e.mem[loc + 1] = io_str(e, request->response, request->used);
     e.mem[loc + 2] = headers;
-    result = term_ctr(CID_HTTPOK, loc);
+    result = term_ctr(CID(HttpOk), loc);
   }
   for (size_t i = 0; i < request->header_count; i++) {
     free(request->headers[i].name); free(request->headers[i].value);
@@ -342,13 +342,13 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
   work->data = (char*)request;
   Term items = fields[5];
   size_t header_bytes = 0;
-  while (term_aux(items) != CID_NIL) {
+  while (term_aux(items) != CID(Nil)) {
     if (request->header_count == STIFF_MAX_HEADERS) {
       term_sink(e, items);
       request->error = "invalid_header";
       break;
     }
-    // List nodes hold a boxed Header and tail in Bend 2.0.20.
+    // List nodes hold a boxed Header and tail in Bend 2.0.35.
     Term pair[2], header[2];
     spare_free(e, cls_fit(2), ctr_take(e, items, 2, pair));
     spare_free(e, cls_fit(2), ctr_take(e, pair[0], 2, header));
@@ -377,5 +377,5 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
 }
 
 static void __attribute__((constructor)) stiff_send_register(void) {
-  io_eff(CID_STIFF_SEND, stiff_send_run, 0);
+  io_eff(CID(Stiff.send), stiff_send_run, 0);
 }

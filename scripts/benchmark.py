@@ -17,6 +17,11 @@ import tempfile
 import threading
 import time
 
+if __name__ == "__main__":
+    from test_env import sanitizer_env
+else:
+    from scripts.test_env import sanitizer_env
+
 ROOT = Path(__file__).resolve().parent.parent
 REQUEST_TIMEOUT = 5
 PAYLOAD = {"text": "x" * 1024, "items": [1, True, None, "🌱"]}
@@ -74,7 +79,7 @@ class Server:
         self.ps = shutil.which("ps")
         self.stderr = tempfile.TemporaryFile(mode="w+t")
         self.process = subprocess.Popen([str(executable)], cwd=executable.parent,
-                                        env={"PATH": "/nonexistent"},
+                                        env={**sanitizer_env(), "PATH": "/nonexistent"},
                                         stdout=subprocess.PIPE, stderr=self.stderr, text=True)
         self.reader = threading.Thread(target=self.read_lines, daemon=True)
         self.reader.start()

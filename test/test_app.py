@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import threading
 import unittest
+from scripts.test_env import sanitizer_env
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -33,7 +34,7 @@ class AppTests(unittest.TestCase):
         self.logs = queue.Queue()
         self.diagnostics = []
         self.server = subprocess.Popen([str(self.directory / getattr(self, "binary", "app")), "127.0.0.1", "0"],
-                                       cwd=self.directory, env={"PATH": "/nonexistent"},
+                                       cwd=self.directory, env={**sanitizer_env(), "PATH": "/nonexistent"},
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         self.addCleanup(self.cleanup_server)
         def read():
@@ -135,7 +136,7 @@ class AppTests(unittest.TestCase):
 
     def test_route_precedence_and_unique_allow_methods(self):
         result = subprocess.run([str(self.directory / "policy")], cwd=self.directory,
-                                env={"PATH": "/nonexistent"}, capture_output=True, text=True, timeout=3)
+                                env={**sanitizer_env(), "PATH": "/nonexistent"}, capture_output=True, text=True, timeout=3)
         self.assertEqual((result.returncode, result.stdout, result.stderr),
                          (0, "first\nGET, POST\nmissing\nsecond\n", ""))
 

@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import time
 import unittest
+from scripts.test_env import sanitizer_env
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,7 +34,7 @@ class StreamingTests(unittest.TestCase):
     def setUp(self):
         self.server = subprocess.Popen(
             [str(self.directory / "server")], cwd=self.directory,
-            env={"PATH": "/nonexistent"}, stdout=subprocess.PIPE,
+            env={**sanitizer_env(), "PATH": "/nonexistent"}, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, text=True)
         self.addCleanup(self.cleanup_server)
         lines = queue.Queue()
@@ -253,7 +254,7 @@ class RequestStreamingTests(unittest.TestCase):
     def setUp(self):
         self.server = subprocess.Popen(
             [str(self.directory / "server")], cwd=self.directory,
-            env={"PATH": "/nonexistent"}, stdout=subprocess.PIPE,
+            env={**sanitizer_env(), "PATH": "/nonexistent"}, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, text=True)
         self.addCleanup(self.cleanup_server)
         line = self.server.stdout.readline().strip()

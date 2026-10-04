@@ -49,7 +49,7 @@ def main():
             f'import {args.package}/stiff.bend as Stiff\n')
         bend = os.environ.get('BEND', str(ROOT / '.cache/toolchain/bin/bend'))
         checked = run([bend, 'check.bend', '--check-only'])
-        if 'All terms check.' not in checked.stdout + checked.stderr:
+        if 'ALL PROOFS CHECK' not in checked.stdout + checked.stderr:
             raise RuntimeError('package proof/type check did not report success')
         with urllib.request.urlopen(f'{hub}/{args.package}/manifest', timeout=30) as response:
             manifest = response.read()
@@ -132,7 +132,7 @@ def main():
                           'manifest_sha256': hashlib.sha256(manifest).hexdigest(),
                           'compiler': run([bend, 'version']).stdout.strip(),
                           'empty_cache_download': True, 'source_bytes_match': True,
-                          'proof_verdict': 'All terms check.', 'native_https': 'passed',
+                          'proof_verdict': 'ALL PROOFS CHECK', 'native_https': 'passed',
                           'independently_built_example_https': bool(args.client_binary),
                           'persistent_application_tests': results.testsRun}, indent=2))
 
