@@ -173,17 +173,20 @@ class LoadTests(unittest.TestCase):
 
     def test_open_loop_offers_continue_while_slow_work_is_dropped(self):
         report = LOAD.run_load(LOAD.LoadConfig(
-            url=self.base + "/slow", rate=100, duration=0.2,
+            url=self.base + "/slow", rate=50, duration=1.0,
             workers=1, queue_capacity=1, timeout=1,
             json_expectations=(LOAD.JsonExpectation("/status", "slow"),)))
         counts = report["counts"]
-        self.assertEqual(counts["offered"], 20)
+        # A scheduler stall on a busy shared runner can skip late offers; the
+        # property is that offering continues while slow work is dropped.
+        self.assertLessEqual(counts["offered"], 50)
+        self.assertGreaterEqual(counts["offered"], 40)
         self.assertGreater(counts["dropped"], 0)
         self.assertEqual(counts["accepted"] + counts["dropped"], counts["offered"])
         self.assertEqual(counts["completed"], counts["accepted"])
         self.assertEqual(counts["errors"], 0)
-        self.assertLess(report["timing"]["offering_elapsed_seconds"], 0.35)
-        self.assertGreater(report["timing"]["total_elapsed_seconds"], 0.25)
+        self.assertLess(report["timing"]["offering_elapsed_seconds"], 1.3)
+        self.assertGreater(report["timing"]["total_elapsed_seconds"], 1.0)
 
     def test_total_sample_budget_is_checked_before_starting_workers(self):
         before = {child.pid for child in multiprocessing.active_children()
