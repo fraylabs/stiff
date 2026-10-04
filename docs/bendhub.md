@@ -6,7 +6,9 @@ Stiff's experimental 0.2.0 library is available as an immutable BendHub package:
 0xf5a52e743a7f75c5d624c27c9e0ec81f
 ```
 
-Use **Bend 2.0.20**. The native effects depend on that compiler's private ABI;
+This published hash requires **Bend 2.0.20**. The current Git checkout targets
+**Bend 2.0.35**; no replacement package has been published. The published
+package's native effects depend on 2.0.20's private ABI;
 a newer compiler is not automatically compatible. The GitHub
 [v0.2.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.2.0) remains
 the source for native archives and pinned build tooling.

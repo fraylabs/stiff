@@ -4,7 +4,7 @@ Native HTTP, application and storage building blocks for **Bend 2**. Write a Ben
 `IO` program with routing, schemas, streaming and durable local state, then compile
 it to a native executable.
 
-**Status:** experimental 0.2.0, pinned to Bend **2.0.20**. No Node or npm dependency.
+**Status:** experimental 0.2.0, pinned to Bend **2.0.35**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
 [Stiff 0.2.0 release and verified macOS arm64 archive](https://github.com/fraylabs/stiff/releases/tag/v0.2.0).
@@ -29,15 +29,17 @@ make build
 # Sample Slide Show
 ```
 
-`make setup` downloads the standalone Bend 2.0.20 release into `.cache/toolchain`,
+`make setup` downloads the standalone Bend 2.0.35 release into `.cache/toolchain`,
 checks its pinned SHA-256 before extraction, and builds the pinned libevent
 dependency under `.cache/libevent`. Setup changes no global installation.
 It supports macOS/Linux release archives on arm64 and x64. Server builds use
 libevent **2.2.2-alpha**, statically linked from the scoped build; its alpha status
 is explicit. See [native dependency pins](docs/dependencies.md). The source revision
-for this compiler release is `a5269a6b2c5ccd6752b66df4bc6f60678b4f49bc`.
+for this compiler release is `79df8d9c40722ee9507a1e253f283b51025f9d6c`.
+For an existing checkout, preserve the old `.cache/toolchain` before setup; see
+[the compiler upgrade report](docs/bend-2.0.35.md) and [cache migration](docs/dependencies.md).
 
-If you already have Bend 2.0.20, set `BEND` to its executable. Server builds
+If you already have Bend 2.0.35, set `BEND` to its executable. Server builds
 still need `python3 scripts/setup-libevent.py` for the scoped dependency.
 `CC` can select Clang. To compile another program:
 
@@ -104,7 +106,8 @@ deployment example.
 
 ## Use Stiff in your own project
 
-Copy [examples/auth-client](examples/auth-client) into a separate project and run
+The published Git-pinned consumer example still uses its historical Bend 2.0.20
+dependency. Copy [examples/auth-client](examples/auth-client) into a separate project and run
 `make setup build` there. It fetches Stiff directly from GitHub at the exact
 revision in `stiff.rev`, installs the pinned compiler, and builds a native client.
 Set `STIFF_TOKEN` in the environment, then run
@@ -112,9 +115,9 @@ Set `STIFF_TOKEN` in the environment, then run
 This Git-based option requires no registry. Commit the revision file alongside your app;
 upgrades are explicit. See the example README for dependency and token handling.
 
-For hash-pinned library imports, use the [BendHub package](docs/bendhub.md) and
-[standalone hub client](examples/bendhub-client). Native build tooling remains
-separately pinned to GitHub; BendHub does not install the C dependencies.
+The published [BendHub package](docs/bendhub.md) and
+[standalone hub client](examples/bendhub-client) still target Bend 2.0.20.
+Use this Git checkout for Bend 2.0.35. BendHub does not install C dependencies.
 
 ## Bend API
 

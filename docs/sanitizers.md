@@ -1,7 +1,7 @@
 # Sanitizer investigation and diagnostic profile
 
-Inspected compiler: Bend 2.0.20, source revision
-`a5269a6b2c5ccd6752b66df4bc6f60678b4f49bc`. The original failure reproduces on
+Current compiler: Bend 2.0.35, source revision
+`79df8d9c40722ee9507a1e253f283b51025f9d6c`. The original Bend 2.0.20 failure reproduced on
 macOS arm64 with Apple Clang 21.0.0 (`clang-2100.1.1.101`).
 
 ## Finding
@@ -33,10 +33,10 @@ The official Bend 2.0.24 macOS arm64 release (source revision
 `2a7f7125cf218b6ff089c366fa8ce69e100d4a17`, archive SHA-256
 `b17380ac7b8fce5c5c0250d23c9bb6d99cc9737bfca8a9e5428e051325926e1e`)
 was tested separately and reproduces the same combined-sanitizer failure. Its
-generated convention definitions are unchanged, so Stiff remains pinned to
-2.0.20 rather than taking an unrelated compiler upgrade.
+generated convention definitions are unchanged, that historical probe did not justify upgrading the compiler. The current
+2.0.35 upgrade retains the same checked mitigation; see [upgrade report](bend-2.0.35.md).
 
-Observed Base-only matrix, `-O1 -g -fno-omit-frame-pointer`:
+Historical Bend 2.0.20 Base-only matrix, `-O1 -g -fno-omit-frame-pointer`:
 
 | Build profile | ASan | UBSan | ASan + UBSan |
 | --- | --- | --- | --- |
@@ -109,3 +109,8 @@ or lifetime poisoning. System libcurl, json-c and SQLite, and the pinned static 
 rebuilt with instrumentation here. Leak/runtime ownership coverage is therefore
 not exhaustive. Formal pure laws do not verify any of these native components.
 Stiff remains experimental.
+
+On macOS, native tests and diagnostic/benchmark harnesses set the absolute
+`/usr/bin/atos` symbolizer path for Apple Clang 21.0.0 (clang-2100.3.34.2).
+Applications still run with `/nonexistent` on PATH; neither checks nor diagnostics
+are suppressed. See the minimal C reproducer in [the upgrade report](bend-2.0.35.md).

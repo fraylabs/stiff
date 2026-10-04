@@ -1,4 +1,7 @@
-# Kingdom rules engine — Bend 2.0.20
+# Kingdom rules engine — Bend 2
+
+The current checkout builds with Bend 2.0.35. Historical comparison evidence
+records 2.0.20. The native CLI now skips the executable-name argument.
 
 This directory contains the Bend implementation of the shared kingdom comparison
 task. `engine.bend` contains command parsing and the pure state transition. The

@@ -115,3 +115,9 @@ verified. System curl/JSON/SQLite libraries remain dynamic dependencies.
 macOS does not claim Linux's hard resident-memory contract. Notes is a local
 single-workspace example, not authentication or a multi-tenant service. Store
 receipts cover local transactions, not exactly-once external operations.
+
+## Post-release compiler upgrade
+
+The historical 0.2.0 evidence above retains its Bend 2.0.20 pin. The current
+checkout targets 2.0.35; see [the upgrade report](bend-2.0.35.md) for local
+verification. The old release archives and BendHub hash have not been replaced.

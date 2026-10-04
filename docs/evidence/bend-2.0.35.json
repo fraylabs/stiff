@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-04",
+  "implementation_revision": "7c651bc765ef6d83581bc18a48e1aa3f514a28b3",
+  "base_revision": "22ff9d3fbddd943796440155c8451e2825d12c9f",
+  "branch": "bend-2.0.35",
+  "platform": "macOS-27.0-arm64-arm-64bit",
+  "machine": "arm64",
+  "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+  "python": "3.11.8",
+  "bend": "bend 2.0.35",
+  "bend_source": "79df8d9c40722ee9507a1e253f283b51025f9d6c",
+  "bend_archive_sha256": "2582f25057a519c330e6875798b784b727d4201f1c1f6944a105348f0eb8972e",
+  "suites": {
+    "normal": {
+      "command": "make test",
+      "tests": 139,
+      "seconds": 300.946,
+      "result": "passed",
+      "log": ".cache/test-2.0.35-final-normal.log",
+      "log_sha256": "58cd06601193e42438c4c6755f2038fbb1b8181e559532980435fbf5f9309c32"
+    },
+    "sanitize": {
+      "command": "make test-sanitize",
+      "tests": 142,
+      "seconds": 366.778,
+      "result": "passed",
+      "log": ".cache/test-2.0.35-final-sanitize.log",
+      "log_sha256": "94c3d93c2942161c2ba3baf87fd45366877d2b2a2e9c84cbba5998650d96c1d7"
+    }
+  },
+  "sanitizer_probe": {
+    "configurations": 6,
+    "passed": 6,
+    "report": ".cache/sanitizer-probe/report.json",
+    "report_sha256": "950c2e220b99aaae3aea9b08c247831bd34c249607c3a0b5b71a2506d1ea62ed"
+  },
+  "other_checks": [
+    "make setup (fresh install and cache reuse)",
+    "make build",
+    "extra store and validated-api builds",
+    "kingdom Bend proof/test/CLI script",
+    "native ABI regression in both suites"
+  ],
+  "kernel_verification": {
+    "command": "bend src/PROOF.bend --verdict",
+    "result": "unavailable",
+    "reason": "Lean v4.34.0 or a prebuilt BendTT kernel is not installed"
+  },
+  "limitations": [
+    "Local macOS arm64 results; other matrix platforms not run here.",
+    "The standalone public Git-pinned consumer test intentionally builds its historical Bend 2.0.20 dependency.",
+    "Sanitized convention profile uses the checked preserve_none mitigation; system/native dependency libraries are not all instrumented; no full memory-safety claim.",
+    "No pushes, tags, releases or BendHub publication; no global installs."
+  ]
+}
