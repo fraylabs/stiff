@@ -107,6 +107,10 @@ package. Packaging records the exact pin rather than accepting arbitrary compile
    is insufficient because the native build deliberately rejects a different
    version. Use a release event from a bot or a schedule to detect external
    repository releases; Stiff's own `release` trigger does not observe Bend.
+   The daily/manual workflow and scoped candidate setup are now implemented;
+   see [release tracking](release-tracking.md). The pinned CI remains unchanged.
+   Small reachable-constructor arity checks and HttpOk hot metadata checks now
+   fail early at startup; they still do not establish field order or ownership.
 5. Add an optional kernel-verification CI lane with scoped Lean/BendTT, require
    `--verdict`, and distinguish it from ordinary compiler checking. This requires
    additional setup and is not claimed by the local test counts below.

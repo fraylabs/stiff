@@ -12,21 +12,55 @@ This is not a static binary distribution or a production-readiness claim.
 
 ## Get started
 
-You need Clang, make, pkg-config, libcurl development files (7.85 or newer),
-json-c and SQLite development files, CMake and patch for the pinned libevent build, and OpenSSL
-for tests. Python **3.11.8+** is used only
-for setup and tests; it is not part of the application runtime. These Python
-tools use the standard library and require no packages or virtual environment.
+On **macOS** (Apple Silicon or Intel), install Apple's command-line tools with
+`xcode-select --install` if Clang/Git/make are absent. With [Homebrew](https://brew.sh)
+already installed:
+
+```sh
+brew install python cmake pkg-config curl json-c sqlite
+export PATH="$(brew --prefix)/bin:$PATH"
+export PKG_CONFIG_PATH="$(brew --prefix curl)/lib/pkgconfig:$(brew --prefix sqlite)/lib/pkgconfig"
+```
+
+On **Ubuntu 24.04**:
+
+```sh
+sudo apt-get update
+sudo apt-get install -y git curl clang make cmake patch pkg-config libcurl4-openssl-dev libjson-c-dev libsqlite3-dev python3 openssl
+```
+
+Then start a server (about five minutes with native prerequisites installed;
+installing Xcode tools/Homebrew or system packages takes additional time):
 
 ```sh
 git clone https://github.com/fraylabs/stiff.git
 cd stiff
 make setup
+make server
+./.cache/native/server 127.0.0.1 8080
+```
+
+Keep that terminal open. In another terminal:
+
+```sh
+curl -fsS http://127.0.0.1:8080/health
+# {"message":"healthy"}
+```
+
+Stop the server with Ctrl-C. No registry account, Python packages or virtual
+environment is needed. Python **3.11.8+** runs setup/tests only; applications are
+native executables. Native builds need Clang, make, pkg-config, libcurl **7.85+**,
+json-c and SQLite development files, plus CMake and patch for scoped libevent.
+OpenSSL is used by tests. [Ubuntu 22.04's stock libcurl](https://packages.ubuntu.com/jammy/libcurl4-openssl-dev)
+is too old for this path.
+
+Run the broader verification separately after first use:
+
+```sh
 make test
+# Optional HTTPS client example:
 make build
 ./.cache/native/get-json https://httpbin.org/json
-# HTTP 200
-# Sample Slide Show
 ```
 
 `make setup` downloads the standalone Bend 2.0.35 release into `.cache/toolchain`,
@@ -38,6 +72,11 @@ is explicit. See [native dependency pins](docs/dependencies.md). The source revi
 for this compiler release is `79df8d9c40722ee9507a1e253f283b51025f9d6c`.
 For an existing checkout, preserve the old `.cache/toolchain` before setup; see
 [the compiler upgrade report](docs/bend-2.0.35.md) and [cache migration](docs/dependencies.md).
+
+Bend's official installer is `curl -fsSL https://bend-lang.com/install.sh | sh`.
+It installs the current upstream compiler, which may differ from Stiff's supported
+version. You do not need it for this quickstart: `make setup` is the supported,
+checksum-pinned path and leaves global Bend installations alone.
 
 If you already have Bend 2.0.35, set `BEND` to its executable. Server builds
 still need `python3 scripts/setup-libevent.py` for the scoped dependency.
@@ -343,8 +382,11 @@ false proof to fail, and compiles actual executables for local HTTP/HTTPS tests.
 The executables are copied outside the checkout and run without source or tools
 on PATH. The standalone example is also copied into a separate project, fetches
 its Git-pinned dependency and compiler, and calls a local HTTPS API with synthetic
-credentials. That integration check requires GitHub network access. CI performs
-this native workflow on Linux without JavaScript actions.
+credentials. That integration check requires GitHub network access. Pinned CI
+runs this native workflow on Linux and macOS. A separate
+[daily/manual latest-release workflow](.github/workflows/bend-latest.yml) tests
+new Bend releases without changing the supported pin; see
+[release tracking and quickstart evidence](docs/release-tracking.md).
 
 The laws cover pure request policy. They do not verify libcurl, json-c, native
 memory safety, or the Bend compiler. Compiler layouts are pinned private ABI.

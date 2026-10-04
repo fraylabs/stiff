@@ -1,0 +1,179 @@
+{
+  "recorded_at": "2026-10-04T12:16:40.655886+00:00",
+  "implementation_revision": "2fe03f96e2ca2894a616cf26ffb55a780f543c6f",
+  "platform": "macOS 27 arm64 / Apple Clang 21.0.0",
+  "quickstart_before": {
+    "seconds": 772.489,
+    "steps": [
+      {
+        "command": [
+          "git",
+          "clone",
+          "https://github.com/fraylabs/stiff.git",
+          "<fresh-temp>/stiff"
+        ],
+        "seconds": 1.036,
+        "exit": 0
+      },
+      {
+        "command": [
+          "make",
+          "setup"
+        ],
+        "seconds": 72.97,
+        "exit": 0
+      },
+      {
+        "command": [
+          "make",
+          "test"
+        ],
+        "seconds": 698.479,
+        "exit": 2
+      }
+    ]
+  },
+  "quickstart_after": {
+    "seconds": 226.235,
+    "steps": [
+      {
+        "command": [
+          "git",
+          "clone",
+          "https://github.com/fraylabs/stiff.git",
+          "<fresh-temp>/stiff"
+        ],
+        "seconds": 2.769
+      },
+      {
+        "command": [
+          "make",
+          "setup"
+        ],
+        "seconds": 176.088
+      },
+      {
+        "command": [
+          "make",
+          "server"
+        ],
+        "seconds": 11.8
+      }
+    ],
+    "health": "{\"message\":\"healthy\"}",
+    "server_exit": 0,
+    "prerequisites": "Preinstalled native tools; no global installs. Homebrew Python 3.14.7 via README PATH; branch overlay after public clone.",
+    "environment": {
+      "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      "BEND_NO_TELEMETRY": "1",
+      "PKG_CONFIG_PATH": "/opt/homebrew/opt/curl/lib/pkgconfig:/opt/homebrew/opt/sqlite/lib/pkgconfig",
+      "HOME": "fresh temporary directory"
+    }
+  },
+  "cpu_limit_focused_reproduction": {
+    "seconds": 6.610358792007901,
+    "exit": 152,
+    "stdout": "",
+    "stderr": "{\"event\":\"stiff_runner_exit\",\"dropped_log_records\":0,\"cancelled\":false,\"timed_out\":false}\n"
+  },
+  "initial_candidate": {
+    "steps": [
+      {
+        "step": "prepare",
+        "seconds": 0.274,
+        "exit": 0
+      },
+      {
+        "step": "setup",
+        "seconds": 3.238,
+        "exit": 0
+      },
+      {
+        "step": "normal",
+        "seconds": 391.958,
+        "exit": 2
+      }
+    ],
+    "failure": "147 tests; CPU-limit supervisor exit 125, original assertion did not retain stderr; cause not established"
+  },
+  "workflow": {
+    "local_execution": "macOS arm64 dry run; Linux execution unavailable (Docker daemon not running)",
+    "actionlint_version": "1.7.12",
+    "summary_sha256": {
+      "workflow-normal-failure-summary.md": "e3263c084bd017f66a8428a01aa94d0fd99f5b298c2f846d3ee23d2d19d33ea9",
+      "workflow-normal-success-summary.md": "c37e5ca47aa8bd4b43539aaf433ee60986d32f83ffac4cdaa95a486bed572554",
+      "workflow-sanitized-success-summary.md": "9573fdff390a014d0c46bed66cb1db3bbc46a99eec4fe1d120c1ed4f360731de"
+    },
+    "pinned_workflow_unchanged": true,
+    "pinned_workflow_sha256": "8ff73923af3841c5404e931ccb8b12628c603ccfeef70978b9fe2a1c3d20467f",
+    "candidate": {
+      "version": "2.0.35",
+      "steps": [
+        {
+          "step": "prepare",
+          "seconds": 0.209,
+          "exit": 0
+        },
+        {
+          "step": "setup",
+          "seconds": 6.605,
+          "exit": 0
+        },
+        {
+          "step": "normal",
+          "seconds": 489.619,
+          "exit": 0
+        },
+        {
+          "step": "sanitized",
+          "seconds": 382.802,
+          "exit": 0
+        }
+      ]
+    },
+    "compiler": {
+      "version": "2.0.35",
+      "target": "darwin-arm64",
+      "release_url": "https://github.com/bendlang/bend/releases/tag/v2.0.35",
+      "source_commitish": "79df8d9c40722ee9507a1e253f283b51025f9d6c",
+      "integrity": "github-release-asset-digest",
+      "archive_sha256": "2582f25057a519c330e6875798b784b727d4201f1c1f6944a105348f0eb8972e"
+    }
+  },
+  "implementation_sha256": {
+    ".github/workflows/bend-latest.yml": "4f990d6cb9235f009e25c2c1ebea6c418b808653285d77bef1c6318f887dfd54",
+    "scripts/setup.py": "62d89f36b1242e344b7e64da794a6475c8f88f12bbbe4b7578cb49423d493219",
+    "scripts/prepare-bend-candidate.py": "0dbe0f362804af69212ee130e65c651d59fabbb2e011804164fa825a8c840711",
+    "scripts/build-native.sh": "2122530ba2a7a7e451cad028e8fd4d26317f9ccf281051a8b37eb9347534596c",
+    "scripts/package.py": "7096616fd1209e40dd8c92bfbbfef669b76495f7708d56dbb46c09b56b1cd89d",
+    "scripts/diagnose-sanitizers.py": "76d1b694a614ef06664d0fce993e345452c71b01b099295b5f4046dcc406b84e",
+    "test/test_abi.py": "d8682b808d062cf606ce1c3c6e0cc8fcea50dab049f2481b1f36fb512d8b12a9",
+    "test/test_setup.py": "f6c4616660a4ee5e395dfc1b7eac48a5b7e67a45a3dac0663f2bb7b869fb56e2",
+    "test/test_execution.py": "22091bee553236e4ec9e3adc8f6ab2560515687f3535161e8e147b8c851a0a9c",
+    "test/test_package.py": "4334c3abf970b66f01b52f1d002e602d410ebddf220c9ff293df042c3eb0bef1",
+    "src/effects/stiff.c": "c50b278114da87bdcdedee39646353fd545d7fc8057818a382f2b93ffd88c7a7",
+    "src/effects/json.c": "75e9e5f7a46007593188c2c5296b6dfa46bb8184d3be6726134d30f9b46d1aea",
+    "src/effects/url.c": "ab31a234fbeabaa8bcda1ef544986cd51e5af334ed42e49d65bcdc7a02c4fbc7",
+    "src/effects/server.c": "895e63c8660f21245fd6c19ae401c7db91071c1ed435f05bd05e0d5039f4a109",
+    "src/effects/store.c": "0e0b562af64b2f2a544abeeb464c75fc2f88815b38aacf7181c34ee3e4c8b0f0"
+  },
+  "logs_sha256": {
+    "quickstart-after.log": "da00f83ff067f737510aefb0168914ffa1c89b69f8c051221fd1003da6860211",
+    "pinned-setup.log": "39a6f99fd521750aa5a022f4ddfab5634dd9d8d06b5d28d6c778e84d379b485c",
+    "setup-policy.log": "a6d1589f032bc074d339bf4daa518753b171fa1e3c485b2855d16a4b061fc7e9",
+    "latest-final.log": "daf0157f58e21de3a1f0df1de0919715da7861ce960fc6053e05eeacbe338d5d",
+    "candidate-prepare.log": "3720fc06afebd63a165460ce92dd9222ce03e79788b59e3fa77e78df46d819f5",
+    "candidate-sanitized.log": "494b5b3328eaaffc7820d73a819e8aba65b26f01026160241ce0658bd745853e",
+    "quickstart-before.log": "c91ad07661987e97a4872d376a86081333ac22ebfdddb3b588d5757f25fd5a76",
+    "candidate-normal.log": "c82f726cadc5ac910663c582bca25f65f5566c91a895bd8d28b15ee48a3804fb",
+    "server-build.log": "0d1ba1f01fccd9d077b22bcba71acbfd71942654c66b6e07b9f42512f75a6f0d",
+    "abi-negative.log": "a0c6edcacdfba6ffd3fc3659df1865273720cc00474aec7709c54050f7fe73e5",
+    "candidate-setup.log": "16b909e9768ad9ae6404939ecc4945cc21d417c1583d666bedbb7f4aba30c540",
+    "cpu-test-final.log": "c49d4eea142ccbc0597d1a0b1836212b09529afd648eaafe322b4512aca1f46d",
+    "workflow-resolve.log": "d7bc5171c8e5772edeec93cdf31be2328eacb9063dc242b948f08843b4be88e0",
+    "initial-candidate/candidate-prepare.log": "3720fc06afebd63a165460ce92dd9222ce03e79788b59e3fa77e78df46d819f5",
+    "initial-candidate/candidate-normal.log": "74680d02fe86c58094d9f438963c58351e5b14728f4727876efc38ac8f5a41ca",
+    "initial-candidate/candidate-setup.log": "16b909e9768ad9ae6404939ecc4945cc21d417c1583d666bedbb7f4aba30c540"
+  },
+  "scope": "Local branch only. No global installs, push, tag, release or BendHub publication."
+}
