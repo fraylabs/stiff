@@ -1,0 +1,99 @@
+name: Latest Bend compatibility
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+permissions:
+  contents: read
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Resolve newest stable Bend release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/bendlang/bend/releases/latest > release.json
+          python3 - <<'PY'
+          import json, os, re
+          release = json.load(open('release.json'))
+          tag = release['tag_name']
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag):
+              raise SystemExit(f'Unexpected Bend release tag: {tag}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'version={tag[1:]}\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f"Testing newest Bend release [{tag}]({release['html_url']})\n")
+          PY
+      - name: Report resolution failure
+        if: failure()
+        run: echo 'Could not resolve newest Bend release; no compatibility result.' >> "$GITHUB_STEP_SUMMARY"
+  test:
+    needs: resolve
+    name: Bend ${{ needs.resolve.outputs.version }} / ${{ matrix.os }} / ${{ matrix.profile }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+        profile: [normal, sanitized]
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      BEND_NO_TELEMETRY: 1
+      BEND_CANDIDATE: ${{ needs.resolve.outputs.version }}
+      STIFF_NATIVE_ABI: compiler
+      STIFF_NATIVE_SANITIZE: ${{ matrix.profile == 'sanitized' && 'combined' || '0' }}
+    steps:
+      - name: Check out exact Stiff commit
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang make cmake patch pkg-config libcurl4-openssl-dev libjson-c-dev libsqlite3-dev python3 openssl
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew install cmake pkg-config curl json-c sqlite
+          echo "PKG_CONFIG_PATH=$(brew --prefix curl)/lib/pkgconfig:$(brew --prefix sqlite)/lib/pkgconfig" >> "$GITHUB_ENV"
+          python3 -c 'import sys; assert sys.version_info >= (3, 11, 8), sys.version'
+      - name: Prepare disposable candidate checkout
+        run: python3 scripts/prepare-bend-candidate.py "$BEND_CANDIDATE"
+      - name: Download and verify candidate compiler
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/setup.py --release-tracking-version "$BEND_CANDIDATE" 2>&1 | tee candidate-setup.log
+      - name: Run suite including proof verdict and negative proof
+        run: make test > candidate-test.log 2>&1 || { tail -100 candidate-test.log; exit 1; }
+      - name: Report candidate result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            echo "## Bend $BEND_CANDIDATE — $RUNNER_OS / ${{ matrix.profile }}: $JOB_STATUS"
+            echo 'This checks compatibility; it does not update the supported pin or publish.'
+            if [ -f .cache/toolchain/.release-metadata.json ]; then
+              echo '```json'
+              cat .cache/toolchain/.release-metadata.json
+              echo '```'
+            fi
+            if [ -f candidate-test.log ]; then
+              echo '```text'
+              tail -30 candidate-test.log
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

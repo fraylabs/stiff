@@ -92,8 +92,10 @@ class ExecutionTests(unittest.TestCase):
             p.stdout.close(); p.stderr.close()
 
     def test_kernel_cpu_limit(self):
-        p = subprocess.run(self.command('cpu','--cpu-seconds','1'), capture_output=True, timeout=5)
-        self.assertIn(p.returncode, (137, 152))
+        # RLIMIT_CPU counts CPU time, not wall time. A loaded runner can need
+        # more than five wall seconds to consume its one-second CPU budget.
+        p = subprocess.run(self.command('cpu','--cpu-seconds','1'), capture_output=True, timeout=20)
+        self.assertIn(p.returncode, (137, 152), (p.stdout, p.stderr))
 
     def test_hard_address_space_limit_or_explicit_platform_rejection(self):
         p = subprocess.run(self.command('memory','--address-space-mb','64'), capture_output=True, timeout=3)

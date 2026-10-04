@@ -137,6 +137,27 @@ static Term stiff_url_query_run(Env e, Term* f, IoWork* w) {
 #endif
 
 static void __attribute__((constructor)) stiff_url_register(void) {
+  // Fail before effects run if the compiler changes a marshaled layout.
+#ifdef CID(QueryParam)
+  if (cid_arity(CID(QueryParam)) != 2)
+    err_fail("Stiff ABI mismatch: QueryParam expected arity 2");
+#endif
+#ifdef CID(UrlReady)
+  if (cid_arity(CID(UrlReady)) != 1)
+    err_fail("Stiff ABI mismatch: UrlReady expected arity 1");
+#endif
+#ifdef CID(UrlError)
+  if (cid_arity(CID(UrlError)) != 1)
+    err_fail("Stiff ABI mismatch: UrlError expected arity 1");
+#endif
+#ifdef CID(Con)
+  if (cid_arity(CID(Con)) != 2)
+    err_fail("Stiff ABI mismatch: Con expected arity 2");
+#endif
+#ifdef CID(SCon)
+  if (cid_arity(CID(SCon)) != 2)
+    err_fail("Stiff ABI mismatch: SCon expected arity 2");
+#endif
 #ifdef CID(Url.encode_component)
   io_eff(CID(Url.encode_component), stiff_url_encode_run, 0);
 #endif

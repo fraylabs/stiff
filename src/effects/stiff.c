@@ -377,5 +377,24 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
 }
 
 static void __attribute__((constructor)) stiff_send_register(void) {
+  // Fail before effects run if the compiler changes a marshaled layout.
+#ifdef CID(HttpOk)
+  if (cid_arity(CID(HttpOk)) != 3)
+    err_fail("Stiff ABI mismatch: HttpOk expected arity 3");
+#endif
+#ifdef CID(HttpError)
+  if (cid_arity(CID(HttpError)) != 2)
+    err_fail("Stiff ABI mismatch: HttpError expected arity 2");
+#endif
+#ifdef CID(ResponseHeader)
+  if (cid_arity(CID(ResponseHeader)) != 2)
+    err_fail("Stiff ABI mismatch: ResponseHeader expected arity 2");
+#endif
+#ifdef CID(Con)
+  if (cid_arity(CID(Con)) != 2)
+    err_fail("Stiff ABI mismatch: Con expected arity 2");
+#endif
+  // Raw HttpOk writes bypass io_seal; this result must remain non-hot.
+  if (cid_hot(CID(HttpOk))) err_fail("Stiff ABI mismatch: HttpOk must be non-hot");
   io_eff(CID(Stiff.send), stiff_send_run, 0);
 }

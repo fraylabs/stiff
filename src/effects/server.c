@@ -1190,6 +1190,39 @@ static Term server_stop_run(Env e, Term* f, IoWork* w) {
 }
 #endif
 static void __attribute__((constructor)) server_register(void) {
+  // Fail before effects run if the compiler changes a marshaled layout.
+#ifdef CID(Received)
+  if (cid_arity(CID(Received)) != 6)
+    err_fail("Stiff ABI mismatch: Received expected arity 6");
+#endif
+#ifdef CID(StreamReceived)
+  if (cid_arity(CID(StreamReceived)) != 5)
+    err_fail("Stiff ABI mismatch: StreamReceived expected arity 5");
+#endif
+#ifdef CID(Metrics)
+  if (cid_arity(CID(Metrics)) != 10)
+    err_fail("Stiff ABI mismatch: Metrics expected arity 10");
+#endif
+#ifdef CID(Config)
+  if (cid_arity(CID(Config)) != 6)
+    err_fail("Stiff ABI mismatch: Config expected arity 6");
+#endif
+#ifdef CID(TransportLimits)
+  if (cid_arity(CID(TransportLimits)) != 2)
+    err_fail("Stiff ABI mismatch: TransportLimits expected arity 2");
+#endif
+#ifdef CID(Reply)
+  if (cid_arity(CID(Reply)) != 3)
+    err_fail("Stiff ABI mismatch: Reply expected arity 3");
+#endif
+#ifdef CID(ServerHeader)
+  if (cid_arity(CID(ServerHeader)) != 2)
+    err_fail("Stiff ABI mismatch: ServerHeader expected arity 2");
+#endif
+#ifdef CID(Con)
+  if (cid_arity(CID(Con)) != 2)
+    err_fail("Stiff ABI mismatch: Con expected arity 2");
+#endif
 #ifdef CID(Server.metrics)
   io_eff(CID(Server.metrics), server_metrics_run, 0);
 #endif

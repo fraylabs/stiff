@@ -515,6 +515,59 @@ static Term stiff_store_operation_run(Env e, Term* f, IoWork* work) {
 #endif
 
 static void __attribute__((constructor)) stiff_store_register(void) {
+  // Fail before effects run if the compiler changes a marshaled layout.
+#ifdef CID(Store)
+  if (cid_arity(CID(Store)) != 1)
+    err_fail("Stiff ABI mismatch: Store expected arity 1");
+#endif
+#ifdef CID(StoreReady)
+  if (cid_arity(CID(StoreReady)) != 1)
+    err_fail("Stiff ABI mismatch: StoreReady expected arity 1");
+#endif
+#ifdef CID(StoreFound)
+  if (cid_arity(CID(StoreFound)) != 2)
+    err_fail("Stiff ABI mismatch: StoreFound expected arity 2");
+#endif
+#ifdef CID(StoreVersionConflict)
+  if (cid_arity(CID(StoreVersionConflict)) != 2)
+    err_fail("Stiff ABI mismatch: StoreVersionConflict expected arity 2");
+#endif
+#ifdef CID(StoreReplayedVersionConflict)
+  if (cid_arity(CID(StoreReplayedVersionConflict)) != 2)
+    err_fail("Stiff ABI mismatch: StoreReplayedVersionConflict expected arity 2");
+#endif
+#ifdef CID(StoreOpenError)
+  if (cid_arity(CID(StoreOpenError)) != 2)
+    err_fail("Stiff ABI mismatch: StoreOpenError expected arity 2");
+#endif
+#ifdef CID(StoreReadError)
+  if (cid_arity(CID(StoreReadError)) != 2)
+    err_fail("Stiff ABI mismatch: StoreReadError expected arity 2");
+#endif
+#ifdef CID(StoreWriteError)
+  if (cid_arity(CID(StoreWriteError)) != 2)
+    err_fail("Stiff ABI mismatch: StoreWriteError expected arity 2");
+#endif
+#ifdef CID(StoreOperationApplied)
+  if (cid_arity(CID(StoreOperationApplied)) != 2)
+    err_fail("Stiff ABI mismatch: StoreOperationApplied expected arity 2");
+#endif
+#ifdef CID(StoreOperationVersionConflict)
+  if (cid_arity(CID(StoreOperationVersionConflict)) != 2)
+    err_fail("Stiff ABI mismatch: StoreOperationVersionConflict expected arity 2");
+#endif
+#ifdef CID(StoreOperationMissingConflict)
+  if (cid_arity(CID(StoreOperationMissingConflict)) != 1)
+    err_fail("Stiff ABI mismatch: StoreOperationMissingConflict expected arity 1");
+#endif
+#ifdef CID(StoreOperationError)
+  if (cid_arity(CID(StoreOperationError)) != 2)
+    err_fail("Stiff ABI mismatch: StoreOperationError expected arity 2");
+#endif
+#ifdef CID(SCon)
+  if (cid_arity(CID(SCon)) != 2)
+    err_fail("Stiff ABI mismatch: SCon expected arity 2");
+#endif
 #ifdef CID(Store.open)
   io_eff(CID(Store.open), stiff_store_open_run, 0);
 #endif

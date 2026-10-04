@@ -302,6 +302,59 @@ static Term json_stringify_with_limit_run(Env e, Term* f, IoWork* w) {
 #endif
 
 static void __attribute__((constructor)) stiff_json_register(void) {
+  // Fail before effects run if the compiler changes a marshaled layout.
+#ifdef CID(JsonBool)
+  if (cid_arity(CID(JsonBool)) != 1)
+    err_fail("Stiff ABI mismatch: JsonBool expected arity 1");
+#endif
+#ifdef CID(JsonNull)
+  if (cid_arity(CID(JsonNull)) != 0)
+    err_fail("Stiff ABI mismatch: JsonNull expected arity 0");
+#endif
+#ifdef CID(JsonNumber)
+  if (cid_arity(CID(JsonNumber)) != 1)
+    err_fail("Stiff ABI mismatch: JsonNumber expected arity 1");
+#endif
+#ifdef CID(JsonString)
+  if (cid_arity(CID(JsonString)) != 1)
+    err_fail("Stiff ABI mismatch: JsonString expected arity 1");
+#endif
+#ifdef CID(JsonArray)
+  if (cid_arity(CID(JsonArray)) != 1)
+    err_fail("Stiff ABI mismatch: JsonArray expected arity 1");
+#endif
+#ifdef CID(JsonObject)
+  if (cid_arity(CID(JsonObject)) != 1)
+    err_fail("Stiff ABI mismatch: JsonObject expected arity 1");
+#endif
+#ifdef CID(JsonDone)
+  if (cid_arity(CID(JsonDone)) != 1)
+    err_fail("Stiff ABI mismatch: JsonDone expected arity 1");
+#endif
+#ifdef CID(JsonFailure)
+  if (cid_arity(CID(JsonFailure)) != 2)
+    err_fail("Stiff ABI mismatch: JsonFailure expected arity 2");
+#endif
+#ifdef CID(JsonEncoded)
+  if (cid_arity(CID(JsonEncoded)) != 1)
+    err_fail("Stiff ABI mismatch: JsonEncoded expected arity 1");
+#endif
+#ifdef CID(JsonEncodeFailure)
+  if (cid_arity(CID(JsonEncodeFailure)) != 2)
+    err_fail("Stiff ABI mismatch: JsonEncodeFailure expected arity 2");
+#endif
+#ifdef CID(Tuple)
+  if (cid_arity(CID(Tuple)) != 2)
+    err_fail("Stiff ABI mismatch: Tuple expected arity 2");
+#endif
+#ifdef CID(Con)
+  if (cid_arity(CID(Con)) != 2)
+    err_fail("Stiff ABI mismatch: Con expected arity 2");
+#endif
+#ifdef CID(SCon)
+  if (cid_arity(CID(SCon)) != 2)
+    err_fail("Stiff ABI mismatch: SCon expected arity 2");
+#endif
 #ifdef CID(Json.parse)
   io_eff(CID(Json.parse), json_parse_run, 0);
 #endif
