@@ -87,7 +87,9 @@ mutant passes the supplied state laws, including the concrete idempotency exampl
 - Reads validate stored JSON and its 200-cent supply before invoking the engine.
   Keys are derived from the retained successful request receipts. The adapter
   compares receipt fields to reject reuse of a successful key with different
-  input. JSON field order is irrelevant; parser duplicate keys remain last-wins.
+  input. Validated requests are reconstructed in fixed field order before
+  persistence, so even concurrent retries with different JSON field order
+  produce identical SQLite inputs; parser duplicate keys remain last-wins.
 - A transfer writes both balances and retained request receipts as **one** store
   value under key `ledger`. The version comparison and SQLite operation receipt
   commit together. A stale comparison returns 409 and gets a durable rejected
@@ -146,7 +148,11 @@ server-test, sanitizer and kernel-build tasks use a mkdir lock at the repository
 parent `.heavy.lock` (the worktrees directory on this Mac). `STIFF_HEAVY_LOCK`
 can override it. They wait if another Stiff job owns it, execute sequentially and
 remove their own lock on normal/error exits. Bend engine checks and mutations
-are light and do not take that lock. No tool invokes setup from scratch.
+are light and do not take that lock. The ledger targets reuse Stiff dependencies
+rather than invoking its setup. Stiff's separate full-suite consumer fixture
+bootstraps a historical dependency in a temporary project; exclude or adapt that
+fixture on the shared Mac. The recorded full-suite run inadvertently included it;
+see the scope deviation in verification evidence.
 
 The sanitizer result covers the generated Bend/Stiff C with the existing checked
 ASan calling-convention mitigation, not uninstrumented SQLite/libevent/libcurl,

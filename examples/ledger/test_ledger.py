@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import socket
+import sqlite3
 import queue
 import random
 import threading
@@ -32,12 +33,12 @@ class LedgerHTTP(unittest.TestCase):
         self.addCleanup(self.stop)
         self.start()
 
-    def start(self):
+    def start(self, threads=2):
         environment = {**os.environ, 'PATH': '/nonexistent'}
         if Path('/usr/bin/atos').is_file():
             environment.update(ASAN_OPTIONS='external_symbolizer_path=/usr/bin/atos',
                                UBSAN_OPTIONS='external_symbolizer_path=/usr/bin/atos')
-        self.process = subprocess.Popen([str(BINARY), '--threads', '2', str(self.db), '0'],
+        self.process = subprocess.Popen([str(BINARY), '--threads', str(threads), str(self.db), '0'],
                                         cwd=self.directory, env=environment,
                                         stdout=subprocess.PIPE, stderr=self.log, text=True)
         lines = queue.Queue()
@@ -62,9 +63,9 @@ class LedgerHTTP(unittest.TestCase):
             self.assertNotIn(marker, logs)
         self.log.seek(0, 2)
 
-    def call(self, method, path, body=None, raw=None):
+    def call(self, method, path, body=None, raw=None, base_url=None):
         data = raw if raw is not None else json.dumps(body).encode() if body is not None else None
-        req = urllib.request.Request(self.url + path, data=data, method=method,
+        req = urllib.request.Request((base_url or self.url) + path, data=data, method=method,
                                      headers={'Content-Type': 'application/json'})
         try:
             response = urllib.request.urlopen(req, timeout=10)
@@ -160,6 +161,54 @@ class LedgerHTTP(unittest.TestCase):
         self.assertEqual(sorted(r[1]['replayed'] for r in results), [False, True])
         self.assertEqual(self.accounts()['accounts'], {'alice': 70, 'bob': 130})
         self.assertEqual(self.accounts()['version'], 2)
+
+    def test_concurrent_reordered_json_retries(self):
+        # Separate native processes share SQLite. Holding its writer lock briefly
+        # lets both handlers read the same prior snapshot before either commits.
+        peer_log = (self.directory / 'peer.log').open('w+')
+        environment = {**os.environ, 'PATH': '/nonexistent'}
+        if Path('/usr/bin/atos').is_file():
+            environment.update(ASAN_OPTIONS='external_symbolizer_path=/usr/bin/atos',
+                               UBSAN_OPTIONS='external_symbolizer_path=/usr/bin/atos')
+        peer = subprocess.Popen([str(BINARY), '--threads', '2', str(self.db), '0'],
+                                cwd=self.directory, env=environment,
+                                stdout=subprocess.PIPE, stderr=peer_log, text=True)
+        try:
+            lines = queue.Queue()
+            threading.Thread(target=lambda: lines.put(peer.stdout.readline()), daemon=True).start()
+            line = lines.get(timeout=10).strip()
+            self.assertTrue(line.startswith('LISTENING '), line)
+            peer_url = f'http://127.0.0.1:{int(line.split()[1])}'
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                for key in range(1, 11):
+                    source, target = ('alice', 'bob') if key % 2 else ('bob', 'alice')
+                    original = self.request(key, key, 1, source, target)
+                    reordered = dict(reversed(list(original.items())))
+                    blocker = sqlite3.connect(self.db, timeout=5)
+                    try:
+                        blocker.execute('BEGIN IMMEDIATE')
+                        futures = [pool.submit(self.call, 'POST', '/transfers', original),
+                                   pool.submit(self.call, 'POST', '/transfers', reordered, base_url=peer_url)]
+                        time.sleep(0.15)
+                        blocker.commit()
+                        results = [f.result(timeout=10) for f in futures]
+                    finally:
+                        blocker.close()
+                    self.assertEqual([r[0] for r in results], [200, 200], (key, results))
+                    self.assertEqual(sorted(r[1]['replayed'] for r in results), [False, True])
+                    self.assertEqual(self.accounts()['version'], key + 1)
+            self.assertEqual(self.accounts()['accounts'], {'alice': 100, 'bob': 100})
+        finally:
+            if peer.poll() is None:
+                peer.terminate()
+            peer.wait(timeout=10)
+            peer.stdout.close()
+            peer_log.seek(0)
+            logs = peer_log.read()
+            peer_log.close()
+            self.assertEqual(peer.returncode, 0, logs)
+            for marker in ('ERROR: AddressSanitizer', 'ERROR: LeakSanitizer', 'runtime error:'):
+                self.assertNotIn(marker, logs)
 
     def test_lost_ack_sigkill_and_reconcile(self):
         payload = json.dumps(self.request()).encode()

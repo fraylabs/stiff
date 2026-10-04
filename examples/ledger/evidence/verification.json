@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-04T12:45:13.759711+00:00",
+  "recorded_at_utc": "2026-10-04T13:05:27.771209+00:00",
   "base_revision": "1c1662b",
   "branch": "ledger",
   "platform": {
@@ -16,7 +16,7 @@
     "examples/ledger/Makefile": "56d21021a52ba5a593eb3c606a54ee8ea525950ba6f1c35dfe0095dde3f2f56e",
     "examples/ledger/PROOF.bend": "ccf86e449f96d8960e851a4e2a0f8984c05d3d09f03e884d80b4fdd10a3cf53c",
     "examples/ledger/engine.bend": "2b9b78814dfe741fb7a1a439574f0dcbe721be51f5b1491b7e9150e7fb0c55c6",
-    "examples/ledger/main.bend": "0327fb4ed80bed8297eabb115c2c67fb296d5f7ffa9aacdb3cc88f830b87cfef",
+    "examples/ledger/main.bend": "fe5fe93cd90803c839a63da7b13bf49826e4ba5d69e8d44f1f80101e2e441bfe",
     "examples/ledger/mistakes/01-credit-extra-cent.patch": "1386974d962638daab8c11a452794607f43ca756d39326574b1577ca2e530438",
     "examples/ledger/mistakes/02-credit-without-debit.patch": "fd1f6018eb1320b1697fe36cd9d07c4d0d953443c7f9befec283ebcb55c17ae4",
     "examples/ledger/mistakes/03-missing-funds-check.patch": "232711d8afe068fa683a0327b4d4f850fbc844ff78070ee476a4587a4d1fbe2b",
@@ -29,7 +29,7 @@
     "examples/ledger/setup-kernel.py": "6834ef7553fc05bcd47e7f995d28d6057f8703386396a2f054cc4c4e904144e7",
     "examples/ledger/spec.bend": "c1532f4a6b769bac17aa665acfb5809713f6218bd058fef2a56a3230c0def406",
     "examples/ledger/tasks.py": "dcf2ca9370fc44aff6f3233a58f09f825e31e0d9667ed146c47c3b8c82ce63d5",
-    "examples/ledger/test_ledger.py": "2a4a53f0ce52bf2865e5e145ca33eb331d565313acaa98c00e97d1199b384e8d",
+    "examples/ledger/test_ledger.py": "b265185548624bc44a5a3fe88e3991d9cd7ea5e849a1e0b4e12cd4805816edea",
     "examples/ledger/witnesses.bend": "e2c6b4ed7ac5c55e91f1495dd32eaf99c89d85579540f6a305aa4dda3f08da4c"
   },
   "laws_proven": [
@@ -99,22 +99,22 @@
   },
   "tests": [
     {
-      "command": "make -C examples/ledger test",
+      "command": "python3 examples/ledger/tasks.py heavy python3 examples/ledger/test_ledger.py",
       "exit": 0,
-      "tests": 13,
-      "seconds": 18.745,
-      "profile": "unmodified Bend compiler ABI",
+      "tests": 14,
+      "seconds": 21.141,
+      "profile": "unmodified Bend compiler ABI; artifact built by make -C examples/ledger test",
       "verdict": "OK",
-      "log": "python3 tasks.py build\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nBuilt <stiff>/.cache/ledger/ledger. Native libraries: libcurl json-c pinned-libevent-2.2.2-alpha-static.\npython3 tasks.py heavy python3 examples/ledger/test_ledger.py\nWaiting for shared Stiff heavy-work lock...\ntest_conflicting_key_race (__main__.LedgerHTTP.test_conflicting_key_race) ... ok\ntest_drain_and_reject_preserves_complete_snapshot (__main__.LedgerHTTP.test_drain_and_reject_preserves_complete_snapshot) ... ok\ntest_identical_concurrent_retries (__main__.LedgerHTTP.test_identical_concurrent_retries) ... ok\ntest_initial_and_both_directions (__main__.LedgerHTTP.test_initial_and_both_directions) ... ok\ntest_invalid_requests_and_routes (__main__.LedgerHTTP.test_invalid_requests_and_routes) ... ok\ntest_lost_ack_sigkill_and_reconcile (__main__.LedgerHTTP.test_lost_ack_sigkill_and_reconcile) ... ok\ntest_numeric_key_and_version_boundaries (__main__.LedgerHTTP.test_numeric_key_and_version_boundaries) ... ok\ntest_receipt_capacity_and_retry_at_capacity (__main__.LedgerHTTP.test_receipt_capacity_and_retry_at_capacity) ... ok\ntest_reordered_json_is_same_input (__main__.LedgerHTTP.test_reordered_json_is_same_input) ... ok\ntest_retry_after_intervening_transfer_and_restart (__main__.LedgerHTTP.test_retry_after_intervening_transfer_and_restart) ... ok\ntest_same_key_different_input (__main__.LedgerHTTP.test_same_key_different_input) ... ok\ntest_seeded_history_against_independent_accounting (__main__.LedgerHTTP.test_seeded_history_against_independent_accounting) ... ok\ntest_version_race (__main__.LedgerHTTP.test_version_race) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 18.745s\n\nOK\n"
+      "log": "test_concurrent_reordered_json_retries (__main__.LedgerHTTP.test_concurrent_reordered_json_retries) ... ok\ntest_conflicting_key_race (__main__.LedgerHTTP.test_conflicting_key_race) ... ok\ntest_drain_and_reject_preserves_complete_snapshot (__main__.LedgerHTTP.test_drain_and_reject_preserves_complete_snapshot) ... ok\ntest_identical_concurrent_retries (__main__.LedgerHTTP.test_identical_concurrent_retries) ... ok\ntest_initial_and_both_directions (__main__.LedgerHTTP.test_initial_and_both_directions) ... ok\ntest_invalid_requests_and_routes (__main__.LedgerHTTP.test_invalid_requests_and_routes) ... ok\ntest_lost_ack_sigkill_and_reconcile (__main__.LedgerHTTP.test_lost_ack_sigkill_and_reconcile) ... ok\ntest_numeric_key_and_version_boundaries (__main__.LedgerHTTP.test_numeric_key_and_version_boundaries) ... ok\ntest_receipt_capacity_and_retry_at_capacity (__main__.LedgerHTTP.test_receipt_capacity_and_retry_at_capacity) ... ok\ntest_reordered_json_is_same_input (__main__.LedgerHTTP.test_reordered_json_is_same_input) ... ok\ntest_retry_after_intervening_transfer_and_restart (__main__.LedgerHTTP.test_retry_after_intervening_transfer_and_restart) ... ok\ntest_same_key_different_input (__main__.LedgerHTTP.test_same_key_different_input) ... ok\ntest_seeded_history_against_independent_accounting (__main__.LedgerHTTP.test_seeded_history_against_independent_accounting) ... ok\ntest_version_race (__main__.LedgerHTTP.test_version_race) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 21.141s\n\nOK\n"
     },
     {
-      "command": "make -C examples/ledger test-sanitize",
+      "command": "LEDGER_BINARY=<stiff>/.cache/ledger/ledger-sanitized python3 examples/ledger/tasks.py heavy python3 examples/ledger/test_ledger.py",
       "exit": 0,
-      "tests": 13,
-      "seconds": 36.51,
-      "profile": "generated Bend/Stiff C ASan+UBSan; checked preserve_none mitigation; external dependencies uninstrumented",
+      "tests": 14,
+      "seconds": 51.301,
+      "profile": "generated Bend/Stiff C ASan+UBSan; artifact built by make -C examples/ledger test-sanitize; checked preserve_none mitigation; external dependencies uninstrumented",
       "verdict": "OK",
-      "log": "STIFF_NATIVE_ABI=compiler STIFF_NATIVE_SANITIZE=combined LEDGER_BINARY=<stiff>/.cache/ledger/ledger-sanitized python3 tasks.py build\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nWaiting for shared Stiff heavy-work lock...\nBuilt <stiff>/.cache/ledger/ledger-sanitized. Native libraries: libcurl json-c pinned-libevent-2.2.2-alpha-static.\n<stiff>/.cache/ledger/ledger-sanitized.c:16725:12: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]\n 16725 |     return sprintf(buf, \"nan\");\n       |            ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here\n  278 | __deprecated_msg(\"This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n<stiff>/.cache/ledger/ledger-sanitized.c:16739:27: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]\n 16739 |     n = (int)(ep - buf) + sprintf(ep, \"e%c%d\", ex < 0 ? '-' : '+', abs(ex));\n       |                           ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here\n  278 | __deprecated_msg(\"This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.\")\n      | ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'\n  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))\n      |                                                       ^\n2 warnings generated.\nLEDGER_BINARY=<stiff>/.cache/ledger/ledger-sanitized python3 tasks.py heavy python3 examples/ledger/test_ledger.py\ntest_conflicting_key_race (__main__.LedgerHTTP.test_conflicting_key_race) ... ok\ntest_drain_and_reject_preserves_complete_snapshot (__main__.LedgerHTTP.test_drain_and_reject_preserves_complete_snapshot) ... ok\ntest_identical_concurrent_retries (__main__.LedgerHTTP.test_identical_concurrent_retries) ... ok\ntest_initial_and_both_directions (__main__.LedgerHTTP.test_initial_and_both_directions) ... ok\ntest_invalid_requests_and_routes (__main__.LedgerHTTP.test_invalid_requests_and_routes) ... ok\ntest_lost_ack_sigkill_and_reconcile (__main__.LedgerHTTP.test_lost_ack_sigkill_and_reconcile) ... ok\ntest_numeric_key_and_version_boundaries (__main__.LedgerHTTP.test_numeric_key_and_version_boundaries) ... ok\ntest_receipt_capacity_and_retry_at_capacity (__main__.LedgerHTTP.test_receipt_capacity_and_retry_at_capacity) ... ok\ntest_reordered_json_is_same_input (__main__.LedgerHTTP.test_reordered_json_is_same_input) ... ok\ntest_retry_after_intervening_transfer_and_restart (__main__.LedgerHTTP.test_retry_after_intervening_transfer_and_restart) ... ok\ntest_same_key_different_input (__main__.LedgerHTTP.test_same_key_different_input) ... ok\ntest_seeded_history_against_independent_accounting (__main__.LedgerHTTP.test_seeded_history_against_independent_accounting) ... ok\ntest_version_race (__main__.LedgerHTTP.test_version_race) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 36.510s\n\nOK\n"
+      "log": "test_concurrent_reordered_json_retries (__main__.LedgerHTTP.test_concurrent_reordered_json_retries) ... ok\ntest_conflicting_key_race (__main__.LedgerHTTP.test_conflicting_key_race) ... ok\ntest_drain_and_reject_preserves_complete_snapshot (__main__.LedgerHTTP.test_drain_and_reject_preserves_complete_snapshot) ... ok\ntest_identical_concurrent_retries (__main__.LedgerHTTP.test_identical_concurrent_retries) ... ok\ntest_initial_and_both_directions (__main__.LedgerHTTP.test_initial_and_both_directions) ... ok\ntest_invalid_requests_and_routes (__main__.LedgerHTTP.test_invalid_requests_and_routes) ... ok\ntest_lost_ack_sigkill_and_reconcile (__main__.LedgerHTTP.test_lost_ack_sigkill_and_reconcile) ... ok\ntest_numeric_key_and_version_boundaries (__main__.LedgerHTTP.test_numeric_key_and_version_boundaries) ... ok\ntest_receipt_capacity_and_retry_at_capacity (__main__.LedgerHTTP.test_receipt_capacity_and_retry_at_capacity) ... ok\ntest_reordered_json_is_same_input (__main__.LedgerHTTP.test_reordered_json_is_same_input) ... ok\ntest_retry_after_intervening_transfer_and_restart (__main__.LedgerHTTP.test_retry_after_intervening_transfer_and_restart) ... ok\ntest_same_key_different_input (__main__.LedgerHTTP.test_same_key_different_input) ... ok\ntest_seeded_history_against_independent_accounting (__main__.LedgerHTTP.test_seeded_history_against_independent_accounting) ... ok\ntest_version_race (__main__.LedgerHTTP.test_version_race) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 51.301s\n\nOK\n"
     },
     {
       "command": "python3 examples/ledger/tasks.py heavy make test",
@@ -149,16 +149,29 @@
   "development_correction": "The first independent attempt lacked Lean. A later automatic Bend kernel build wrote new bendtt/bendtt.c files to ~/.bend; those newly generated files were moved into the worktree cache, leaving the pre-existing pinned Lean source. The final documented bootstrap builds explicitly under .cache/ledger with BENDTT set. No global installation remains.",
   "native_artifacts": {
     "ledger": {
-      "binary_sha256": "704fc79a5df4295ea56b05c0bef902d110c205582ec7d0c867df6b43be4d4c66",
-      "generated_c_sha256": "c1f6f4a5f87c7a6960add2f67b9684f9ef88ac2d50af55495fbcfc54e1d3013d",
+      "binary_sha256": "2c6ea1a41697b8d60953d5b7b3eb12666232848a6b915153eb764bb6b7543171",
+      "generated_c_sha256": "438913ecdd91affee3fa4bbe0b1eb6474d4291fc01101cfab98c09b8b6f87b97",
       "attribute_macro_retained": true,
       "preserve_none_sites": 2
     },
     "ledger-sanitized": {
-      "binary_sha256": "6a28a2275b41275b0800a206235af0fb2d81050357c26a8e808478a0d4b23461",
-      "generated_c_sha256": "13f4d7e6fc7c221f37037a07e8a088e7fc8f093348e2829900c8c3b5e3d10a6b",
+      "binary_sha256": "1c68c9e5cd80ce5d49e0a8b98c9a8b3d511581616a6acfa0b73bcdcd25b14dd9",
+      "generated_c_sha256": "245a34c493e9a70ea699dc129f3ea8a75da73f6ac76b6f204139a038c5a61f09",
       "attribute_macro_retained": true,
       "preserve_none_sites": 0
     }
+  },
+  "adapter_regression": {
+    "description": "Equivalent requests with different JSON field order could race across two server processes sharing SQLite and produce different byte inputs, causing a false idempotency conflict. Normalize validated request fields before persistence.",
+    "before_revision": "f6289ce",
+    "before_exit": 1,
+    "before_log": "test_concurrent_reordered_json_retries (__main__.LedgerHTTP.test_concurrent_reordered_json_retries) ... FAIL\n\n======================================================================\nFAIL: test_concurrent_reordered_json_retries (__main__.LedgerHTTP.test_concurrent_reordered_json_retries)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"<stiff>/examples/ledger/test_ledger.py\", line 197, in test_concurrent_reordered_json_retries\n    self.assertEqual([r[0] for r in results], [200, 200], (key, results))\nAssertionError: Lists differ: [409, 200] != [200, 200]\n\nFirst differing element 0:\n409\n200\n\n- [409, 200]\n?  ^ ^\n\n+ [200, 200]\n?  ^ ^\n : (1, [(409, {'error': {'code': 'idempotency_conflict', 'message': 'Key already names another transaction'}}, {'x-request-id': '1', 'content-type': 'application/json', 'Date': 'Sun, 04 Oct 2026 12:58:15 GMT', 'Content-Length': '91', 'Connection': 'close'}), (200, {'version': 2, 'replayed': False, 'accounts': {'alice': 99, 'bob': 101}}, {'x-request-id': '1', 'content-type': 'application/json', 'Date': 'Sun, 04 Oct 2026 12:58:15 GMT', 'Content-Length': '64', 'Connection': 'close'})])\n\n----------------------------------------------------------------------\nRan 1 test in 0.257s\n\nFAILED (failures=1)\n",
+    "after": "The final two-process fixture uses a short SQLite writer barrier to force overlapping prior-state reads. All ten pairs of differently ordered equivalent requests succeed once and replay once. It passes in both final 14-test suites.",
+    "proof_scope": "This adapter bug was outside the engine laws, which were unchanged. It was detected by an executable regression test, not by proof checking."
+  },
+  "framework_fixture_scope_deviation": {
+    "description": "The existing full-suite test_standalone_pinned_authenticated_project removes BEND and invokes make setup build in an auto-cleaned temporary consumer project. That fixture fetched a historical Stiff/Bend dependency and built its own scoped libevent, contrary to the shared-Mac instruction to avoid fresh setup and temporary repo copies. This was identified after the full suite completed.",
+    "remaining_state": "The temporary consumer project was removed by its TemporaryDirectory context; no global install or main-checkout change resulted. Ledger source/proof/build/test work used the shared Bend 2.0.35 compiler and pinned libevent.",
+    "future_runs": "Exclude or adapt that historical consumer fixture for shared-Mac work rather than blindly invoking the complete root suite."
   }
 }

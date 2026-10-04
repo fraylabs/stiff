@@ -41,6 +41,16 @@ def uint(value: Maybe<Json.Json>) -> U32:
     case Some{Json.JsonNumber{s}}: number(U32.read(s))
     case other: 0
 
+# SQLite compares receipt inputs byte-for-byte. Normalize validated fields before
+# either concurrent writer constructs its snapshot, not only on the replay path.
+def canonical_request(+value: Json.Json) -> Json.Json:
+  Json.object([
+    ("idempotency_key", Json.u32(uint(Json.field("idempotency_key", value)))),
+    ("expected_version", Json.u32(uint(Json.field("expected_version", value)))),
+    ("from", Json.string(text(Json.field("from", value)))),
+    ("to", Json.string(text(Json.field("to", value)))),
+    ("amount", Json.u32(uint(Json.field("amount", value))))])
+
 def entries(value: Maybe<Json.Json>) -> List<&2, Json.Json>:
   match value:
     case Some{Json.JsonArray{items}}: items
@@ -178,7 +188,7 @@ def accounts(store: Db.Store, params: List<&2, Router.Param>, request: Web.Incom
 def transfer(store: Db.Store, params: List<&2, Router.Param>, request: Web.Incoming) -> IO(Web.Reply):
   match request:
     case Web.Incoming{id, method, path, target, headers, body}:
-      App.json_body(body, value => Schema.apply(request_schema(), value, v => load(store, Some{v})))
+      App.json_body(body, value => Schema.apply(request_schema(), value, v => load(store, Some{canonical_request(v)})))
 
 def reconciled(result: Db.OperationResult) -> IO(Web.Reply):
   match result:
