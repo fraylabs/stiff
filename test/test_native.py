@@ -605,8 +605,10 @@ class NativeTests(unittest.TestCase):
             shutil.copytree(ROOT / "examples/auth-client", project,
                             ignore=shutil.ignore_patterns("deps", "build"))
             # Exercise the documented GitHub fetch, compiler install and build.
+            # This builds scoped libevent from source (its own build budget is
+            # 600s); 120s can expire before a sanitized consumer even compiles.
             result = subprocess.run(["make", "setup", "build"], cwd=project,
-                                    capture_output=True, text=True, timeout=120,
+                                    capture_output=True, text=True, timeout=600,
                                     env={k: v for k, v in os.environ.items() if k != "BEND"})
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             expected = (project / "stiff.rev").read_text().strip()
