@@ -10,7 +10,8 @@
 
 Experimental release; compiler/native dependencies remain trusted. See
 docs/compatibility.md, docs/bend-2.0.35.md and docs/release-tracking.md for
-verified coverage and limits.
+verified coverage and limits. Published as an experimental release at
+https://github.com/fraylabs/stiff/releases/tag/v0.3.0.
 
 ## 0.2.0 — September 21, 2026
 

@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-04",
+  "status": "published and verified",
+  "release": "https://github.com/fraylabs/stiff/releases/tag/v0.3.0",
+  "tag": "v0.3.0",
+  "tag_revision": "e55cf6cfcb60944b3170683fe8d4c90d046d889a",
+  "tag_object": "863c029ab0c160ba8173a6f2fbd4a1413627ff74",
+  "bendhub_hash": "0x2731c2a5d4185b57cf5353061639642e",
+  "consumer_library_and_native_tools_revision": "3295bf9180f6844fc9d2ed7ca94ad6109ed9045b",
+  "consumer_anchor_matches_tagged_library_and_native_build_sources": true,
+  "author": "BrianLYS",
+  "prerelease": true,
+  "assets": [
+    {
+      "name": "stiff-0.3.0-darwin-arm64.tar.gz",
+      "size": 353167,
+      "sha256": "8c694521f9d3edd3c5f478162e04b956147a54f1bde94e9a7c869d9937b2e551",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.3.0/stiff-0.3.0-darwin-arm64.tar.gz"
+    },
+    {
+      "name": "stiff-0.3.0-darwin-arm64.tar.gz.sha256",
+      "size": 98,
+      "sha256": "deaf94fafdc511ace67c07c66f0715d54b72289141ad4fa58eac72f58676bc77",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.3.0/stiff-0.3.0-darwin-arm64.tar.gz.sha256"
+    }
+  ],
+  "order": [
+    "Commit version and native build-tool preparation.",
+    "Publish BendHub anonymously with the pinned compiler and verify the downloaded package.",
+    "Commit the hash/manifest, updated consumer pins and verification evidence.",
+    "Build and verify a clean archive from that exact candidate; push main and wait for both CI workflows.",
+    "Tag the verified candidate, publish the pre-release, then download and compare both assets.",
+    "Record publication and final CI results in a subsequent documentation/evidence commit."
+  ],
+  "why": "BendHub precedes tagging so the immutable tag includes its verified hash and matching manifest. Consumer pins name an earlier immutable 0.3.0 source/native-tool anchor with matching bytes, avoiding a circular self-referential Git hash. The archive manifest names the exact tagged commit. Publication receipts are committed afterwards without changing that tag.",
+  "limits": [
+    "Native dependencies/compiler remain trusted.",
+    "Independent Lean/BendTT kernel verification is not claimed.",
+    "Native prebuilt archive is macOS arm64 only; other platforms build from source.",
+    "Historical workload measurements retain their original revisions."
+  ]
+}

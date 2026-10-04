@@ -1,0 +1,165 @@
+{
+  "revision": "e55cf6cfcb60944b3170683fe8d4c90d046d889a",
+  "supported_bend": "2.0.35",
+  "pinned": {
+    "conclusion": "success",
+    "jobs": [
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186338"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (macos-15, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186421"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186455"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04-arm, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186473"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (macos-15-intel, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186490"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (macos-15, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186497"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (macos-15-intel, sanitized)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186518"
+      },
+      {
+        "checks": [
+          {
+            "conclusion": "success",
+            "name": "Run make test"
+          },
+          {
+            "conclusion": "success",
+            "name": "Verify hard resident-memory isolation in a disposable unit"
+          }
+        ],
+        "conclusion": "success",
+        "name": "test (ubuntu-24.04-arm, normal)",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714/job/111438186901"
+      }
+    ],
+    "revision": "e55cf6cfcb60944b3170683fe8d4c90d046d889a",
+    "status": "completed",
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37202947714"
+  },
+  "latest_bend": {
+    "conclusion": "success",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "resolve",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947964/job/111438189655"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / ubuntu-24.04 / sanitized",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947964/job/111438200372"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / macos-15 / normal",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947964/job/111438200402"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / macos-15 / sanitized",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947964/job/111438200404"
+      },
+      {
+        "conclusion": "success",
+        "name": "Bend 2.0.35 / ubuntu-24.04 / normal",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37202947964/job/111438200409"
+      }
+    ],
+    "revision": "e55cf6cfcb60944b3170683fe8d4c90d046d889a",
+    "status": "completed",
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37202947964"
+  }
+}

@@ -1,9 +1,10 @@
 # Bend 2.0.35 upgrade
 
-This checkout targets Bend 2.0.35, source
-`79df8d9c40722ee9507a1e253f283b51025f9d6c`, on branch `bend-2.0.35`
-from `22ff9d3`. Release archives, historical evidence and the published BendHub
-package still describe the older release; no publication is part of this upgrade.
+This report records the upgrade to Bend 2.0.35, source
+`79df8d9c40722ee9507a1e253f283b51025f9d6c`, begun on branch `bend-2.0.35`
+from `22ff9d3`. No publication was performed as part of that upgrade work.
+The separate 0.3.0 release now provides matching native archives and a
+[BendHub package](bendhub.md); [release evidence](evidence/0.3.0/) records it.
 
 ## What changed
 
@@ -20,7 +21,7 @@ package still describe the older release; no publication is part of this upgrade
   Metrics, boxed Header and scalar JsonBool layouts remain the same in the
   exercised programs; no field reordering was needed.
 - Since 2.0.32, `IO.args()` includes the executable name. Current checkout CLI
-  examples and fixtures explicitly drop the head with `List.tail`. Invocation
+  examples and fixtures explicitly drop the executable-name head. Invocation
   syntax remains unchanged for their users. The independent kingdom CLI also
   needed this adjustment; its historical comparison reports retain their dates.
 - `--check-only` now prints `ALL PROOFS CHECK`. Test and verification scripts

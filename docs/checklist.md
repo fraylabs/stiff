@@ -8,7 +8,23 @@ constructor ABI checks, a server-first quickstart and load-test timing robustnes
 The [BendHub package](bendhub.md) and both standalone clients use 2.0.35.
 [Experimental release](https://github.com/fraylabs/stiff/releases/tag/v0.3.0).
 
-Current verification is recorded in [0.3.0 evidence](evidence/0.3.0/).
+[Pinned Check](https://github.com/fraylabs/stiff/actions/runs/37202947714) passed
+all eight Linux/macOS arm64/x64 normal/sanitizer jobs on release commit
+`e55cf6cfcb60944b3170683fe8d4c90d046d889a`.
+[Latest-Bend CI](https://github.com/fraylabs/stiff/actions/runs/37202947964) passed
+four test jobs plus resolution on that same commit with Bend 2.0.35.
+[Platform results](evidence/0.3.0/platform.json) retain the exact job scope.
+The local native suite passed **147 tests in 148.086 seconds**, including the
+copied Git-pinned HTTPS client; [local evidence](evidence/0.3.0/local-verification.json)
+identifies the preparation tree and verified source hashes.
+
+The clean macOS arm64 archive was built from the exact tagged commit. Its
+checksums/provenance, supervised application health, persistent create/read/
+restart and all six notes journeys passed with no build tools on PATH.
+Both published assets were downloaded again and matched the verified local bytes.
+[Archive evidence](evidence/0.3.0/release-archive.json),
+[BendHub verification](evidence/0.3.0/bendhub.json) and
+[publication order/receipt](evidence/0.3.0/publication.json) record these checks.
 The compiler migration and latest-Bend checks have distinct scope; see
 [the upgrade report](bend-2.0.35.md) and [release tracking](release-tracking.md).
 Historical workload and independent QA results below remain attributed to their
