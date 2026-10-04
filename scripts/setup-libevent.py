@@ -219,7 +219,7 @@ def main():
                         f"-DCMAKE_INSTALL_PREFIX={DESTINATION}", *CMAKE_OPTIONS],
                        check=True, timeout=300)
         subprocess.run([cmake, "--build", str(build), "--parallel",
-                        str(min(os.cpu_count() or 1, 8))], check=True, timeout=600)
+                        str(min(os.cpu_count() or 1, 5))], check=True, timeout=600)
         environment = {**os.environ, "DESTDIR": str(stage)}
         subprocess.run([cmake, "--install", str(build)], check=True,
                        env=environment, timeout=300)
