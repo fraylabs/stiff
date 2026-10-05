@@ -599,6 +599,10 @@ class NativeTests(unittest.TestCase):
         self.assertNotIn("authorization", self.proxy_headers)
         self.assertNotIn("x-api-key", self.proxy_headers)
 
+    # A fresh consumer downloads its own compiler and builds libevent from
+    # source. CI runs it on every push; set STIFF_CONSUMER_TEST=1 to run it locally.
+    @unittest.skipUnless(os.environ.get("CI") or os.environ.get("STIFF_CONSUMER_TEST"),
+                         "fresh consumer setup runs in CI; set STIFF_CONSUMER_TEST=1 locally")
     def test_standalone_pinned_authenticated_project(self):
         with tempfile.TemporaryDirectory(prefix="stiff-consumer-") as directory:
             project = Path(directory) / "app"
