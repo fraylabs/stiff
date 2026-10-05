@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-05",
+  "status": "published and verified",
+  "release": "https://github.com/fraylabs/stiff/releases/tag/v0.4.0",
+  "tag": "v0.4.0",
+  "tag_revision": "945e73b4fd2a2b3b25e41fa696f3b908b7677e7e",
+  "tag_object": "df63ae477e81a06fb6b0dbd14b84153df4781a2d",
+  "bendhub_hash": "0x4ee0ec16258e9b8ad6ef37e5b8c4f95e",
+  "consumer_library_and_native_tools_revision": "be078621ad69303546de258fd8db578fc8c9b0f6",
+  "consumer_anchor_matches_tagged_library_and_native_build_sources": true,
+  "author": "BrianLYS",
+  "prerelease": true,
+  "assets": [
+    {
+      "name": "stiff-0.4.0-darwin-arm64.tar.gz",
+      "size": 353141,
+      "sha256": "87763ad34e144e5792a9093d10904abcfa5f37bedd7a3ac508803708931ff9be",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.4.0/stiff-0.4.0-darwin-arm64.tar.gz",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.4.0-darwin-arm64.tar.gz.sha256",
+      "size": 98,
+      "sha256": "99b75fdf4ff9793c79d891fddb865c91809072460b5811054070b0e82fd8cfbb",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.4.0/stiff-0.4.0-darwin-arm64.tar.gz.sha256",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.4.0-linux-aarch64.tar.gz",
+      "size": 442377,
+      "sha256": "a250bde754296eea2ef1ba6ec246be148840491e3f236d464c8622972a6e16de",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.4.0/stiff-0.4.0-linux-aarch64.tar.gz",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.4.0-linux-aarch64.tar.gz.sha256",
+      "size": 99,
+      "sha256": "c2cf9941dd0cebaaf6e809dc675c018ce496f9946819422fb722cf16c089d8e8",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.4.0/stiff-0.4.0-linux-aarch64.tar.gz.sha256",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.4.0-linux-x86_64.tar.gz",
+      "size": 455680,
+      "sha256": "e1dcf985b8221f5bbb31b2949c923e73118e65a93821de536c4875890aa363f3",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.4.0/stiff-0.4.0-linux-x86_64.tar.gz",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.4.0-linux-x86_64.tar.gz.sha256",
+      "size": 98,
+      "sha256": "2291b5b08f554b2ab00e5fe4ddfa6c2d692000c34c79298091f55c80c73403e7",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.4.0/stiff-0.4.0-linux-x86_64.tar.gz.sha256",
+      "published_download_matches": true
+    }
+  ],
+  "ci_runs": {
+    "preparation": 37333290463,
+    "archive_rehearsal": 37333290526,
+    "tag_source": 37335463100,
+    "final_linux_archives": 37335491116
+  },
+  "order": [
+    "Verified candidate CI and rehearsed hosted Linux archives.",
+    "Published BendHub with the pinned compiler and verified empty-cache source bytes, proofs and consumers.",
+    "Committed immutable consumer pins and evidence; fast-forwarded main.",
+    "Built all three clean archives from the final commit and verified them; waited for final CI.",
+    "Tagged that commit and created the pre-release with all six assets.",
+    "Downloaded each published asset and compared every byte; committed final receipts afterwards."
+  ],
+  "why": "The tag contains the verified BendHub hash and manifest. Consumer pins use an earlier immutable source/build-tool anchor with matching bytes, avoiding a circular self-referential Git hash. All archive manifests name the exact tag commit. Publication receipts follow without changing the tag.",
+  "limits": [
+    "Local RSS benchmark fails because the sandbox blocks /bin/ps; hosted CI supplies the full-suite result.",
+    "Pure modeled decisions are compiler-checked; native effects/compiler/dependencies and edge integrations remain trusted/tested.",
+    "No new capacity, end-to-end verification or full memory-safety claim."
+  ],
+  "local_release_branch_deleted": true,
+  "main_push": "fast-forward; no force push or published history rewrite"
+}

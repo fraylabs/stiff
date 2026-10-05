@@ -44,8 +44,7 @@ from GitHub revision `be078621ad69303546de258fd8db578fc8c9b0f6`, verifies that
 revision before building, and keeps the downloaded hub package in `.bend/lib`
 using `BEND_LIB`. It does not change your global compiler or package cache.
 The library, compiler pin and native build scripts match the tagged release;
-subsequent release commits add consumer pins, verification tooling, documentation
-and evidence.
+subsequent release commits add consumer pins, documentation and evidence.
 
 Server applications still need the scoped, patched libevent 2.2.2-alpha build;
 storage needs SQLite. Client binaries use libcurl and json-c. Runtime has no

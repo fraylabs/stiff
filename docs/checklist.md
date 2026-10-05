@@ -25,6 +25,20 @@ CI with exact-archive provenance, checksum, supervised health and persistent
 journey checks before use for release builds. Historical measurements below
 retain their original revisions and are not new 0.4.0 capacity measurements.
 
+[Final pinned CI](https://github.com/fraylabs/stiff/actions/runs/37335463100) passed
+all eight platform/profile jobs on tagged source
+`945e73b4fd2a2b3b25e41fa696f3b908b7677e7e`.
+[Final Linux archive CI](https://github.com/fraylabs/stiff/actions/runs/37335491116)
+passed both hosted builds after the separate workflow rehearsal. Each of the three
+clean archives passed provenance/checksum checks, supervised health,
+create/read/restart and all six persistent notes journeys. All six published
+assets were downloaded again and matched every original byte.
+[Platform results](evidence/0.4.0/platform.json),
+[archive results](evidence/0.4.0/release-archives.json) and
+[publication receipt](evidence/0.4.0/publication.json) record the exact scope.
+BendHub was verified before tagging so the tag contains its immutable hash and
+manifest; publication receipts follow in a separate documentation commit.
+
 ## Historical 0.3.0 release
 
 Stiff **0.3.0** supports Bend **2.0.35** and retains the bounded framework
