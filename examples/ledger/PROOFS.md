@@ -196,6 +196,8 @@ ASan calling-convention mitigation, not uninstrumented SQLite/libevent/libcurl,
 the unmodified default ABI, or a formal memory-safety claim.
 
 [HTTP contract verification evidence](evidence/contracts-verification.json) records
-the accepted kernel verdict, native ledger checks and the normal-suite RSS
-inspection limitation. The full normal suite needs a rerun where process RSS
-inspection is permitted.
+the accepted kernel verdict, native ledger checks and the local RSS inspection
+limitation. [CI run 37298832406](https://github.com/fraylabs/stiff/actions/runs/37298832406)
+passed all four normal jobs on the implementation commit. Overall CI was 7/8:
+the macOS Intel sanitized job failed an unrelated load-tool timing assertion
+(0.7037 seconds against a 0.7-second bound); no bound was relaxed here.

@@ -56,12 +56,12 @@
     "skipped": 1,
     "failed": 1,
     "failure": "test_native_measurement_overload_recovery_and_shutdown: PermissionError: [Errno 1] Operation not permitted: /bin/ps. RSS sampling could not run in this environment.",
-    "claim": "The full normal suite did not pass. It requires a rerun where process RSS inspection is permitted."
+    "claim": "The local normal-suite run could not complete RSS sampling in the sandbox. All four normal CI jobs passed on the same implementation commit; see ci."
   },
   "execution": {
     "dependencies": "Existing toolchain/libevent symlinks and scoped BendTT kernel reused; no setup or global installation.",
     "heavy_work": "One heavy run at a time under the repository parent mkdir lock. Ledger tasks took their own lock. make test took and released the lock externally.",
-    "publication": "No push, tag, release or publication."
+    "publication": "Implementation commit 2a3276a was pushed to contracts for CI by the maintainer. This evidence follow-up is local only; no push, tag, release or publication was performed as part of this follow-up."
   },
   "limits": [
     "Universal 404/405 laws start from Selection; URI matching and method collection have concrete table proofs/tests, not a general matching theorem.",
@@ -70,5 +70,69 @@
     "GET/HEAD preservation covers complete modeled state; effectful adapter writes remain tested/reviewed.",
     "The new protected accounts route uses a fixed public demo value, not a real credential validation system.",
     "BendTT translation, Base semantics, native code generation/runtime, SQLite and transport remain trusted."
-  ]
+  ],
+  "ci": {
+    "run_id": 37298832406,
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406",
+    "workflow": "Check",
+    "commit": "2a3276a801f4e9787d12d0bfb427008ae1231d15",
+    "conclusion": "failure",
+    "jobs_total": 8,
+    "jobs_passed": 7,
+    "normal_jobs_total": 4,
+    "normal_jobs_passed": 4,
+    "jobs": [
+      {
+        "name": "test (ubuntu-24.04, sanitized)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429152"
+      },
+      {
+        "name": "test (ubuntu-24.04-arm, sanitized)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429407"
+      },
+      {
+        "name": "test (macos-15-intel, normal)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429426"
+      },
+      {
+        "name": "test (ubuntu-24.04-arm, normal)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429432"
+      },
+      {
+        "name": "test (macos-15, normal)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429449"
+      },
+      {
+        "name": "test (macos-15-intel, sanitized)",
+        "conclusion": "failure",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429454"
+      },
+      {
+        "name": "test (ubuntu-24.04, normal)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429511"
+      },
+      {
+        "name": "test (macos-15, sanitized)",
+        "conclusion": "success",
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37298832406/job/111726429563"
+      }
+    ],
+    "normal_suite_verdict": "make test passed on Ubuntu 24.04 x64/arm64 and macOS 15 arm64/Intel, including benchmark RSS sampling.",
+    "sanitized_failure": {
+      "job": "test (macos-15-intel, sanitized)",
+      "test": "test_load.LoadTests.test_global_drain_deadline_cancels_active_and_queued_work",
+      "assertion": "0.703715898999917 not less than 0.7",
+      "tests": 150,
+      "passed": 149,
+      "failed": 1,
+      "assessment": "Hosted-runner timing-bound failure in unchanged load tooling, classified as an unrelated flake by the maintainer. The maintainer will address it separately; no timing bound was changed here."
+    },
+    "verification": "Read workflow job conclusions and the failed job log through GitHub CLI; overall CI remains failure (7/8), not an all-green sanitizer claim."
+  }
 }
