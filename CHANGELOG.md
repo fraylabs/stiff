@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 — October 5, 2026
+
+- Add pure HTTP contracts with compiler-checked protected-route, GET/HEAD state, and 404/405 laws in `src/contracts.bend`. Applications can prove declared statuses and response bodies.
+- Add the proven two-account ledger example: conservation, overdraft rejection, unchanged rejection, idempotency, and HTTP response laws; twelve independently typechecked mistakes are rejected before building a binary.
+- Run the consumer fresh-setup test in CI rather than on shared local machines.
+- Harden load-test and shutdown timing checks against scheduler stalls while preserving arrival accounting and deadline checks.
+- Add Linux x64 and arm64 release archives built and verified on hosted Ubuntu 24.04 runners, alongside macOS arm64.
+
+Experimental release pinned to Bend 2.0.35. Proofs cover pure modeled decisions;
+credential validation, decoding, persistence, serialization, native effects,
+compiler/runtime and dependencies remain trusted/tested. See docs/contracts.md
+and examples/ledger/PROOFS.md for the exact boundaries.
+
 ## 0.3.0 — October 4, 2026
 
 - Support Bend 2.0.35 native effects, constructor packing and executable-name CLI arguments.

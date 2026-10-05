@@ -17,11 +17,15 @@ class PackageTests(unittest.TestCase):
     def test_archive_checksums_and_native_journey(self):
         with tempfile.TemporaryDirectory(prefix='stiff-package-test-') as directory:
             root = Path(directory)
-            p = subprocess.run(['python3',str(ROOT/'scripts/package.py'),'--output',str(root)],
-                               cwd=ROOT,capture_output=True,text=True,timeout=600,
-                               env={**os.environ,'STIFF_NATIVE_SANITIZE':'0','STIFF_NATIVE_ABI':'compiler'})
-            self.assertEqual(p.returncode,0,p.stdout+p.stderr)
-            archive, = root.glob('*.tar.gz')
+            supplied = os.environ.get('STIFF_PACKAGE_ARCHIVE')
+            if supplied:
+                archive = Path(supplied).resolve()
+            else:
+                p = subprocess.run(['python3',str(ROOT/'scripts/package.py'),'--output',str(root)],
+                                   cwd=ROOT,capture_output=True,text=True,timeout=600,
+                                   env={**os.environ,'STIFF_NATIVE_SANITIZE':'0','STIFF_NATIVE_ABI':'compiler'})
+                self.assertEqual(p.returncode,0,p.stdout+p.stderr)
+                archive, = root.glob('*.tar.gz')
             self.assertEqual(hashlib.sha256(archive.read_bytes()).hexdigest(),
                              Path(str(archive)+'.sha256').read_text().split()[0])
             with tarfile.open(archive) as tar: tar.extractall(root/'unpacked',filter='data')

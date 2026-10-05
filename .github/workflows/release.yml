@@ -1,0 +1,62 @@
+name: Release archives
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Exact candidate commit or existing release tag
+        required: true
+        default: main
+        type: string
+      publish:
+        description: Upload verified archives to the existing pre-release (tag required)
+        default: false
+        type: boolean
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    env:
+      BEND_NO_TELEMETRY: 1
+      STIFF_NATIVE_ABI: compiler
+      STIFF_NATIVE_SANITIZE: 0
+      SOURCE_REF: ${{ inputs.source_ref }}
+      PUBLISH: ${{ inputs.publish }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out exact package source
+        run: |
+          git init .
+          git remote add origin "git@github.com:$GITHUB_REPOSITORY.git"
+          # Hosted runner checkout uses the public HTTPS endpoint; the stored remote is SSH.
+          git fetch --depth=1 "https://github.com/$GITHUB_REPOSITORY.git" "$SOURCE_REF"
+          git checkout --detach FETCH_HEAD
+          if [ "$PUBLISH" = true ]; then
+            test "$SOURCE_REF" = "v$(cat VERSION)"
+            gh release view "$SOURCE_REF" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease > "$RUNNER_TEMP/prerelease"
+            test "$(cat "$RUNNER_TEMP/prerelease")" = true
+          fi
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang make cmake patch pkg-config libcurl4-openssl-dev libjson-c-dev libsqlite3-dev python3 openssl
+      - run: make setup
+      - name: Build clean archive
+        run: python3 scripts/package.py --require-clean
+      - name: Verify exact archive
+        run: python3 scripts/verify-package.py .cache/dist/*.tar.gz --evidence .cache/dist/verification-${{ matrix.os }}.json
+      - name: Retain verified build bytes and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: .cache/dist/*
+          if-no-files-found: error
+      - name: Upload verified release assets
+        if: inputs.publish
+        run: gh release upload "$SOURCE_REF" .cache/dist/*.tar.gz .cache/dist/*.sha256 --repo "$GITHUB_REPOSITORY"
