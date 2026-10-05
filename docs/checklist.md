@@ -1,6 +1,31 @@
 # Framework completion checklist
 
-## Current release: 0.3.0
+## Current release: 0.4.0
+
+Stiff **0.4.0** targets Bend **2.0.35**. It adds [pure HTTP contracts](contracts.md)
+with compiler-checked authorization, modeled GET/HEAD state preservation and
+404/405 laws, plus the [proven ledger](../examples/ledger/README.md) with twelve
+caught mistakes. Declared statuses and response bodies are application laws to
+prove. Credential validation, decoding, original receipt selection, serialization,
+SQLite, native effects, the compiler/runtime and dependencies remain trusted/tested.
+
+The fresh consumer setup test runs in CI. Load and shutdown timing checks retain
+arrival accounting and deadline checks while tolerating scheduler stalls.
+The [BendHub package](bendhub.md) includes the contract modules, with immutable
+consumer source/build-tool pins. The [experimental release](https://github.com/fraylabs/stiff/releases/tag/v0.4.0)
+provides macOS arm64 and hosted Ubuntu 24.04 Linux x64/arm64 native archives;
+these dynamically require libcurl, json-c and SQLite.
+
+[Release verification evidence](evidence/0.4.0) records separate source revisions
+and scopes. The local suite has one expected RSS failure because the sandbox
+blocks `/bin/ps`, and skips fresh consumer setup; full-suite results come from
+hosted CI. Ledger verification caught all twelve ordinarily typechecked mutations
+and passed fifteen native journeys. The Linux archive workflow was rehearsed in
+CI with exact-archive provenance, checksum, supervised health and persistent
+journey checks before use for release builds. Historical measurements below
+retain their original revisions and are not new 0.4.0 capacity measurements.
+
+## Historical 0.3.0 release
 
 Stiff **0.3.0** supports Bend **2.0.35** and retains the bounded framework
 contracts below. The release adds daily latest-Bend compatibility CI, startup

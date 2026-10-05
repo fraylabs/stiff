@@ -1,0 +1,16 @@
+{
+  "source_anchor": "be078621ad69303546de258fd8db578fc8c9b0f6",
+  "compiler": "bend 2.0.35",
+  "framework_and_ledger_proof_gate": "ALL PROOFS CHECK",
+  "mutations": 12,
+  "ordinary_typechecks": "all passed",
+  "proof_rejections": "all 12 caught, concrete witnesses agree",
+  "mutant_binaries_built": false,
+  "native_journeys": {
+    "tests": 15,
+    "seconds": 23.427,
+    "result": "passed"
+  },
+  "log_sha256": "6e5e0890f60c788c6b1f82290c89764ff394d705490bae150e5c2553b099bd11",
+  "limits": "Pure decisions are compiler-checked; credential validation, decoding, original receipt selection, serialization, SQLite and native dependencies remain trusted/tested. This run did not repeat independent BendTT verification."
+}

@@ -387,9 +387,10 @@ untrusted destinations need their own destination policy.
 `make test` checks the pure laws with the standalone Bend checker, requires a
 false proof to fail, and compiles actual executables for local HTTP/HTTPS tests.
 The executables are copied outside the checkout and run without source or tools
-on PATH. The standalone example is also copied into a separate project, fetches
+on PATH. In CI, the standalone example is also copied into a separate project, fetches
 its Git-pinned dependency and compiler, and calls a local HTTPS API with synthetic
-credentials. That integration check requires GitHub network access. Pinned CI
+credentials. That fresh-setup check requires GitHub network access; run it locally
+with `STIFF_CONSUMER_TEST=1 make test`. Pinned CI
 runs this native workflow on Linux and macOS. A separate
 [daily/manual latest-release workflow](.github/workflows/bend-latest.yml) tests
 new Bend releases without changing the supported pin; see

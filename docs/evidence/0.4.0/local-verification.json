@@ -1,0 +1,18 @@
+{
+  "revision": "be078621ad69303546de258fd8db578fc8c9b0f6",
+  "platform": "macOS arm64",
+  "bend": "2.0.35",
+  "setup": "passed (pinned dependencies already installed)",
+  "normal_suite": {
+    "tests": 147,
+    "passed": 145,
+    "failed": 1,
+    "skipped": 1,
+    "seconds": 111.734,
+    "failure": "test_native_measurement_overload_recovery_and_shutdown: sandbox blocks /bin/ps, PermissionError; no RSS measurements",
+    "skipped_test": "fresh consumer setup runs in CI",
+    "log_sha256": "e1d4b855a4a92e7e892de92a74fbf716ef23dec1b16daf2651b2eb6f1a01b818"
+  },
+  "full_suite_authority": "Hosted Check CI; local result is not a full-suite pass",
+  "heavy_work": "One local Stiff job at a time under stiff-worktrees/.heavy.lock; native build cap five"
+}

@@ -1,0 +1,232 @@
+{
+  "experiments": [
+    {
+      "mutation": "01-credit-extra-cent",
+      "failing_law_instance": "transfer_conserves_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : 22n\n- observed : 20n\nLocation: transfer_conserves_example\n7 | def transfer_conserves_example():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.move_conserves",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {S.moved_total(1n+Nat.add(balance, destination), E.move(rest, balance, 2n+destination)) == 1n+Nat.add(balance, destination) : Nat}\n- observed : {S.moved_total(1n+Nat.add(balance, destination), E.move(rest, balance, 1n+destination)) == 1n+Nat.add(balance, destination) : Nat}\nContext:\n- rest        : Nat\n- balance     : Nat\n- destination : Nat\nLocation: L.move_conserves\n40 |         case 1n+balance:\n41>|           %L.add_successor(balance, destination) :\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n42 |             {S.moved_total(_, E.move(rest, balance, 1n+destination)) == _ : Nat}\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "02-credit-without-debit",
+      "failing_law_instance": "transfer_conserves_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : 22n\n- observed : 20n\nLocation: transfer_conserves_example\n7 | def transfer_conserves_example():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.move_conserves",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {S.moved_total(1n+Nat.add(balance, destination), E.move(rest, 1n+balance, 1n+destination)) == 1n+Nat.add(balance, destination) : Nat}\n- observed : {S.moved_total(1n+Nat.add(balance, destination), E.move(rest, balance, 1n+destination)) == 1n+Nat.add(balance, destination) : Nat}\nContext:\n- rest        : Nat\n- balance     : Nat\n- destination : Nat\nLocation: L.move_conserves\n40 |         case 1n+balance:\n41>|           %L.add_successor(balance, destination) :\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n42 |             {S.moved_total(_, E.move(rest, balance, 1n+destination)) == _ : Nat}\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "03-missing-funds-check",
+      "failing_law_instance": "insufficient_conserves_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : 21n\n- observed : 20n\nLocation: insufficient_conserves_example\n7 | def insufficient_conserves_example():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.move_conserves",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : 1n+destination\n- observed : destination\nContext:\n- rest        : Nat\n- destination : Nat\nLocation: L.move_conserves\n38 |       match source:\n39>|         case 0n: {==}\n   |                  ^^^^\n40 |         case 1n+balance:\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "04-unbalanced-fee",
+      "failing_law_instance": "transfer_conserves_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : 18n\n- observed : 20n\nLocation: transfer_conserves_example\n7 | def transfer_conserves_example():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.move_conserves",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {S.moved_total(1n+Nat.add(balance, destination), E.move(rest, balance, destination)) == 1n+Nat.add(balance, destination) : Nat}\n- observed : {S.moved_total(1n+Nat.add(balance, destination), E.move(rest, balance, 1n+destination)) == 1n+Nat.add(balance, destination) : Nat}\nContext:\n- rest        : Nat\n- balance     : Nat\n- destination : Nat\nLocation: L.move_conserves\n40 |         case 1n+balance:\n41>|           %L.add_successor(balance, destination) :\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n42 |             {S.moved_total(_, E.move(rest, balance, 1n+destination)) == _ : Nat}\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "05-rejected-debits",
+      "failing_law_instance": "rejected_transfer_unchanged_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : E.State{9n, 10n, []}\n- observed : E.State{10n, 10n, []}\nLocation: rejected_transfer_unchanged_example\n7 | def rejected_transfer_unchanged_example():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.finish_conserves",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : S.total(S.state(E.finish(E.NoFunds{}, original, key, direction)))\n- observed : S.total(original)\nContext:\n- original  : E.State\n- key       : Nat\n- direction : E.Direction\nLocation: L.finish_conserves\n69 |   match moved:\n70>|     case E.NoFunds{}: {==}\n   |                       ^^^^\n71 |     case E.Moved{source, destination}:\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "06-double-apply-retry",
+      "failing_law_instance": "same_key_twice_equals_once_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : E.State{6n, 14n, [7n, 7n]}\n- observed : E.State{8n, 12n, [7n]}\nLocation: same_key_twice_equals_once_example\n 8 | def same_key_twice_equals_once_example():\n 9>|   {==}\n   |   ^^^^\n10 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "replay_response",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : H.complete(E.fresh(state, key, direction, amount), original)\n- observed : C.Decision{state, C.Reply{200n, H.Replayed{original}}}\nContext:\n- state     : E.State\n- original  : H.Operation\n- key       : Nat\n- direction : E.Direction\n- amount    : Nat\nLocation: replay_response\n15 | def replay_response(state, original, key, direction, amount):\n16>|   {==}\n   |   ^^^^\n17 | \n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "07-forget-idempotency-key",
+      "failing_law_instance": "same_key_twice_equals_once_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : E.State{6n, 14n, []}\n- observed : E.State{8n, 12n, []}\nLocation: same_key_twice_equals_once_example\n 8 | def same_key_twice_equals_once_example():\n 9>|   {==}\n   |   ^^^^\n10 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.finish_retry",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {S.state(E.dispatch(E.seen(keys, key), E.State{source, destination, keys}, key, E.AliceToBob{}, amount)) == E.State{source, destination, keys} : E.State}\n- observed : {S.state(E.dispatch(Bool.or(Cmp.is_eq(Nat.cmp(key, key)), E.seen(keys, key)), E.State{source, destination, key <> keys}, key, E.AliceToBob{}, amount)) == E.State{source, destination, key <> keys} : E.State}\nContext:\n- source      : Nat\n- destination : Nat\n- alice       : Nat\n- bob         : Nat\n- keys        : List<&2, Nat>\n- key         : Nat\n- amount      : Nat\n- first       : {S.state(E.dispatch(E.seen(keys, key), E.State{alice, bob, keys}, key, E.AliceToBob{}, amount)) == E.State{source, destination, keys} : E.State}\nLocation: L.finish_retry\n147 |             case E.AliceToBob{}:\n148>|               %Equal.sym(Bool, E.seen(key <> keys, key), True{}, L.remembered_key(key, keys)) :\n    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n149 |                 {S.state(E.dispatch(_, E.State{source, destination, key <> keys}, key, direction, amount))\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "08-reverse-accounts",
+      "failing_law_instance": "alice_exact_debit_credit_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : E.Outcome{E.Applied{}, E.State{12n, 8n, [7n]}}\n- observed : E.Outcome{E.Applied{}, E.State{8n, 12n, [7n]}}\nLocation: alice_exact_debit_credit_example\n 8 | def alice_exact_debit_credit_example():\n 9>|   {==}\n   |   ^^^^\n10 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "L.finish_conserves",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : Nat.add(destination, source)\n- observed : Nat.add(source, destination)\nContext:\n- source      : Nat\n- destination : Nat\n- alice       : Nat\n- bob         : Nat\n- keys        : List<&2, Nat>\n- key         : Nat\nLocation: L.finish_conserves\n74 |           match direction:\n75>|             case E.AliceToBob{}: {==}\n   |                                  ^^^^\n76 |             case E.BobToAlice{}: L.add_commutes(destination, source)\n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "09-replay-labelled-applied",
+      "failing_law_instance": "replay_response_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Decision{E.State{10n, 10n, [7n]}, C.Reply{200n, H.Applied{H.Operation{7n, 1n, E.AliceToBob{}, 2n}}}}\n- observed : C.Decision{E.State{10n, 10n, [7n]}, C.Reply{200n, H.Replayed{H.Operation{7n, 1n, E.AliceToBob{}, 2n}}}}\nLocation: replay_response_example\n15 | def replay_response_example():\n16>|   {==}\n   |   ^^^^\n17 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "replay_response",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Decision{state, C.Reply{200n, H.Applied{original}}}\n- observed : C.Decision{state, C.Reply{200n, H.Replayed{original}}}\nContext:\n- state     : E.State\n- original  : H.Operation\n- key       : Nat\n- direction : E.Direction\n- amount    : Nat\nLocation: replay_response\n15 | def replay_response(state, original, key, direction, amount):\n16>|   {==}\n   |   ^^^^\n17 | \n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "10-missing-auth-check",
+      "failing_law_instance": "protected_accounts_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Decision{Unit{}, C.Reply{200n, H.Execute{4n, []}}}\n- observed : C.Decision{Unit{}, C.Error{401n, \"unauthorized\", []}}\nLocation: protected_accounts_example\n13 | def protected_accounts_example():\n14>|   {==}\n   |   ^^^^\n15 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "protected_accounts_denied",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Decision{Unit{}, C.Reply{200n, H.Execute{4n, []}}}\n- observed : C.Decision{Unit{}, C.Error{401n, \"unauthorized\", []}}\nLocation: protected_accounts_denied\n34 | def protected_accounts_denied():\n35>|   {==}\n   |   ^^^^\n36 | \n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "11-get-writes",
+      "failing_law_instance": "get_no_write_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : E.State{0n, 0n, []}\n- observed : E.State{10n, 10n, [7n]}\nLocation: get_no_write_example\n13 | def get_no_write_example():\n14>|   {==}\n   |   ^^^^\n15 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "get_does_not_write",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : E.State{0n, 0n, []}\n- observed : state\nContext:\n- state : E.State\nLocation: get_does_not_write\n57 | def get_does_not_write(state):\n58>|   {==}\n   |   ^^^^\n59 | \n"
+      },
+      "binary_built": false
+    },
+    {
+      "mutation": "12-undeclared-status",
+      "failing_law_instance": "declared_status_example",
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : False{}\n- observed : True{}\nLocation: declared_status_example\n14 | def declared_status_example():\n15>|   {==}\n   |   ^^^^\n16 | \n"
+      },
+      "caught": true,
+      "first_failing_proof": "transfer_status_declared",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "proof_check": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : False{}\n- observed : True{}\nContext:\n- state     : E.State\n- operation : H.Operation\nLocation: transfer_status_declared\n26 |       match status:\n27>|         case E.Applied{}: {==}\n   |                           ^^^^\n28 |         case E.Replayed{}: {==}\n"
+      },
+      "binary_built": false
+    }
+  ]
+}

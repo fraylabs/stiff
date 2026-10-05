@@ -1,0 +1,176 @@
+{
+  "conclusion": "success",
+  "headSha": "be078621ad69303546de258fd8db578fc8c9b0f6",
+  "jobs": [
+    {
+      "completedAt": "2026-10-05T15:30:57Z",
+      "conclusion": "success",
+      "databaseId": 111841582128,
+      "name": "package (ubuntu-24.04)",
+      "startedAt": "2026-10-05T15:29:53Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-05T15:29:54Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-05T15:29:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:29:55Z",
+          "conclusion": "success",
+          "name": "Check out exact package source",
+          "number": 2,
+          "startedAt": "2026-10-05T15:29:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:23Z",
+          "conclusion": "success",
+          "name": "Install native dependencies",
+          "number": 3,
+          "startedAt": "2026-10-05T15:29:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:45Z",
+          "conclusion": "success",
+          "name": "Run make setup",
+          "number": 4,
+          "startedAt": "2026-10-05T15:30:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:54Z",
+          "conclusion": "success",
+          "name": "Build clean archive",
+          "number": 5,
+          "startedAt": "2026-10-05T15:30:45Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:54Z",
+          "conclusion": "success",
+          "name": "Verify exact archive",
+          "number": 6,
+          "startedAt": "2026-10-05T15:30:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:55Z",
+          "conclusion": "success",
+          "name": "Retain verified build bytes and evidence",
+          "number": 7,
+          "startedAt": "2026-10-05T15:30:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:55Z",
+          "conclusion": "skipped",
+          "name": "Upload verified release assets",
+          "number": 8,
+          "startedAt": "2026-10-05T15:30:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:55Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "startedAt": "2026-10-05T15:30:55Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37333290526/job/111841582128"
+    },
+    {
+      "completedAt": "2026-10-05T15:30:37Z",
+      "conclusion": "success",
+      "databaseId": 111841582311,
+      "name": "package (ubuntu-24.04-arm)",
+      "startedAt": "2026-10-05T15:29:54Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-05T15:29:56Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-05T15:29:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:29:56Z",
+          "conclusion": "success",
+          "name": "Check out exact package source",
+          "number": 2,
+          "startedAt": "2026-10-05T15:29:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:11Z",
+          "conclusion": "success",
+          "name": "Install native dependencies",
+          "number": 3,
+          "startedAt": "2026-10-05T15:29:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:28Z",
+          "conclusion": "success",
+          "name": "Run make setup",
+          "number": 4,
+          "startedAt": "2026-10-05T15:30:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:35Z",
+          "conclusion": "success",
+          "name": "Build clean archive",
+          "number": 5,
+          "startedAt": "2026-10-05T15:30:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:35Z",
+          "conclusion": "success",
+          "name": "Verify exact archive",
+          "number": 6,
+          "startedAt": "2026-10-05T15:30:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:36Z",
+          "conclusion": "success",
+          "name": "Retain verified build bytes and evidence",
+          "number": 7,
+          "startedAt": "2026-10-05T15:30:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:36Z",
+          "conclusion": "skipped",
+          "name": "Upload verified release assets",
+          "number": 8,
+          "startedAt": "2026-10-05T15:30:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-05T15:30:36Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "startedAt": "2026-10-05T15:30:36Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37333290526/job/111841582311"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/fraylabs/stiff/actions/runs/37333290526",
+  "scope": "Candidate workflow rehearsal; these archives are not release assets. Final archives are built from the tag commit.",
+  "artifacts_downloaded_and_checksums_matched": true
+}
