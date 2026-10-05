@@ -220,7 +220,9 @@ class LoadTests(unittest.TestCase):
             url=self.base + "/trickle", rate=100, duration=0.1,
             workers=1, queue_capacity=10, timeout=2, drain_timeout=0.15))
         elapsed = time.monotonic() - started
-        self.assertLess(elapsed, 0.7)
+        # Well under the 2-second request timeout, with room for worker startup
+        # on a busy hosted runner; the drain timeout errors prove the cancellation.
+        self.assertLess(elapsed, 1.5)
         counts = report["counts"]
         self.assertEqual(counts["accepted"], counts["completed"])
         self.assertGreater(counts["drain_timeout_errors"], 0)

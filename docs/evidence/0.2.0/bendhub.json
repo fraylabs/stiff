@@ -35,9 +35,6 @@
     "cached_native_file_tamper": "rejected"
   },
   "independent_review": {
-    "worker": "/root/hub_qa",
-    "model": "gpt-5.6-sol high",
-    "skill": "committed-execution v1.4",
     "findings_addressed": [
       "Package carries compiler pin, native trust boundary, dependency/build directions and MIT text.",
       "Verified exact copied example and pinned Git tooling in addition to isolated library consumers.",
