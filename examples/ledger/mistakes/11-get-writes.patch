@@ -1,0 +1,5 @@
+--- contracts.bend
++++ contracts.bend
+@@ -112 +112 @@
+-        case Decision{state, response}: Decision{original, response}
++        case Decision{state, response}: Decision{state, response}

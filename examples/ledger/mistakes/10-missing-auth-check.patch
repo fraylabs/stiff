@@ -1,0 +1,5 @@
+--- contracts.bend
++++ contracts.bend
+@@ -118 +118 @@
+-    case True{} False{}: Decision{state, Error{401n, "unauthorized", Nil{}}}
++    case True{} False{}: next(state)

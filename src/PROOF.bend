@@ -1,4 +1,5 @@
 import Base
+import ./CONTRACTS_PROOF.bend as Contracts
 import ./http.bend as Http
 import ./LAWS.bend as Laws
 

@@ -63,10 +63,10 @@ class LedgerHTTP(unittest.TestCase):
             self.assertNotIn(marker, logs)
         self.log.seek(0, 2)
 
-    def call(self, method, path, body=None, raw=None, base_url=None):
+    def call(self, method, path, body=None, raw=None, base_url=None, headers=None):
         data = raw if raw is not None else json.dumps(body).encode() if body is not None else None
         req = urllib.request.Request((base_url or self.url) + path, data=data, method=method,
-                                     headers={'Content-Type': 'application/json'})
+                                     headers={'Content-Type': 'application/json', **(headers or {})})
         try:
             response = urllib.request.urlopen(req, timeout=10)
         except urllib.error.HTTPError as e:
@@ -83,6 +83,19 @@ class LedgerHTTP(unittest.TestCase):
         self.assertEqual(status, 200, body)
         self.assertEqual(sum(body['accounts'].values()), 200)
         return body
+
+    def test_contract_route_guard_and_allow(self):
+        before = self.accounts()
+        for headers in ({}, {'X-Demo-Access': 'wrong'}):
+            status, body, _ = self.call('GET', '/protected/accounts', headers=headers)
+            self.assertEqual(status, 401, body)
+        self.assertEqual(self.call('GET', '/protected/accounts',
+                                  headers={'X-Demo-Access': 'allowed'})[1], before)
+        status, body, headers = self.call('DELETE', '/transfers')
+        self.assertEqual(status, 405, body)
+        self.assertEqual({k.lower(): v for k, v in headers.items()}['allow'], 'POST')
+        self.assertEqual(self.call('GET', '/absent')[0], 404)
+        self.assertEqual(self.accounts(), before)
 
     def test_initial_and_both_directions(self):
         self.assertEqual(self.accounts()['accounts'], {'alice': 100, 'bob': 100})
@@ -114,6 +127,7 @@ class LedgerHTTP(unittest.TestCase):
         status, body, _ = self.call('POST', '/transfers', original)
         self.assertEqual(status, 200, body)
         self.assertTrue(body['replayed'])
+        self.assertEqual(body['operation'], original)
         self.assertEqual(body['accounts'], before['accounts'])
         self.assertEqual(body['version'], before['version'])
         status, receipt, _ = self.call('GET', '/operations/1')

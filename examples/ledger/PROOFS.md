@@ -59,7 +59,8 @@ those missing constraints. Rejection identity includes receipts: it cannot both
 leave the *complete* state unchanged and insert a rejected key. Keys are retained
 on success only. Idempotency does not say a rejected request can never succeed
 after intervening transfers, or that a replay has identical status/HTTP bytes.
-The deliberate status-label mutant remains accepted.
+The new HTTP laws separately reject the status-label mutant; the engine laws
+continue to describe state, not response bytes.
 
 ## What mutation rejection means
 
@@ -71,11 +72,45 @@ money; the real false rule is idempotency. Reversing accounts similarly invalida
 a `finish_conserves` proof while retaining the total. The mutation harness also
 checks a concrete instance of the intended rule, using fixed specification
 observations, and requires that instance to fail for every caught mutation.
-Those diagnostics show the actual wrong amount/state. All nine mutants pass
-ordinary pure-engine typechecking, and no mutant binary is emitted. The status-label
-mutant passes the supplied state laws, including the concrete idempotency example.
+Those diagnostics show the actual wrong amount/state. All twelve mutants pass
+ordinary pure-program typechecking, and no mutant binary is emitted. The status-label
+mutant still passes state-only laws, but fails the HTTP replay law and witness.
+Three additional mutations fail authorization, GET-state and declared-status laws.
 
-## HTTP and SQLite contract (tested, not proved)
+## Pure HTTP laws
+
+[HTTP_PROOF.bend](HTTP_PROOF.bend) adds seven checked laws:
+
+| Law | Exact guarantee |
+| --- | --- |
+| `replay_response` | For any state, supplied original Operation and retry inputs, a duplicate dispatch produces exactly unchanged state plus HTTP 200 and Replayed{original} |
+| `transfer_status_declared` | For every engine Outcome and Operation, the pure transfer response's status occurs in the actual transfer route declaration |
+| `protected_accounts_denied` | GET /protected/accounts without valid credentials returns exactly 401/unauthorized and no Execute plan |
+| `unknown_route` | GET /absent returns exactly 404/not_found |
+| `wrong_method_allow` | DELETE /transfers returns exactly 405/method_not_allowed with precisely ["POST"] |
+| `get_does_not_write` | For every engine state, GET /accounts preserves complete modeled state even when the pure handler proposes zero balances |
+| `head_does_not_write` | For every engine state, an explicitly declared HEAD /accounts likewise preserves state |
+
+The eight [framework laws](../../src/CONTRACTS_PROOF.bend) also quantify over
+arbitrary state/body types and handlers, including protected-route denial and
+read-state preservation. Both proof files are imported by the ledger proof gate
+and were checked by the independent kernel. There remain 28 engine/arithmetic
+laws; these additions do not weaken or replace them.
+
+The effectful adapter consumes the actual H.transfer/H.complete plans. Replay
+conversion selects the persisted original operation before constructing the
+final plan; the response adds its canonical fields as `operation`. The replay
+theorem covers every supplied original operation. It does not establish that
+the adapter fetched the correct receipt. SQLite write results are observations
+at the edge; response encoding and committing the plan are tested, not proved.
+
+The framework's read policy returns the input state regardless of a handler's
+proposed change; no IO exists in that handler. The ledger's effectful read paths
+still need review/tests to ensure they perform no SQLite writes. The pure access
+plan runs before ledger dispatch. Its fixed public demo credential is not a
+real authentication system; existing endpoints remain public.
+
+## HTTP and SQLite edge (tested, not proved)
 
 - `GET /health`: liveness. `GET /accounts`: current snapshot/version.
 - `POST /transfers`: strict schema with `idempotency_key`, `expected_version`,
@@ -102,11 +137,13 @@ mutant passes the supplied state laws, including the concrete idempotency exampl
 - Insufficient funds: 422, no snapshot/receipt write. Full successful-receipt list:
   409 `ledger_full`, no write. Existing successful keys can still replay at capacity.
   Database errors: 503 with a fixed store code. No implicit retry loop exists.
-- Loopback binding, no authentication, TLS, arbitrary account creation, fees,
+- GET /protected/accounts: synthetic gate, `X-Demo-Access: allowed`; missing or
+  wrong value is 401 before reading storage. No credentials/login system.
+- Loopback binding, no real authentication, TLS, arbitrary account creation, fees,
   money issuance, receipt compaction, bank integration or payment provider.
 
-The persisted request-to-engine mapping, JSON encoding/decoding, route selection,
-receipt field comparison, schema enforcement, whole-snapshot write discipline and
+The persisted request-to-engine mapping, JSON encoding/decoding, general URI
+matching correctness, receipt field comparison, schema enforcement, whole-snapshot write discipline and
 startup/restart logic are application code outside these proofs. SQLite atomicity
 and durability depend on the C effect, SQLite, OS, filesystem and hardware.
 Networking depends on Stiff's C ABI, libevent and json-c; libcurl is linked by the
@@ -157,3 +194,8 @@ see the scope deviation in verification evidence.
 The sanitizer result covers the generated Bend/Stiff C with the existing checked
 ASan calling-convention mitigation, not uninstrumented SQLite/libevent/libcurl,
 the unmodified default ABI, or a formal memory-safety claim.
+
+[HTTP contract verification evidence](evidence/contracts-verification.json) records
+the accepted kernel verdict, native ledger checks and the normal-suite RSS
+inspection limitation. The full normal suite needs a rerun where process RSS
+inspection is permitted.

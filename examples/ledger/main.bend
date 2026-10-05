@@ -7,6 +7,8 @@ import ../../src/json.bend as Json
 import ../../src/store.bend as Db
 import ./engine.bend as E
 import ./spec.bend as S
+import ./http.bend as H
+import ../../src/contracts.bend as C
 
 # Adapters decode, validate, invoke E.transfer and commit its complete state.
 # All balance arithmetic belongs to E. No account is written separately.
@@ -82,6 +84,44 @@ def balances(version: U32, replayed: Bool, state: E.State) -> IO(Web.Reply):
         ("accounts", Json.object([("alice", Json.u32(U32.from_nat(alice))),
           ("bob", Json.u32(U32.from_nat(bob)))]))]))
 
+# These conversions are the explicit, tested edge of the pure HTTP model.
+def domain(+request: Json.Json, direction: E.Direction) -> H.Operation:
+  H.Operation{key(request), U32.to_nat(uint(Json.field("expected_version", request))),
+    direction, U32.to_nat(uint(Json.field("amount", request)))}
+
+def operation_json(operation: H.Operation) -> Json.Json:
+  match operation:
+    case H.Operation{key, expected, direction, amount}:
+      match direction:
+        case E.AliceToBob{}:
+          Json.object([("idempotency_key", Json.u32(U32.from_nat(key))), ("expected_version", Json.u32(U32.from_nat(expected))),
+            ("from", Json.string("alice")), ("to", Json.string("bob")), ("amount", Json.u32(U32.from_nat(amount)))])
+        case E.BobToAlice{}:
+          Json.object([("idempotency_key", Json.u32(U32.from_nat(key))), ("expected_version", Json.u32(U32.from_nat(expected))),
+            ("from", Json.string("bob")), ("to", Json.string("alice")), ("amount", Json.u32(U32.from_nat(amount)))])
+
+def original_from(from: String, request: Json.Json) -> H.Operation:
+  match from:
+    case "alice": domain(request, E.AliceToBob{})
+    case other: domain(request, E.BobToAlice{})
+
+def original_domain(+request: Json.Json) -> H.Operation:
+  original_from(text(Json.field("from", request)), request)
+
+def transfer_balances(status: Nat, version: U32, replayed: Bool, operation: H.Operation, state: E.State) -> IO(Web.Reply):
+  match state:
+    case E.State{alice, bob, seen}:
+      Web.json_value(U32.from_nat(status), Json.object([("version", Json.u32(version)),
+        ("replayed", Json.boolean(replayed)), ("operation", operation_json(operation)),
+        ("accounts", Json.object([("alice", Json.u32(U32.from_nat(alice))), ("bob", Json.u32(U32.from_nat(bob)))]))]))
+
+def transfer_reply(version: U32, decision: C.Decision<E.State, H.Body>) -> IO(Web.Reply):
+  match decision:
+    case C.Decision{state, C.Reply{status, H.Applied{operation}}}: transfer_balances(status, version, False{}, operation, state)
+    case C.Decision{state, C.Reply{status, H.Replayed{operation}}}: transfer_balances(status, version, True{}, operation, state)
+    case C.Decision{state, C.Reply{status, H.Rejected{}}}: App.error(U32.from_nat(status), "insufficient_funds", "Transfer exceeds source balance")
+    case C.Decision{state, C.Error{status, code, allow}}: App.error(U32.from_nat(status), code, "Request rejected")
+
 def receipt_hit(hit: Bool, head: Json.Json, rest: Maybe<Json.Json>) -> Maybe<Json.Json>:
   match hit:
     case True{}: Some{head}
@@ -99,21 +139,21 @@ def same_request(+a: Json.Json, +b: Json.Json) -> Bool:
         Bool.and(String.eq(text(Json.field("to", a)), text(Json.field("to", b))),
           U32.is_eq(uint(Json.field("amount", a)), uint(Json.field("amount", b)))))))
 
-def replay_same(same: Bool, version: U32, state: E.State) -> IO(Web.Reply):
+def replay_same(same: Bool, version: U32, state: E.State, original: H.Operation) -> IO(Web.Reply):
   match same:
-    case True{}: balances(version, True{}, state)
+    case True{}: transfer_reply(version, H.complete(E.Outcome{E.Replayed{}, state}, original))
     case False{}: App.error(409, "idempotency_conflict", "Key already names another request")
 
 def replay(previous: Maybe<Json.Json>, request: Json.Json, version: U32, state: E.State) -> IO(Web.Reply):
   match previous:
-    case Some{original}:
-      replay_same(same_request(original, request), version, state)
+    case Some{+original}:
+      replay_same(same_request(original, request), version, state, original_domain(original))
     case None{}: App.error(500, "stored_value_invalid", "Missing engine receipt")
 
-def written(+state: E.State, result: Db.WriteResult) -> IO(Web.Reply):
+def written(+state: E.State, +operation: H.Operation, result: Db.WriteResult) -> IO(Web.Reply):
   match result:
-    case Db.StoreApplied{version}: balances(version, False{}, state)
-    case Db.StoreReplayed{version}: balances(version, True{}, state)
+    case Db.StoreApplied{version}: transfer_reply(version, H.complete(E.Outcome{E.Applied{}, state}, operation))
+    case Db.StoreReplayed{version}: transfer_reply(version, H.complete(E.Outcome{E.Replayed{}, state}, operation))
     case Db.StoreVersionConflict{version, value}: App.error(409, "version_conflict", "Read accounts and submit a new operation")
     case Db.StoreReplayedVersionConflict{version, value}: App.error(409, "version_conflict", "Read accounts and submit a new operation")
     case Db.StoreMissingConflict{}: App.error(409, "missing_conflict", "Ledger is missing")
@@ -121,10 +161,10 @@ def written(+state: E.State, result: Db.WriteResult) -> IO(Web.Reply):
     case Db.StoreIdempotencyConflict{}: App.error(409, "idempotency_conflict", "Key already names another transaction")
     case Db.StoreWriteError{code, message}: App.error(503, code, message)
 
-def encoded(store: Db.Store, operation: String, expected: U32, +state: E.State, result: Json.EncodeResult) -> IO(Web.Reply):
+def encoded(store: Db.Store, operation: String, expected: U32, +state: E.State, operation_data: H.Operation, result: Json.EncodeResult) -> IO(Web.Reply):
   match result:
     case Json.JsonEncoded{body}:
-      IO.bind(Db.WriteResult, Web.Reply, Db.Store.compare_write(store, operation, "ledger", expected, body), r => written(state, r))
+      IO.bind(Db.WriteResult, Web.Reply, Db.Store.compare_write(store, operation, "ledger", expected, body), r => written(state, operation_data, r))
     case Json.JsonEncodeFailure{code, message}: App.error(500, code, message)
 
 def save_room(room: Bool, store: Db.Store, +stored: Json.Json, +request: Json.Json, +next: E.State) -> IO(Web.Reply):
@@ -133,22 +173,24 @@ def save_room(room: Bool, store: Db.Store, +stored: Json.Json, +request: Json.Js
     case True{}:
       IO.bind(Json.EncodeResult, Web.Reply,
         Json.Json.stringify(snapshot(next, request <> entries(Json.field("receipts", stored)))),
-        r => encoded(store, "transfer:" ++ Nat.show(key(request)), uint(Json.field("expected_version", request)), next, r))
+        r => encoded(store, "transfer:" ++ Nat.show(key(request)), uint(Json.field("expected_version", request)), next, original_domain(request), r))
 
-def decided(outcome: E.Outcome, store: Db.Store, version: U32, +stored: Json.Json, +request: Json.Json) -> IO(Web.Reply):
+def decided(outcome: C.Decision<E.State, H.Body>, store: Db.Store, version: U32, +stored: Json.Json, +request: Json.Json) -> IO(Web.Reply):
   match outcome:
-    case E.Outcome{E.Rejected{}, next}: App.error(422, "insufficient_funds", "Transfer exceeds source balance")
-    case E.Outcome{E.Replayed{}, next}:
+    case C.Decision{next, C.Reply{status, H.Rejected{}}}: App.error(U32.from_nat(status), "insufficient_funds", "Transfer exceeds source balance")
+    case C.Decision{next, C.Reply{status, H.Replayed{operation}}}:
       replay(receipt(entries(Json.field("receipts", stored)), key(request)), request, version, next)
-    case E.Outcome{E.Applied{}, +next}:
+    case C.Decision{+next, C.Reply{status, H.Applied{operation}}}:
       save_room(Nat.is_lt(List.length(&2, Json.Json, entries(Json.field("receipts", stored))), 1000n), store, stored, request, next)
+
+    case C.Decision{next, C.Error{status, code, allow}}: App.error(U32.from_nat(status), code, "Request rejected")
 
 def transfer_from(from: String, to: String, store: Db.Store, version: U32, +stored: Json.Json, +request: Json.Json) -> IO(Web.Reply):
   match from to:
     case "alice" "bob":
-      decided(E.transfer(decode(stored), key(request), E.AliceToBob{}, U32.to_nat(uint(Json.field("amount", request)))), store, version, stored, request)
+      decided(H.transfer(decode(stored), domain(request, E.AliceToBob{})), store, version, stored, request)
     case "bob" "alice":
-      decided(E.transfer(decode(stored), key(request), E.BobToAlice{}, U32.to_nat(uint(Json.field("amount", request)))), store, version, stored, request)
+      decided(H.transfer(decode(stored), domain(request, E.BobToAlice{})), store, version, stored, request)
     case other other2: App.error(422, "invalid_accounts", "Use distinct alice and bob accounts")
 
 def supply_valid(valid: Bool, store: Db.Store, version: U32, +stored: Json.Json, request: Maybe<Json.Json>) -> IO(Web.Reply):
@@ -216,13 +258,41 @@ def operation(store: Db.Store, params: List<&2, Router.Param>, request: Web.Inco
 def health(params: List<&2, Router.Param>, request: Web.Incoming) -> IO(Web.Reply):
   Web.json_value(200, Json.object([("status", Json.string("ok"))]))
 
+# No effectful handler is called until the pure routing/authorization plan permits it.
+def credential(value: Maybe<String>) -> Bool:
+  match value:
+    case Some{text}: String.eq(text, "allowed")
+    case None{}: False{}
+
+def execute(store: Db.Store, id: Nat, params: List<&2, C.Param>, request: Web.Incoming) -> IO(Web.Reply):
+  match id:
+    case 0n: health(Nil{}, request)
+    case 1n: load(store, None{})
+    case 2n: transfer(store, Nil{}, request)
+    case 3n: operation_id(C.param("id", params), store)
+    case 4n: load(store, None{})
+    case other: App.error(500, "route_error", "Unknown route ID")
+
+def route_allow(methods: List<&2, String>, reply: Web.Reply) -> Web.Reply:
+  match methods:
+    case Nil{}: reply
+    case head <> tail: Web.with_header("Allow", App.allowed(head <> tail), reply)
+
+def routed(store: Db.Store, request: Web.Incoming, decision: C.Decision<Unit, H.Access>) -> IO(Web.Reply):
+  match decision:
+    case C.Decision{state, C.Reply{status, H.Execute{id, params}}}: execute(store, id, params, request)
+    case C.Decision{state, C.Error{status, code, methods}}:
+      do IO<Web.Reply>:
+        reply : Web.Reply <- App.error(U32.from_nat(status), code, "Request rejected")
+        IO.pure(Web.Reply, route_allow(methods, reply))
+
+def dispatch(store: Db.Store, +request: Web.Incoming) -> IO(Web.Reply):
+  match request:
+    case Web.Incoming{id, method, path, target, headers, body}:
+      routed(store, request, H.route(method, path, credential(Web.header("x-demo-access", headers))))
+
 def handler(+store: Db.Store, request: Web.Incoming) -> IO(Web.Reply):
-  App.observe(r => Router.route([
-    Router.Route{"GET", "/health", health},
-    Router.Route{"GET", "/accounts", p => r => accounts(store, p, r)},
-    Router.Route{"POST", "/transfers", p => r => transfer(store, p, r)},
-    Router.Route{"GET", "/operations/:id", p => r => operation(store, p, r)}
-  ], r), request)
+  App.observe(r => dispatch(store, r), request)
 
 @unsafe
 def serve(+store: Db.Store) -> IO(Unit):

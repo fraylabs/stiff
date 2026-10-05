@@ -1,4 +1,6 @@
 import Base
+import ./HTTP_PROOF.bend as HttpProof
+import ../../src/CONTRACTS_PROOF.bend as ContractsProof
 import ./engine.bend as E
 import ./spec.bend as S
 import ./LAWS.bend as L

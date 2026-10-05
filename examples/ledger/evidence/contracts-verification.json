@@ -1,0 +1,74 @@
+{
+  "base_revision": "893250a217415d1bc7a24f9192bddb3f0d3e3e46",
+  "compiler": "bend 2.0.35",
+  "source_sha256": {
+    "src/contracts.bend": "95d367a2ece84565bd6654a8ec83bd5be2817252157adb51a191a9a49a1dc071",
+    "src/CONTRACTS_PROOF.bend": "886a094ca7446785373df040d619eaeb9e04f0688a7b62f83d3b049e53b0950e",
+    "src/PROOF.bend": "bcfacac47dcbb196e468038a456fa354b5c7ee5a5ed89ba39d350777d8630da2",
+    "examples/ledger/http.bend": "e3cb7d156b3314bf825d883c77c18e02fb0642cf1ecc8be95f6b7ff5a71b4dc2",
+    "examples/ledger/HTTP_PROOF.bend": "4aa78b38d417e74accb1694f2a0fa7df9c60812fac4f429d820204087743a72c",
+    "examples/ledger/PROOF.bend": "ccda9acdd47d2502de90d73088847eeb8a70154c5b8811fbbed27a44a8a15aa2",
+    "examples/ledger/engine.bend": "2b9b78814dfe741fb7a1a439574f0dcbe721be51f5b1491b7e9150e7fb0c55c6",
+    "examples/ledger/main.bend": "99f29ead74cd72d8e62e1d734afa392a04322ca65773ecd5253e6670248c0503",
+    "examples/ledger/tasks.py": "c55eb5844e4e0d819cc74a0aeebe80791cfa093d7e2e62584edc00866c953cd4",
+    "examples/ledger/http_witnesses.bend": "b00ba408b57fe8841bd52dcc2348f0392921a830540eeab12c13c92f0503d0c0",
+    "examples/ledger/test_ledger.py": "96c97fe4f147616c57f8221193b86dc21f525d28516e43f6e72ba50f27a0e3db"
+  },
+  "framework_laws": [
+    "protected_denies",
+    "read_preserves",
+    "dispatch_read_preserves",
+    "get_is_read",
+    "head_is_read",
+    "unknown_is_404",
+    "wrong_method_is_405",
+    "protected_route_denies"
+  ],
+  "ledger_http_laws": [
+    "replay_response",
+    "transfer_status_declared",
+    "protected_accounts_denied",
+    "unknown_route",
+    "wrong_method_allow",
+    "get_does_not_write",
+    "head_does_not_write"
+  ],
+  "ledger_check_mistakes_test_verdict": {
+    "exit": 0,
+    "native_tests": 15,
+    "mutation_count": 12,
+    "all_mutations_caught": true,
+    "output": "python3 tasks.py check\nChecking src/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nChecking examples/ledger/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\npython3 tasks.py mistakes\nChecking src/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nChecking examples/ledger/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\n01-credit-extra-cent: CAUGHT: transfer_conserves_example (generic proof: L.move_conserves)\n02-credit-without-debit: CAUGHT: transfer_conserves_example (generic proof: L.move_conserves)\n03-missing-funds-check: CAUGHT: insufficient_conserves_example (generic proof: L.move_conserves)\n04-unbalanced-fee: CAUGHT: transfer_conserves_example (generic proof: L.move_conserves)\n05-rejected-debits: CAUGHT: rejected_transfer_unchanged_example (generic proof: L.finish_conserves)\n06-double-apply-retry: CAUGHT: same_key_twice_equals_once_example (generic proof: replay_response)\n07-forget-idempotency-key: CAUGHT: same_key_twice_equals_once_example (generic proof: L.finish_retry)\n08-reverse-accounts: CAUGHT: alice_exact_debit_credit_example (generic proof: L.finish_conserves)\n09-replay-labelled-applied: CAUGHT: replay_response_example (generic proof: replay_response)\n10-missing-auth-check: CAUGHT: protected_accounts_example (generic proof: protected_accounts_denied)\n11-get-writes: CAUGHT: get_no_write_example (generic proof: get_does_not_write)\n12-undeclared-status: CAUGHT: declared_status_example (generic proof: transfer_status_declared)\npython3 tasks.py build\nChecking src/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nChecking examples/ledger/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nBuilt <stiff>/.cache/ledger/ledger. Native libraries: libcurl json-c pinned-libevent-2.2.2-alpha-static.\npython3 tasks.py heavy python3 examples/ledger/test_ledger.py\ntest_concurrent_reordered_json_retries (__main__.LedgerHTTP.test_concurrent_reordered_json_retries) ... ok\ntest_conflicting_key_race (__main__.LedgerHTTP.test_conflicting_key_race) ... ok\ntest_contract_route_guard_and_allow (__main__.LedgerHTTP.test_contract_route_guard_and_allow) ... ok\ntest_drain_and_reject_preserves_complete_snapshot (__main__.LedgerHTTP.test_drain_and_reject_preserves_complete_snapshot) ... ok\ntest_identical_concurrent_retries (__main__.LedgerHTTP.test_identical_concurrent_retries) ... ok\ntest_initial_and_both_directions (__main__.LedgerHTTP.test_initial_and_both_directions) ... ok\ntest_invalid_requests_and_routes (__main__.LedgerHTTP.test_invalid_requests_and_routes) ... ok\ntest_lost_ack_sigkill_and_reconcile (__main__.LedgerHTTP.test_lost_ack_sigkill_and_reconcile) ... ok\ntest_numeric_key_and_version_boundaries (__main__.LedgerHTTP.test_numeric_key_and_version_boundaries) ... ok\ntest_receipt_capacity_and_retry_at_capacity (__main__.LedgerHTTP.test_receipt_capacity_and_retry_at_capacity) ... ok\ntest_reordered_json_is_same_input (__main__.LedgerHTTP.test_reordered_json_is_same_input) ... ok\ntest_retry_after_intervening_transfer_and_restart (__main__.LedgerHTTP.test_retry_after_intervening_transfer_and_restart) ... ok\ntest_same_key_different_input (__main__.LedgerHTTP.test_same_key_different_input) ... ok\ntest_seeded_history_against_independent_accounting (__main__.LedgerHTTP.test_seeded_history_against_independent_accounting) ... ok\ntest_version_race (__main__.LedgerHTTP.test_version_race) ... ok\n\n----------------------------------------------------------------------\nRan 15 tests in 26.933s\n\nOK\npython3 tasks.py verdict\nALL PROOFS CHECK\n"
+  },
+  "independent_kernel": {
+    "exit": 0,
+    "verdict": "ALL PROOFS CHECK\n"
+  },
+  "documentation_example": {
+    "verdict": "ALL PROOFS CHECK",
+    "exit": 0
+  },
+  "framework_suite": {
+    "command": "make test",
+    "exit": 2,
+    "tests": 147,
+    "passed": 145,
+    "skipped": 1,
+    "failed": 1,
+    "failure": "test_native_measurement_overload_recovery_and_shutdown: PermissionError: [Errno 1] Operation not permitted: /bin/ps. RSS sampling could not run in this environment.",
+    "claim": "The full normal suite did not pass. It requires a rerun where process RSS inspection is permitted."
+  },
+  "execution": {
+    "dependencies": "Existing toolchain/libevent symlinks and scoped BendTT kernel reused; no setup or global installation.",
+    "heavy_work": "One heavy run at a time under the repository parent mkdir lock. Ledger tasks took their own lock. make test took and released the lock externally.",
+    "publication": "No push, tag, release or publication."
+  },
+  "limits": [
+    "Universal 404/405 laws start from Selection; URI matching and method collection have concrete table proofs/tests, not a general matching theorem.",
+    "The declared-status theorem covers pure transfer outcomes, not all adapter errors or socket/encoder fallbacks.",
+    "Original-operation preservation is relative to the supplied original; receipt lookup and JSON/domain conversion are tested edges.",
+    "GET/HEAD preservation covers complete modeled state; effectful adapter writes remain tested/reviewed.",
+    "The new protected accounts route uses a fixed public demo value, not a real credential validation system.",
+    "BendTT translation, Base semantics, native code generation/runtime, SQLite and transport remain trusted."
+  ]
+}

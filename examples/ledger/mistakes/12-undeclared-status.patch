@@ -1,0 +1,5 @@
+--- http.bend
++++ http.bend
+@@ -17 +17 @@
+-    case E.Outcome{E.Applied{}, state}: C.Decision{state, C.Reply{200n, Applied{operation}}}
++    case E.Outcome{E.Applied{}, state}: C.Decision{state, C.Reply{201n, Applied{operation}}}

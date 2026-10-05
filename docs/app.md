@@ -110,3 +110,7 @@ does not intercept errors before application dispatch or catch process failures.
 source or tools on PATH. It checks success, Unicode bounds, route precedence,
 unique allowed methods, middleware rejection before parsing, malformed JSON,
 validation failures, and recovery. It runs in normal and diagnostic sanitizer CI.
+
+For pure, total request-to-response decisions with application laws, see
+[pure HTTP contracts](contracts.md). The existing IO routing and middleware APIs
+remain available.

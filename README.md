@@ -146,8 +146,10 @@ deployment example.
 The [proven ledger example](examples/ledger) is a native two-account money API:
 its pure Bend engine has checked conservation, overdraft rejection, unchanged
 rejection and idempotency laws. `make -C examples/ledger mistakes` demonstrates
-eight caught accounting bugs and one honest proof-coverage gap before building a
-binary. HTTP/SQLite integration is tested and remains outside those proofs.
+twelve caught accounting and HTTP-policy bugs before building a binary.
+[Pure HTTP contracts](docs/contracts.md) add checked replay responses,
+authorization and modeled read-state laws. SQLite and native HTTP integration
+remain tested edges outside the proofs.
 
 ## Use Stiff in your own project
 
