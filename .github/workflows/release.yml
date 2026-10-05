@@ -1,5 +1,7 @@
 name: Release archives
 on:
+  push:
+    branches: [release-0.4.0]
   workflow_dispatch:
     inputs:
       source_ref:
@@ -26,7 +28,7 @@ jobs:
       BEND_NO_TELEMETRY: 1
       STIFF_NATIVE_ABI: compiler
       STIFF_NATIVE_SANITIZE: 0
-      SOURCE_REF: ${{ inputs.source_ref }}
+      SOURCE_REF: ${{ inputs.source_ref || github.sha }}
       PUBLISH: ${{ inputs.publish }}
       GH_TOKEN: ${{ github.token }}
     steps:
