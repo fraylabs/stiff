@@ -11,8 +11,7 @@ This is one paired run on macOS arm64, using Bend 2.0.20 and rustc 1.95.0
 
 ## What each agent received
 
-Two fresh subagent contexts used the same model (`gpt-5.6-sol`) and reasoning
-setting (`high`). Both read [PROMPT.md](PROMPT.md), with only their assigned
+Two fresh agent contexts used the same AI model and settings. Both read [PROMPT.md](PROMPT.md), with only their assigned
 language, owned directory and toolchain instructions differing. Both read the
 same repository/execution instructions, could use their language's standard
 library and installed compiler, and were prohibited from reading the other

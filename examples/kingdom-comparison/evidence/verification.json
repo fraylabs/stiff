@@ -5,10 +5,7 @@
     "bend": "bend 2.0.20",
     "rust": "rustc 1.95.0 (59807616e 2026-04-14)"
   },
-  "model": "gpt-5.6-sol",
-  "reasoning_effort": "high",
   "contexts": "fresh task contexts; common prompt with language/directory-specific toolchain instructions",
-  "skill": "committed-execution v1.4",
   "workers": {
     "bend": "/root/kingdom_bend",
     "rust": "/root/kingdom_rust"

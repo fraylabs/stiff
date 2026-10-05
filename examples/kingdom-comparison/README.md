@@ -1,8 +1,8 @@
 # Kingdom rules: Bend 2 and Rust
 
 Two independent agents received the same [task prompt](PROMPT.md), with the
-language and output directory supplied separately. Both used `gpt-5.6-sol` at
-high reasoning effort with fresh task contexts. Neither was allowed to inspect
+language and output directory supplied separately. Both used the same AI model
+and settings with fresh task contexts. Neither was allowed to inspect
 the other's implementation or the parent's independent reference model.
 
 The game has two players, one parcel, gold, a bank and alternating turns. Players
