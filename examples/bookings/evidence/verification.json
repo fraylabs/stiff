@@ -1,0 +1,115 @@
+{
+  "base_revision": "c8a519b22156c9e76d635920065705cc0e0743a1",
+  "compiler": "bend 2.0.35",
+  "source_sha256": {
+    "examples/bookings/ENGINE_PROOF.bend": "901067d8e4223242f32230ab0ec40a8f7a7ed1bf90f7e43c97ee1f5f87eeb5cb",
+    "examples/bookings/HTTP_PROOF.bend": "244cfb8e3240c2371b404e5140ad5ceac2ff716ee19ab1c50e892bbed71c0ef5",
+    "examples/bookings/Makefile": "9df2e066a8b2de5c806e072db361d5cb679e151a16c9a49c12b16689755ed376",
+    "examples/bookings/PROOF.bend": "b698141ef9ec7f4366ec11bb9afac82e6253c01bbdac1cca9ca245d1fef69182",
+    "examples/bookings/engine.bend": "b0dbfc327ef64708480dfb6847585bbfb7e44b07601d3fdad41b56971f918a37",
+    "examples/bookings/http.bend": "2fd7533fd0a659018d1871f50947afbf25ea65f702d0344d40a748089e36bbf6",
+    "examples/bookings/main.bend": "c43fd3693e89561fa26adaa1531cea90b3b5bce41863606ebe3ad17dbe534d8a",
+    "examples/bookings/model.bend": "e62bac1631d2d2b6294a4367d24727d046a48f2ccf55425031dfa01089fcdefd",
+    "examples/bookings/spec.bend": "64795954d01c1bd02faab8dbfab637d573ed87c1ff477f1af5e50403475feb83",
+    "examples/bookings/tasks.py": "4374fce3112ecafabfb6e22e4c655a86c7a1beb2b549b7ca8980ab22b71173a7",
+    "examples/bookings/test_bookings.py": "bc357fcef7987f95c647cf214372abcfebe947da884df7443f6d6d092dae0017",
+    "examples/bookings/witnesses.bend": "d97c56738e1198226a7c3bf20bf02fd0c4d7a39a2be93bdd763cc184868136f1",
+    "src/CONTRACTS_PROOF.bend": "886a094ca7446785373df040d619eaeb9e04f0688a7b62f83d3b049e53b0950e",
+    "src/PROOF.bend": "bcfacac47dcbb196e468038a456fa354b5c7ee5a5ed89ba39d350777d8630da2",
+    "src/contracts.bend": "95d367a2ece84565bd6654a8ec83bd5be2817252157adb51a191a9a49a1dc071"
+  },
+  "engine_laws": [
+    "overlap_matches_half_open",
+    "compatible_matches",
+    "safe_matches",
+    "finish_safe",
+    "checked_safe",
+    "dispatch_safe",
+    "no_double_booking",
+    "finish_rejection",
+    "checked_rejection",
+    "dispatch_rejection",
+    "rejected_request_unchanged",
+    "keep_matches",
+    "remove_exact",
+    "cancelling_removes_exactly",
+    "key_reflexive",
+    "remembered_key",
+    "finish_retry",
+    "checked_retry",
+    "dispatch_retry",
+    "same_key_twice_equals_once",
+    "remove_step_retry",
+    "remove_retry",
+    "cancellation_twice_equals_once"
+  ],
+  "http_laws": [
+    "booking_status_declared",
+    "cancellation_status_declared",
+    "read_status_declared",
+    "admin_denied",
+    "access_denied_before_effects",
+    "get_does_not_write",
+    "head_does_not_write",
+    "unknown_route",
+    "wrong_method",
+    "booking_handler_status_declared",
+    "admin_response_status_declared",
+    "head_status_declared"
+  ],
+  "framework_contracts_laws": [
+    "protected_denies",
+    "read_preserves",
+    "dispatch_read_preserves",
+    "get_is_read",
+    "head_is_read",
+    "unknown_is_404",
+    "wrong_method_is_405",
+    "protected_route_denies"
+  ],
+  "booking_gate": {
+    "command": "make -C examples/bookings check mistakes test verdict",
+    "check": "ALL PROOFS CHECK",
+    "mutation_count": 6,
+    "all_ordinary_programs_check": true,
+    "all_generic_and_concrete_law_failures": true,
+    "native_tests": 7,
+    "native_result": "OK"
+  },
+  "independent_kernel": {
+    "exit": 0,
+    "verdict": "ALL PROOFS CHECK\n"
+  },
+  "ledger_regression": {
+    "command": "make -C examples/ledger check mistakes test",
+    "check": "ALL PROOFS CHECK",
+    "mutation_count": 12,
+    "all_caught": true,
+    "native_tests": 15,
+    "native_result": "OK"
+  },
+  "framework_suite": {
+    "command": "make test (under shared heavy lock)",
+    "exit": 2,
+    "tests": 147,
+    "passed": 145,
+    "skipped": 1,
+    "failed": 1,
+    "failure": "test_native_measurement_overload_recovery_and_shutdown: PermissionError: [Errno 1] Operation not permitted: /bin/ps. RSS sampling unavailable in sandbox.",
+    "skipped_test": "fresh consumer setup (CI-only unless STIFF_CONSUMER_TEST=1)",
+    "ci_status": "Not run for this change; local changes only."
+  },
+  "execution": {
+    "cache": "Existing pinned toolchain, static libevent and scoped BendTT kernel reused; no new compiler/native dependency installation or global install.",
+    "heavy_work": "Ledger and bookings tasks reuse the same parent mkdir lock. Full suite and starter curl used that lock. New example tests use at most two native processes/client workers; the existing full-suite benchmark has its own workload concurrency.",
+    "native_boundary": "SQLite snapshot/version races, canonical retry, restart/SIGKILL, independently computed schedule histories, route/credential guards, schema bounds, receipt capacity and retry at capacity tested; effects not formally verified."
+  },
+  "limits": [
+    "No-double-booking constrains Applied outcomes; an arbitrary already-corrupt state can be Replayed unchanged.",
+    "Cancellation removes all matching IDs in arbitrary duplicate-ID states; ordinary reachable adapter states have IDs derived from fresh keys.",
+    "State idempotency does not assert identical response bytes. Rejected keys may later succeed.",
+    "Pure status laws cover modeled decisions and declared matched routes; decoding/encoding/storage errors and transport fallback remain tested/trusted.",
+    "Credential is a fixed public demo value, not a login system.",
+    "BendTT translation, Base semantics, compiler/runtime, native ABI, SQLite, transport and OS remain trusted."
+  ]
+}

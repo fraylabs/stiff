@@ -1,0 +1,65 @@
+{
+  "make_run_curl": [
+    {
+      "path": "/hello",
+      "exit": 0,
+      "response": "HTTP/1.1 200 OK\nx-request-id: 1\ncontent-type: text/plain; charset=utf-8\nConnection: close\nDate: Mon, 05 Oct 2026 16:21:56 GMT\nContent-Length: 22\n\nhello from proven-demo"
+    },
+    {
+      "path": "/absent",
+      "exit": 0,
+      "response": "HTTP/1.1 404 Not Found\nx-request-id: 2\ncontent-type: application/json\nConnection: close\nDate: Mon, 05 Oct 2026 16:21:56 GMT\nContent-Length: 59\n\n{\"error\":{\"code\":\"not_found\",\"message\":\"Request rejected\"}}"
+    }
+  ],
+  "run_started_after_proof_gate": "python3 tasks.py build\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nBuilt <project>/build/proven-demo. Native libraries: libcurl json-c pinned-libevent-2.2.2-alpha-static.\n./build/proven-demo --threads 2 0\nLISTENING 57619\n",
+  "broken_source_build": {
+    "exit": 2,
+    "verdict": "python3 tasks.py build\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nSOME PROOFS FAIL\nError:\n- expected : C.Decision{state, C.Reply{200n, \"goodbye from proven-demo\"}}\n- observed : C.Decision{state, C.Reply{200n, \"hello from proven-demo\"}}\nContext:\n- state : Nat\nLocation: hello_contract\n10 | def hello_contract(state):\n11>|   {==}\n   |   ^^^^\n12 | \nProof gate failed: no binary will be built.\nmake: *** [build] Error 1\n",
+    "existing_binary_unchanged": true
+  },
+  "restored_check": "python3 tasks.py check\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\n",
+  "generated_sources_match_template": true,
+  "base_revision": "c8a519b22156c9e76d635920065705cc0e0743a1",
+  "compiler": "bend 2.0.35",
+  "source_sha256": {
+    "templates/proven-api/.gitignore": "a34bec66d19e079390e070f98e30f1b696ece6d66ff3dab40c218beb4c956f9d",
+    "templates/proven-api/LICENSE": "91155449683df48cd7a4c3d5b8e693537dd44658ac5294376a1a1c396f6204a4",
+    "templates/proven-api/Makefile": "f4b4783f19b24c8dfb59eb081153fd0863634490d2226672667442b860e5ae4c",
+    "templates/proven-api/PROOF.bend": "a15312b059a746a32fc987f93cf29cf282fc4475c8b8ca72f69c1eae4f1299b4",
+    "templates/proven-api/README.md": "a5789e1d419701b25660ae6b57b3e46b518ee63d3309d2a5bbf46f407f12fc90",
+    "templates/proven-api/api.bend": "3373adfc925137ea63f9929b582c73aeeab7f1eeb382ae38076b119496cca7c2",
+    "templates/proven-api/fetch-stiff.sh": "f637931b01bc27f346a8b1ba9bda6f3b32573eeffe5ebbcd071d2139ffafc664",
+    "templates/proven-api/main.bend": "8a8bd619eb3609d8d813e9975e03fc7f4f995cc2982c433700bddfb96295c5b0",
+    "templates/proven-api/stiff.rev": "765d6f4bdf532dab45605650f93a52f5c6215dc5e4c5022100a54b205729a6b0",
+    "templates/proven-api/tasks.py": "fb85fac2d18a4fc40d9b326affb24ab26a89609e23bb8a5b6c7983b700af3da2"
+  },
+  "generator_sha256": "1be3bd9f6f5a08cbf86f4e59dd0df56808f78e8be1a9d85042978ecc7a70b651",
+  "starter_command": "make new NAME=myapi DIR=../myapi",
+  "verified_commands": [
+    "make new NAME=proven-demo DIR=$TMPDIR/proven-demo-verified",
+    "STIFF_CACHE=<stiff>/.cache STIFF_HEAVY_LOCK=<shared-lock> make -C <project> setup check build mistakes",
+    "make -C <project> run PORT=0",
+    "curl -sS -i http://127.0.0.1:<port>/hello",
+    "curl -sS -i http://127.0.0.1:<port>/absent",
+    "change api.bend greeting; make -C <project> build",
+    "restore api.bend; make -C <project> check"
+  ],
+  "setup": {
+    "dependency": "One HTTPS fetch of exact pinned Stiff revision in a temporary generated project. Dependency checkout reused in the final generated project.",
+    "native_cache": "Existing compiler/libevent symlinks reused and verified by pinned Stiff setup. No fresh compiler/libevent build or global install.",
+    "final_project_location": "Under TMPDIR, outside the Stiff repository.",
+    "additional_generation_checks": "Invalid NAME and existing DIR rejected; generated MIT license and name substitutions checked."
+  },
+  "law": "hello_contract: for every Nat state, GET /hello returns exactly unchanged state, HTTP 200 and the named greeting.",
+  "mutation": "Changing hello to goodbye passes ordinary pure-program checks and fails hello_contract. No mutant binary is built.",
+  "limits": [
+    "Proof covers pure request-to-response decisions. Rendering, HTTP effects, compiler/runtime and OS remain trusted.",
+    "No authentication or persistence in the minimal template.",
+    "CI steps added for normal profiles; not run remotely or published in this task."
+  ],
+  "independent_kernel": {
+    "command": "BENDTT=<scoped-kernel> bend <project>/PROOF.bend --verdict",
+    "exit": 0,
+    "verdict": "ALL PROOFS CHECK"
+  }
+}

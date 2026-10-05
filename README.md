@@ -54,6 +54,33 @@ json-c and SQLite development files, plus CMake and patch for scoped libevent.
 OpenSSL is used by tests. [Ubuntu 22.04's stock libcurl](https://packages.ubuntu.com/jammy/libcurl4-openssl-dev)
 is too old for this path.
 
+Start your own proven API outside this checkout with one command:
+
+```sh
+make new NAME=myapi DIR=../myapi
+make -C ../myapi setup check build run
+# In another terminal:
+curl -fsS http://127.0.0.1:8080/hello
+# hello from myapi
+make -C ../myapi mistakes
+# CAUGHT: hello_contract
+```
+
+The [standalone template](templates/proven-api/README.md) has one route, one
+universal law and one deliberate mistake. It pins Stiff 0.4.0 by Git revision;
+setup uses the checksum-pinned compiler and scoped native dependencies above.
+Builds require both framework and application proof verdicts. With a compatible
+existing cache, use `STIFF_CACHE=/absolute/path/to/stiff/.cache make -C ../myapi setup`.
+Edit `api.bend` and `PROOF.bend` to express your promises. Generation takes
+seconds; first dependency setup takes longer. Choose a new destination directory.
+
+For complete storage examples, try [room bookings](examples/bookings): arbitrary
+accepted schedules have no double booking, half-open adjacent slots fit,
+cancellation removes precisely the named booking and retries preserve state.
+Its six realistic mutations fail the proof gate before a binary exists.
+The [money ledger](examples/ledger) proves conservation and exact debit/credit.
+Both keep effects at a tested SQLite edge and document where their proofs stop.
+
 Run the broader verification separately after first use:
 
 ```sh

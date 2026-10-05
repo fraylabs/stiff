@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -65 +65 @@
+-        case M.Booking{bid, room, start, end}: keep(Nat.is_eq(bid, id), b, remove(tail, id))
++        case M.Booking{bid, room, start, end}: keep(Nat.is_eq(bid, 1n+id), b, remove(tail, id))

@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -47 +47 @@
+-    case True{}: M.Outcome{M.Replayed{}, original}
++    case True{}: finish(True{}, original, key, b)

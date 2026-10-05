@@ -36,6 +36,16 @@ jobs:
       - run: clang --version
       - run: make setup
       - run: make test
+      - name: Verify proven storage examples
+        if: matrix.profile == 'normal'
+        run: |
+          make -C examples/ledger check mistakes test
+          make -C examples/bookings check mistakes test
+      - name: Generate and build a standalone proven API
+        if: matrix.profile == 'normal'
+        run: |
+          make new NAME=starter-smoke DIR="$RUNNER_TEMP/starter-smoke"
+          STIFF_CACHE="$PWD/.cache" make -C "$RUNNER_TEMP/starter-smoke" setup check build mistakes
       - name: Verify hard resident-memory isolation in a disposable unit
         if: runner.os == 'Linux' && matrix.profile == 'normal'
         run: |

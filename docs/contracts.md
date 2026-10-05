@@ -91,6 +91,14 @@ method-list collection. The ledger supplies concrete table proofs and native
 routing tests. The contracts matcher has the same documented pattern semantics
 as Router; the existing effectful Router API remains available.
 
+The [bookings example](../examples/bookings) applies the same contracts to room
+schedules: no double booking, exact cancellation, retry state equality, read
+preservation, admin denial and declared statuses. Its independent specification
+uses half-open intervals and its mutation demo includes enclosing-slot and
+wrong-room bugs. The [standalone starter](../templates/proven-api/README.md),
+generated with `make new NAME=myapi DIR=../myapi`, checks both framework and
+application laws before building.
+
 The compiler checks supplied proofs, not all possible promises automatically.
 A build must explicitly check its proof entry point and require the verdict text
 `ALL PROOFS CHECK` without `SOME PROOFS FAIL` or `Error:`. Compiling the effectful

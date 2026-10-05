@@ -29,3 +29,7 @@ benchmark:
 runner:
 	mkdir -p .cache/native
 	$(CC) -std=c11 -Wall -Wextra -Werror -O2 native/stiff-run.c -o .cache/native/stiff-run
+
+.PHONY: new
+new:
+	python3 scripts/new.py --name "$(NAME)" --dir "$(DIR)"

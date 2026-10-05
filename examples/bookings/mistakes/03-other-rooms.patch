@@ -1,0 +1,5 @@
+--- engine.bend
++++ engine.bend
+@@ -8 +8 @@
+-      Bool.and(Nat.is_eq(ar, br), Bool.and(Nat.is_lt(ast, be), Nat.is_lt(bst, ae)))
++      Bool.and(Bool.not(Nat.is_eq(ar, br)), Bool.and(Nat.is_lt(ast, be), Nat.is_lt(bst, ae)))
