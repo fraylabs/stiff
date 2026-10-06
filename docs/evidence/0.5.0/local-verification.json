@@ -1,0 +1,20 @@
+{
+  "base_revision": "980b445f4110d22e5d3f79d46f628f83d4128364",
+  "version_anchor": "8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157",
+  "scope": "Suite started at the base revision; only release versions, documentation and workflow configuration changed during the run. Framework, native build and test bytes stayed unchanged.",
+  "platform": "macOS arm64",
+  "bend": "2.0.35",
+  "setup": "passed (pinned dependencies already installed)",
+  "normal_suite": {
+    "tests": 147,
+    "passed": 145,
+    "failed": 1,
+    "skipped": 1,
+    "seconds": 79.013,
+    "failure": "test_native_measurement_overload_recovery_and_shutdown: sandbox blocks /bin/ps; no RSS measurements",
+    "skipped_test": "fresh consumer setup runs in CI",
+    "log_sha256": "a8da62b6b1b3bc9e1de3e325fd7ea66c468925e22e84153fe10652564e9e30ac"
+  },
+  "full_suite_authority": "Hosted Check CI; local result is not a full-suite pass",
+  "heavy_work": "One local heavy job at a time under the shared directory lock; native build cap five"
+}

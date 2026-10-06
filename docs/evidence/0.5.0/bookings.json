@@ -1,0 +1,39 @@
+{
+  "revision": "8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157",
+  "compiler": "bend 2.0.35",
+  "command": "make -C examples/bookings check mistakes test",
+  "framework_and_application_verdict": "ALL PROOFS CHECK",
+  "mutations": 6,
+  "all_ordinary_programs_check": true,
+  "all_generic_and_concrete_law_failures": true,
+  "no_mutant_binary_built": true,
+  "native_tests": 7,
+  "native_result": "OK",
+  "source_sha256": {
+    "examples/bookings/ENGINE_PROOF.bend": "901067d8e4223242f32230ab0ec40a8f7a7ed1bf90f7e43c97ee1f5f87eeb5cb",
+    "examples/bookings/HTTP_PROOF.bend": "244cfb8e3240c2371b404e5140ad5ceac2ff716ee19ab1c50e892bbed71c0ef5",
+    "examples/bookings/Makefile": "9df2e066a8b2de5c806e072db361d5cb679e151a16c9a49c12b16689755ed376",
+    "examples/bookings/PROOF.bend": "b698141ef9ec7f4366ec11bb9afac82e6253c01bbdac1cca9ca245d1fef69182",
+    "examples/bookings/PROOFS.md": "c8dc1438e0344c5f9099339b838dd32364418b6d303fe33fec24864dedfcf6ca",
+    "examples/bookings/README.md": "c1d8e5d28a0b0efaf88992b4b4b7ed6f91442e55d7405d92fee4a30cad69243f",
+    "examples/bookings/engine.bend": "b0dbfc327ef64708480dfb6847585bbfb7e44b07601d3fdad41b56971f918a37",
+    "examples/bookings/http.bend": "2fd7533fd0a659018d1871f50947afbf25ea65f702d0344d40a748089e36bbf6",
+    "examples/bookings/main.bend": "c43fd3693e89561fa26adaa1531cea90b3b5bce41863606ebe3ad17dbe534d8a",
+    "examples/bookings/mistakes/01-closed-interval.patch": "d530c827c72f8352d983e0910b4916f4e6aafdfc47e759698e1b4964913e327f",
+    "examples/bookings/mistakes/02-start-only.patch": "2e2c2de6b051df5bda74a59e4cd1b6364eea869e52b97204072f9dc7083bde42",
+    "examples/bookings/mistakes/03-other-rooms.patch": "79da80d5373a074fbe97a76d4a9ecd996149f02e90042dc4b9d2854d6f241103",
+    "examples/bookings/mistakes/04-wrong-cancellation.patch": "8653eee9c1005228ed4739dec14c92e9c78b2a2dfad8078640fa17992fb7cb6f",
+    "examples/bookings/mistakes/05-double-apply.patch": "84a1060b0080366e4131406f709fad93239d64251534ed539a8ee6895bf967c4",
+    "examples/bookings/mistakes/06-get-writes.patch": "436b7583ef6e3df04d0d8aad4b1f456f57950eca189e5f0bd4abf59f3d1f2fd8",
+    "examples/bookings/model.bend": "e62bac1631d2d2b6294a4367d24727d046a48f2ccf55425031dfa01089fcdefd",
+    "examples/bookings/spec.bend": "64795954d01c1bd02faab8dbfab637d573ed87c1ff477f1af5e50403475feb83",
+    "examples/bookings/tasks.py": "15a6e89ddb76b0ada80cf453672db01add5f01236d7f3024b5e41703d01a928c",
+    "examples/bookings/test_bookings.py": "bc357fcef7987f95c647cf214372abcfebe947da884df7443f6d6d092dae0017",
+    "examples/bookings/witnesses.bend": "d97c56738e1198226a7c3bf20bf02fd0c4d7a39a2be93bdd763cc184868136f1"
+  },
+  "independent_kernel": "Not repeated for this release; earlier evidence remains attributed to its original sources.",
+  "limits": [
+    "Pure decisions only; native effects/compiler/dependencies and edge integrations remain trusted/tested.",
+    "No new capacity or end-to-end verification claim."
+  ]
+}

@@ -1,0 +1,116 @@
+[
+  {
+    "mutation": "01-closed-interval",
+    "caught": true,
+    "law_instance": "half_open_boundary",
+    "first_failing_proof": "overlap_matches_half_open",
+    "ordinary_typecheck": {
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    "proof_check": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : Bool.and(Cmp.is_eq(Nat.cmp(ar, br)), Bool.and(Cmp.is_le(Nat.cmp(ast, be)), Cmp.is_le(Nat.cmp(bst, ae))))\n- observed : Bool.and(Cmp.is_eq(Nat.cmp(ar, br)), Bool.and(Cmp.is_lt(Nat.cmp(ast, be)), Cmp.is_lt(Nat.cmp(bst, ae))))\nContext:\n- ai  : Nat\n- ar  : Nat\n- ast : Nat\n- ae  : Nat\n- bi  : Nat\n- br  : Nat\n- bst : Nat\n- be  : Nat\nLocation: overlap_matches_half_open\n11 |   match a b:\n12>|     case M.Booking{ai, ar, ast, ae} M.Booking{bi, br, bst, be}: {==}\n   |                                                                 ^^^^\n13 | \n"
+    },
+    "concrete_witness": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : True{}\n- observed : False{}\nLocation: half_open_boundary\n13 | def half_open_boundary():\n14>|   {==}\n   |   ^^^^\n15 | \n"
+    },
+    "binary_built": false
+  },
+  {
+    "mutation": "02-start-only",
+    "caught": true,
+    "law_instance": "enclosing_slot_rejected",
+    "first_failing_proof": "overlap_matches_half_open",
+    "ordinary_typecheck": {
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    "proof_check": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : Bool.and(Cmp.is_eq(Nat.cmp(ar, br)), Bool.and(Cmp.is_lt(Nat.cmp(ast, be)), Cmp.is_le(Nat.cmp(bst, ast))))\n- observed : Bool.and(Cmp.is_eq(Nat.cmp(ar, br)), Bool.and(Cmp.is_lt(Nat.cmp(ast, be)), Cmp.is_lt(Nat.cmp(bst, ae))))\nContext:\n- ai  : Nat\n- ar  : Nat\n- ast : Nat\n- ae  : Nat\n- bi  : Nat\n- br  : Nat\n- bst : Nat\n- be  : Nat\nLocation: overlap_matches_half_open\n11 |   match a b:\n12>|     case M.Booking{ai, ar, ast, ae} M.Booking{bi, br, bst, be}: {==}\n   |                                                                 ^^^^\n13 | \n"
+    },
+    "concrete_witness": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : M.Outcome{M.Applied{}, M.State{[M.Booking{2n, 0n, 5n, 25n}, M.Booking{1n, 0n, 10n, 20n}], [2n, 1n]}}\n- observed : M.Outcome{M.Rejected{}, M.State{[M.Booking{1n, 0n, 10n, 20n}], [1n]}}\nLocation: enclosing_slot_rejected\n14 | def enclosing_slot_rejected():\n15>|   {==}\n   |   ^^^^\n16 | \n"
+    },
+    "binary_built": false
+  },
+  {
+    "mutation": "03-other-rooms",
+    "caught": true,
+    "law_instance": "same_room_rejected",
+    "first_failing_proof": "overlap_matches_half_open",
+    "ordinary_typecheck": {
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    "proof_check": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : Bool.and(Bool.not(Cmp.is_eq(Nat.cmp(ar, br))), Bool.and(Cmp.is_lt(Nat.cmp(ast, be)), Cmp.is_lt(Nat.cmp(bst, ae))))\n- observed : Bool.and(Cmp.is_eq(Nat.cmp(ar, br)), Bool.and(Cmp.is_lt(Nat.cmp(ast, be)), Cmp.is_lt(Nat.cmp(bst, ae))))\nContext:\n- ai  : Nat\n- ar  : Nat\n- ast : Nat\n- ae  : Nat\n- bi  : Nat\n- br  : Nat\n- bst : Nat\n- be  : Nat\nLocation: overlap_matches_half_open\n11 |   match a b:\n12>|     case M.Booking{ai, ar, ast, ae} M.Booking{bi, br, bst, be}: {==}\n   |                                                                 ^^^^\n13 | \n"
+    },
+    "concrete_witness": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : M.Outcome{M.Applied{}, M.State{[M.Booking{2n, 0n, 15n, 25n}, M.Booking{1n, 0n, 10n, 20n}], [2n, 1n]}}\n- observed : M.Outcome{M.Rejected{}, M.State{[M.Booking{1n, 0n, 10n, 20n}], [1n]}}\nLocation: same_room_rejected\n14 | def same_room_rejected():\n15>|   {==}\n   |   ^^^^\n16 | \n"
+    },
+    "binary_built": false
+  },
+  {
+    "mutation": "04-wrong-cancellation",
+    "caught": true,
+    "law_instance": "cancel_exact_instance",
+    "first_failing_proof": "remove_exact",
+    "ordinary_typecheck": {
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    "proof_check": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : {E.keep(Cmp.is_eq(Nat.cmp(bid, 1n+id)), M.Booking{bid, room, start, end}, E.remove(tail, id)) == S.retain(Cmp.is_eq(Nat.cmp(bid, id)), M.Booking{bid, room, start, end}, S.without(tail, id)) : List<&2, M.Booking>}\n- observed : {E.keep(Cmp.is_eq(Nat.cmp(bid, id)), M.Booking{bid, room, start, end}, E.remove(tail, id)) == S.retain(Cmp.is_eq(Nat.cmp(bid, id)), M.Booking{bid, room, start, end}, S.without(tail, id)) : List<&2, M.Booking>}\nContext:\n- bid   : Nat\n- room  : Nat\n- start : Nat\n- end   : Nat\n- tail  : List<&2, M.Booking>\n- id    : Nat\nLocation: remove_exact\n155 |         case M.Booking{bid, room, start, end}:\n156>|           %Equal.sym(List<&2, M.Booking>, E.remove(tail, id), S.without(tail, id), remove_exact(tail, id)) : {E.keep(Nat.is_eq(bid, id), b, _) == S.without(b <> tail, id) : List<&2, M.Booking>}\n    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n157 |           keep_matches(Nat.is_eq(bid, id), b, S.without(tail, id))\n"
+    },
+    "concrete_witness": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : M.State{[M.Booking{1n, 0n, 10n, 20n}], [1n, 2n]}\n- observed : M.State{[M.Booking{2n, 1n, 10n, 20n}], [1n, 2n]}\nLocation: cancel_exact_instance\n14 | def cancel_exact_instance():\n15>|   {==}\n   |   ^^^^\n16 | \n"
+    },
+    "binary_built": false
+  },
+  {
+    "mutation": "05-double-apply",
+    "caught": true,
+    "law_instance": "retry_once_instance",
+    "first_failing_proof": "dispatch_safe",
+    "ordinary_typecheck": {
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    "proof_check": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : S.accepted_safe(E.finish(True{}, original, key, b))\n- observed : True{}\nContext:\n- original : M.State\n- key      : Nat\n- b        : M.Booking\nLocation: dispatch_safe\n72 |   match duplicate:\n73>|     case True{}: {==}\n   |                  ^^^^\n74 |     case False{}: checked_safe(E.valid(b), original, key, b)\n"
+    },
+    "concrete_witness": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : M.State{[M.Booking{1n, 0n, 10n, 20n}, M.Booking{1n, 0n, 10n, 20n}], [1n, 1n]}\n- observed : M.State{[M.Booking{1n, 0n, 10n, 20n}], [1n]}\nLocation: retry_once_instance\n14 | def retry_once_instance():\n15>|   {==}\n   |   ^^^^\n16 | \n"
+    },
+    "binary_built": false
+  },
+  {
+    "mutation": "06-get-writes",
+    "caught": true,
+    "law_instance": "get_no_write_instance",
+    "first_failing_proof": "read_preserves",
+    "ordinary_typecheck": {
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    "proof_check": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : changed\n- observed : state\nContext:\n- S        : Data\n- B        : Data\n- state    : S\n- changed  : S\n- response : C.Response<B>\nLocation: read_preserves\n21 |   match proposed:\n22>|     case C.Decision{changed, response}: {==}\n   |                                         ^^^^\n23 | \n"
+    },
+    "concrete_witness": {
+      "exit": 1,
+      "verdict": "SOME PROOFS FAIL\nError:\n- expected : M.State{[], []}\n- observed : M.State{[M.Booking{1n, 0n, 10n, 20n}], [1n]}\nLocation: get_no_write_instance\n15 | def get_no_write_instance():\n16>|   {==}\n   |   ^^^^\n17 | \n"
+    },
+    "binary_built": false
+  }
+]

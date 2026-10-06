@@ -1,0 +1,43 @@
+{
+  "package": "0x958db28bf0cef817bff69fac7beb9846",
+  "hub": "https://hub.bend-lang.com",
+  "files": 20,
+  "manifest_sha256": "958db28bf0cef817bff69fac7beb9846fcc7a1cca061c80b552f95deceb806b8",
+  "compiler": "bend 2.0.35",
+  "empty_cache_download": true,
+  "source_bytes_match": true,
+  "proof_verdict": "ALL PROOFS CHECK",
+  "native_https": "passed",
+  "independently_built_example_https": true,
+  "persistent_application_tests": 6,
+  "date": "2026-10-07",
+  "platform": "macOS arm64",
+  "status": "published and verified",
+  "library_release": "v0.5.0 experimental",
+  "library_and_build_tool_revision": "8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157",
+  "publication_response": [
+    "Publishing to BendHub: public and permanent, under https://bend-lang.com/bender/terms#s18",
+    "License: see LICENSE",
+    "publishing 20 files, 163662 bytes, as 0x958db28bf0cef817bff69fac7beb9846 (mining its proof of work)",
+    "0x958db28bf0cef817bff69fac7beb9846",
+    "import 0x958db28bf0cef817bff69fac7beb9846/stiff.bend as Stiff"
+  ],
+  "standalone_example": {
+    "copied_outside_repository": true,
+    "native_build": "passed",
+    "cached_native_file_tamper": "rejected",
+    "restored_cache_build": "passed",
+    "setup_scope": "Copied consumer compiled with the matching anchor build tools and existing pinned toolchain. Fresh Git setup is covered by hosted CI, not this local copied-client check."
+  },
+  "prepublication_check": {
+    "candidate_manifest_http_status": 404,
+    "remote_v0_5_0_tag": "absent",
+    "github_release": "release not found",
+    "github_login": "BrianLYS"
+  },
+  "limits": [
+    "Native C/compiler/dependencies remain trusted.",
+    "Hub-consumption verification covers macOS arm64.",
+    "Compiler proof verdict does not establish end-to-end verification or full memory safety."
+  ]
+}

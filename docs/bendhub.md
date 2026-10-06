@@ -1,15 +1,15 @@
 # BendHub package
 
-Stiff's experimental 0.4.0 library is available as an immutable BendHub package:
+Stiff's experimental 0.5.0 library is available as an immutable BendHub package:
 
 ```text
-0x4ee0ec16258e9b8ad6ef37e5b8c4f95e
+0x958db28bf0cef817bff69fac7beb9846
 ```
 
 This published hash requires **Bend 2.0.35**, matching the current Git checkout.
 The native effects depend on its private compiler ABI; a newer compiler is not
 automatically compatible. The GitHub
-[v0.4.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.4.0) provides
+[v0.5.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.5.0) provides
 native archives and pinned build tooling. The historical 0.2.0 package remains
 immutable and requires Bend 2.0.20.
 
@@ -27,9 +27,9 @@ make setup build
 The example uses these imports:
 
 ```python
-import 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e/src/http.bend as Http
-import 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e/src/io.bend as Net
-import 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e/src/json.bend as Json
+import 0x958db28bf0cef817bff69fac7beb9846/src/http.bend as Http
+import 0x958db28bf0cef817bff69fac7beb9846/src/io.bend as Net
+import 0x958db28bf0cef817bff69fac7beb9846/src/json.bend as Json
 ```
 
 The same package contains `url`, `server`, `app`, `router`, `schema`, `store`
@@ -40,7 +40,7 @@ checking. Native effects and external dependencies remain trusted code.
 
 BendHub stores Bend and referenced C sources. It does **not** install the native
 libraries, compiler or build scripts. The example separately fetches build tools
-from GitHub revision `be078621ad69303546de258fd8db578fc8c9b0f6`, verifies that
+from GitHub revision `8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157`, verifies that
 revision before building, and keeps the downloaded hub package in `.bend/lib`
 using `BEND_LIB`. It does not change your global compiler or package cache.
 The library, compiler pin and native build scripts match the tagged release;
@@ -73,7 +73,7 @@ The hash identifies bytes; it is not a proof of native safety or an author ident
 Run from this checkout after `make setup`:
 
 ```sh
-python3 scripts/verify-bendhub.py 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e
+python3 scripts/verify-bendhub.py 0x958db28bf0cef817bff69fac7beb9846
 ```
 
 This network-dependent release check creates an empty temporary `BEND_LIB`,
@@ -88,7 +88,7 @@ The temporary consumers and their synthetic state are removed afterwards.
 It requires the exact package sources, so use the corresponding source revision
 when checking an older package after library changes.
 
-[Publication and download evidence](evidence/0.4.0/bendhub.json) records the
+[Publication and download evidence](evidence/0.5.0/bendhub.json) records the
 verified hash, compiler and local platform. This package verification adds
 macOS arm64 evidence; the broader platform checks are linked
 from [the checklist](checklist.md).

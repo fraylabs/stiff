@@ -1,7 +1,7 @@
 import Base
-import 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e/src/http.bend as Http
-import 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e/src/io.bend as Net
-import 0x4ee0ec16258e9b8ad6ef37e5b8c4f95e/src/json.bend as Json
+import 0x958db28bf0cef817bff69fac7beb9846/src/http.bend as Http
+import 0x958db28bf0cef817bff69fac7beb9846/src/io.bend as Net
+import 0x958db28bf0cef817bff69fac7beb9846/src/json.bend as Json
 
 def print_message(value: Maybe<Json.Json>) -> IO(Unit):
   match value:

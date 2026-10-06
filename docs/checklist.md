@@ -1,6 +1,37 @@
 # Framework completion checklist
 
-## Current release: 0.4.0
+## Current release: 0.5.0
+
+Stiff **0.5.0** targets Bend **2.0.35**. The [room-bookings example](../examples/bookings)
+proves no double booking after an accepted booking on arbitrary schedules,
+half-open slot semantics, exact cancellation and retry state equality.
+Six ordinarily typechecked mistakes fail both the generic proof gate and a
+concrete law instance before any mutant binary is built.
+
+`make new NAME=myapi DIR=../myapi` generates a [standalone proven API](../templates/proven-api/README.md)
+with an immutable Stiff source/build-tool pin. Its build checks framework and
+application laws; changing its greeting is caught before compilation.
+Heavy tasks honour the optional `STIFF_HEAVY_LOCK`; no lock is required by default.
+Normal Linux/macOS CI jobs check both proven storage examples and generate,
+set up, build and mutation-check a standalone starter.
+
+The [BendHub package](bendhub.md) supplies the library sources and manifest.
+The [experimental release](https://github.com/fraylabs/stiff/releases/tag/v0.5.0)
+provides platform-specific macOS arm64 and Linux x64/arm64 archives of the app,
+notes and supervisor examples. They dynamically require libcurl, json-c and
+SQLite; patched libevent 2.2.2-alpha is statically included.
+
+[Release evidence](evidence/0.5.0) records exact revisions and separate scopes.
+The local suite passed 145 tests, skipped the CI-only fresh consumer setup and
+failed only the RSS benchmark because the sandbox blocks `/bin/ps`.
+Hosted CI supplies the full-suite result. Proofs cover pure modeled decisions;
+credential validation, decoding, persisted receipt selection, serialization,
+SQLite integration, native effects, compiler/runtime, dependencies and OS remain
+trusted/tested. See [contracts](contracts.md) and [booking limits](../examples/bookings/PROOFS.md).
+Historical measurements below retain their original revisions and are not new
+0.5.0 capacity measurements.
+
+## Historical 0.4.0 release
 
 Stiff **0.4.0** targets Bend **2.0.35**. It adds [pure HTTP contracts](contracts.md)
 with compiler-checked authorization, modeled GET/HEAD state preservation and

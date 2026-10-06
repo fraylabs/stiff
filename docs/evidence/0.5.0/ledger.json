@@ -1,0 +1,13 @@
+{
+  "revision": "8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157",
+  "compiler": "bend 2.0.35",
+  "command": "make -C examples/ledger check mistakes test",
+  "framework_and_application_verdict": "ALL PROOFS CHECK",
+  "mutations": 12,
+  "all_caught": true,
+  "no_mutant_binary_built": true,
+  "native_tests": 15,
+  "native_result": "OK",
+  "log_sha256": "2a8646600f255710e409d75a908b60f08d3eca06b6f206be0f2425253e274c31",
+  "independent_kernel": "Not repeated for this release."
+}
