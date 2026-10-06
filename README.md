@@ -4,10 +4,10 @@ Native HTTP, application and storage building blocks for **Bend 2**. Write a Ben
 `IO` program with routing, schemas, streaming and durable local state, then compile
 it to a native executable.
 
-**Status:** experimental 0.4.0, pinned to Bend **2.0.35**. No Node or npm dependency.
+**Status:** experimental 0.5.0, pinned to Bend **2.0.35**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
-[Stiff 0.4.0 release with macOS arm64 and Linux x64/arm64 archives](https://github.com/fraylabs/stiff/releases/tag/v0.4.0).
+[Stiff 0.5.0 release with macOS arm64 and Linux x64/arm64 archives](https://github.com/fraylabs/stiff/releases/tag/v0.5.0).
 [Completed checklist and verification evidence](docs/checklist.md).
 
 ## Get started
@@ -67,7 +67,7 @@ make -C ../myapi mistakes
 ```
 
 The [standalone template](templates/proven-api/README.md) has one route, one
-universal law and one deliberate mistake. It pins Stiff 0.4.0 by Git revision;
+universal law and one deliberate mistake. It pins Stiff 0.5.0 by Git revision;
 setup uses the checksum-pinned compiler and scoped native dependencies above.
 Builds require both framework and application proof verdicts. With a compatible
 existing cache, use `STIFF_CACHE=/absolute/path/to/stiff/.cache make -C ../myapi setup`.

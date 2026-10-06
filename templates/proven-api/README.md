@@ -16,7 +16,7 @@ preserving any modeled natural-number state. Edit `api.bend`, then adapt
 framework laws and your application law and requires `ALL PROOFS CHECK`.
 Compiling `main.bend` directly bypasses the gate.
 
-`stiff.rev` pins an exact MIT Stiff 0.4.0 revision. Setup fetches it into
+`stiff.rev` pins an exact MIT Stiff 0.5.0 revision. Setup fetches it into
 `deps/stiff`, then installs checksum-pinned Bend 2.0.35 and scoped libevent.
 No global install. Use a destination path without spaces for native builds. With an existing compatible Stiff cache, use
 `STIFF_CACHE=/absolute/path/to/stiff/.cache make setup` to reuse its compiler

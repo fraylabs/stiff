@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 — October 7, 2026
+
+- Add the proven room-bookings example: no double booking after any accepted booking, half-open slots, exact cancellation and retry state equality. Six ordinarily typechecked mistakes fail the proof gate before any mutant binary is built.
+- Add `make new NAME=myapi DIR=../myapi`, a standalone proven API starter with an immutable Stiff pin, mandatory framework/application proof gates and a caught greeting mistake.
+- Make the shared heavy-work lock opt-in through `STIFF_HEAVY_LOCK` for examples and the starter; ordinary users need no shared-machine configuration.
+- Check both proven storage examples and generate, set up and build the standalone starter in normal Linux/macOS CI jobs.
+
+Experimental release pinned to Bend 2.0.35. Proofs cover pure modeled decisions;
+credential validation, decoding, persisted receipt selection, serialization,
+SQLite integration, native effects, compiler/runtime and dependencies remain
+trusted/tested. See docs/contracts.md, examples/bookings/PROOFS.md and the
+starter README for the exact boundaries.
+
 ## 0.4.0 — October 5, 2026
 
 - Add pure HTTP contracts with compiler-checked protected-route, GET/HEAD state, and 404/405 laws in `src/contracts.bend`. Applications can prove declared statuses and response bodies.
