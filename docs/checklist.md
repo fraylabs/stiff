@@ -31,6 +31,24 @@ trusted/tested. See [contracts](contracts.md) and [booking limits](../examples/b
 Historical measurements below retain their original revisions and are not new
 0.5.0 capacity measurements.
 
+[Final pinned CI](https://github.com/fraylabs/stiff/actions/runs/37508009362) passed
+all eight platform/profile jobs on tagged source
+`ef5cf4b9ec8c471f538e00e972cc89e5fdfbc453`. All four normal jobs generated,
+set up, proof-checked, built and mutation-checked a starter against the new
+`8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157` pin. Its library/native build-tool
+bytes match the tag; [anchor hashes](evidence/0.5.0/source-anchor.json) and
+[starter results](evidence/0.5.0/starter.json) record that scope.
+
+[Linux archive CI](https://github.com/fraylabs/stiff/actions/runs/37508030606)
+passed both hosted builds. Each of the three clean archives passed exact
+provenance/checksum, supervised health, create/read/restart and six persistent
+notes journeys. All six published archives/checksum assets were downloaded
+again and matched every original byte. [Platform results](evidence/0.5.0/platform.json),
+[archive results](evidence/0.5.0/release-archives.json) and
+[publication receipt](evidence/0.5.0/publication.json) record the exact scope.
+BendHub was verified before tagging so the tag contains its immutable hash and
+manifest; publication receipts follow without changing the tag.
+
 ## Historical 0.4.0 release
 
 Stiff **0.4.0** targets Bend **2.0.35**. It adds [pure HTTP contracts](contracts.md)

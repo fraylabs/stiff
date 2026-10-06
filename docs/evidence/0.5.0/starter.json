@@ -1,0 +1,54 @@
+{
+  "tag_revision": "ef5cf4b9ec8c471f538e00e972cc89e5fdfbc453",
+  "starter_pin": "8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157",
+  "library_and_build_tools_match_tag": true,
+  "generator": "scripts/new.py",
+  "command": "make new NAME=starter-smoke DIR=<temporary-project>",
+  "commands_verified_in_ci": [
+    "setup",
+    "check",
+    "build",
+    "mistakes"
+  ],
+  "normal_jobs": [
+    {
+      "name": "test (ubuntu-24.04-arm, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37508009362/job/112421511224",
+      "conclusion": "success"
+    },
+    {
+      "name": "test (macos-15, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37508009362/job/112421511624",
+      "conclusion": "success"
+    },
+    {
+      "name": "test (macos-15-intel, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37508009362/job/112421511647",
+      "conclusion": "success"
+    },
+    {
+      "name": "test (ubuntu-24.04, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37508009362/job/112421511676",
+      "conclusion": "success"
+    }
+  ],
+  "framework_and_application_verdict": "ALL PROOFS CHECK",
+  "greeting_mistake": "caught before building a mutant binary",
+  "source_sha256": {
+    "templates/proven-api/.gitignore": "a34bec66d19e079390e070f98e30f1b696ece6d66ff3dab40c218beb4c956f9d",
+    "templates/proven-api/LICENSE": "91155449683df48cd7a4c3d5b8e693537dd44658ac5294376a1a1c396f6204a4",
+    "templates/proven-api/Makefile": "f4b4783f19b24c8dfb59eb081153fd0863634490d2226672667442b860e5ae4c",
+    "templates/proven-api/PROOF.bend": "a15312b059a746a32fc987f93cf29cf282fc4475c8b8ca72f69c1eae4f1299b4",
+    "templates/proven-api/README.md": "e36c8ddba7fce6b71e14cbbe1ec421e7285b6a4eb9e9360419cad10caf38642d",
+    "templates/proven-api/api.bend": "3373adfc925137ea63f9929b582c73aeeab7f1eeb382ae38076b119496cca7c2",
+    "templates/proven-api/fetch-stiff.sh": "f637931b01bc27f346a8b1ba9bda6f3b32573eeffe5ebbcd071d2139ffafc664",
+    "templates/proven-api/main.bend": "8a8bd619eb3609d8d813e9975e03fc7f4f995cc2982c433700bddfb96295c5b0",
+    "templates/proven-api/stiff.rev": "b6dab1e4bc7baee7a977088bfffda7cac75045865dd1428a38e4175d55d10a9f",
+    "templates/proven-api/tasks.py": "4e0464bd0df46cd9b8e7297dcca30b6473ced6e263d39d71bd9280f4d0d524f9"
+  },
+  "generator_sha256": "1be3bd9f6f5a08cbf86f4e59dd0df56808f78e8be1a9d85042978ecc7a70b651",
+  "limits": [
+    "Proof covers pure decisions; native rendering/transport/compiler/runtime and OS remain trusted.",
+    "This release CI verifies generation, fresh Git dependency setup, proofs, native build and mutation rejection; earlier runtime and independent-kernel evidence retains its original revision."
+  ]
+}
