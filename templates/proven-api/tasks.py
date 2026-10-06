@@ -33,7 +33,12 @@ def bend():
 
 @contextmanager
 def heavy():
-    lock = Path(ENV.get('STIFF_HEAVY_LOCK', str(ROOT.parent / '.heavy.lock')))
+    # Optional: set STIFF_HEAVY_LOCK to a directory path to serialize heavy
+    # tasks across projects that share one machine.
+    if not ENV.get('STIFF_HEAVY_LOCK'):
+        yield
+        return
+    lock = Path(ENV['STIFF_HEAVY_LOCK'])
     announced = False
     while True:
         try:

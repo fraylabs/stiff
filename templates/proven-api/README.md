@@ -21,8 +21,8 @@ Compiling `main.bend` directly bypasses the gate.
 No global install. Use a destination path without spaces for native builds. With an existing compatible Stiff cache, use
 `STIFF_CACHE=/absolute/path/to/stiff/.cache make setup` to reuse its compiler
 and libevent via symlinks; setup verifies the pins. Don't edit that shared cache.
-Builds/setup serialize through `../.heavy.lock`, overridable with
-`STIFF_HEAVY_LOCK`. Python runs tooling only; deployment needs just the native
+Set `STIFF_HEAVY_LOCK` to a directory path to serialize builds across projects
+on one machine; by default no lock is used. Python runs tooling only; deployment needs just the native
 binary and its system libraries. `PORT=0 make run` chooses an available port.
 
 The law covers a pure decision, not native memory safety, response encoding,

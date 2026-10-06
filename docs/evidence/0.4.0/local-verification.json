@@ -14,5 +14,5 @@
     "log_sha256": "e1d4b855a4a92e7e892de92a74fbf716ef23dec1b16daf2651b2eb6f1a01b818"
   },
   "full_suite_authority": "Hosted Check CI; local result is not a full-suite pass",
-  "heavy_work": "One local Stiff job at a time under stiff-worktrees/.heavy.lock; native build cap five"
+  "heavy_work": "One local Stiff job at a time under a shared local lock; native build cap five"
 }

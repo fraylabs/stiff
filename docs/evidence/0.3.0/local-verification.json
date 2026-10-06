@@ -27,5 +27,5 @@
     "examples/bendhub-client/package.manifest": "2731c2a5d4185b57cf5353061639642e14f92fcc34e1bb6ada3e6ef11431ec5e",
     "scripts/verify-bendhub.py": "ebcaa6ef564b3e9e1ba5a85ff8f2eeca34362b6708d8be525a90e49b046ddfd8"
   },
-  "heavy_work": "One local Stiff job at a time under stiff-worktrees/.heavy.lock; libevent build cap five."
+  "heavy_work": "One local Stiff job at a time under a shared local lock; libevent build cap five."
 }

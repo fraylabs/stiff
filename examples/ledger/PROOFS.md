@@ -171,25 +171,12 @@ extracts it under `.cache/ledger/lean`, and explicitly compiles the pinned
 that path, avoiding Bend's automatic global `~/.bend` cache. Override `BENDTT`
 with another locally built kernel if needed. Neither target installs global tools.
 
-On the shared development Mac, reuse dependencies before running the commands:
-
-```sh
-export BEND="$HOME/coding/fray/repos/stiff/.cache/toolchain/bin/bend"
-mkdir -p .cache
-ln -s "$HOME/coding/fray/repos/stiff/.cache/libevent" .cache/libevent
-ln -s "$HOME/coding/fray/repos/stiff/.cache/toolchain" .cache/toolchain
-```
-
-Create only missing symlinks; leave existing scoped caches alone. Heavy build,
-server-test, sanitizer and kernel-build tasks use a mkdir lock at the repository's
-parent `.heavy.lock` (the worktrees directory on this Mac). `STIFF_HEAVY_LOCK`
-can override it. They wait if another Stiff job owns it, execute sequentially and
-remove their own lock on normal/error exits. Bend engine checks and mutations
-are light and do not take that lock. The ledger targets reuse Stiff dependencies
-rather than invoking its setup. Stiff's separate full-suite consumer fixture
-bootstraps a historical dependency in a temporary project; exclude or adapt that
-fixture on the shared Mac. The recorded full-suite run inadvertently included it;
-see the scope deviation in verification evidence.
+To reuse an existing Stiff checkout's compiler and libevent instead of running
+setup, set `BEND` to its `.cache/toolchain/bin/bend` and symlink its
+`.cache/libevent` and `.cache/toolchain` into this checkout's `.cache`. Set
+`STIFF_HEAVY_LOCK` to a directory path to make heavy build, server-test,
+sanitizer and kernel-build tasks wait for one another across checkouts; by
+default no lock is used. Bend engine checks and mutations are light.
 
 The sanitizer result covers the generated Bend/Stiff C with the existing checked
 ASan calling-convention mitigation, not uninstrumented SQLite/libevent/libcurl,

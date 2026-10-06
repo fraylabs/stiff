@@ -103,6 +103,6 @@ receipt endpoint in this example.
 `make check mistakes test` checks the framework and application gates and
 native API. `make verdict` uses the ledger's existing scoped independent kernel
 (or `BENDTT`); it succeeded with `ALL PROOFS CHECK`. Bend-to-BendTT translation
-is still trusted. Build/setup tests share the ledger's parent-directory
-`.heavy.lock`; no fresh dependency setup occurs here. Python is tooling only.
+is still trusted. Heavy tasks honour the optional `STIFF_HEAVY_LOCK`, as in the ledger;
+no fresh dependency setup occurs here. Python is tooling only.
 MIT; the running service is a native executable.

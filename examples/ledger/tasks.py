@@ -45,7 +45,12 @@ def check():
 
 @contextmanager
 def heavy():
-    lock = Path(os.environ.get('STIFF_HEAVY_LOCK', str(ROOT.parent / '.heavy.lock')))
+    # Optional: set STIFF_HEAVY_LOCK to a directory path to serialize heavy
+    # tasks across checkouts that share one machine.
+    if not os.environ.get('STIFF_HEAVY_LOCK'):
+        yield
+        return
+    lock = Path(os.environ['STIFF_HEAVY_LOCK'])
     announced = False
     while True:
         try:

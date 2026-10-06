@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Proof and native gates; reuse the ledger's shared heavy-work lock."""
+"""Proof and native gates; reuse the ledger's optional heavy-work lock."""
 import importlib.util
 import json
 import os
