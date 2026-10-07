@@ -40,6 +40,7 @@ jobs:
       - name: Verify proven storage examples
         if: matrix.profile == 'normal'
         run: |
+          make routing-mistakes
           make -C examples/ledger check mistakes test
           make -C examples/bookings check mistakes test
       - name: Generate and build a standalone proven API
