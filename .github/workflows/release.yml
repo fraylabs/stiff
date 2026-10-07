@@ -9,6 +9,10 @@ on:
         required: true
         default: main
         type: string
+      publish_hub:
+        description: Publish the exact source library to BendHub before verification
+        default: false
+        type: boolean
       hub_package:
         description: Optional immutable BendHub hash to verify with native consumers
         default: ""
@@ -20,7 +24,39 @@ on:
 permissions:
   contents: write
 jobs:
+  publish_hub:
+    if: inputs.publish_hub
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BEND_NO_TELEMETRY: 1
+      SOURCE_REF: ${{ inputs.source_ref }}
+    steps:
+      - name: Check out exact library source
+        run: |
+          git init .
+          git remote add origin "git@github.com:$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 "https://github.com/$GITHUB_REPOSITORY.git" "$SOURCE_REF"
+          git checkout --detach FETCH_HEAD
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang make cmake patch pkg-config libcurl4-openssl-dev libjson-c-dev libsqlite3-dev python3 openssl
+      - run: make setup
+      - name: Check library proofs and publish
+        run: |
+          .cache/toolchain/bin/bend src/PROOF.bend --check-only
+          .cache/toolchain/bin/bend stiff.bend --publish > "$RUNNER_TEMP/hub-publication.txt"
+          cat "$RUNNER_TEMP/hub-publication.txt"
+      - name: Retain publication response
+        uses: actions/upload-artifact@v4
+        with:
+          name: bendhub-publication
+          path: ${{ runner.temp }}/hub-publication.txt
+          if-no-files-found: error
   package:
+    needs: publish_hub
+    if: always() && (needs.publish_hub.result == 'success' || needs.publish_hub.result == 'skipped')
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -62,7 +98,18 @@ jobs:
         env:
           HUB_PACKAGE: ${{ inputs.hub_package }}
         run: |
-          python3 scripts/verify-bendhub.py "$HUB_PACKAGE" > .cache/dist/bendhub-${{ matrix.os }}.json
+          cp -R examples/bendhub-client "$RUNNER_TEMP/hub-client"
+          make -C "$RUNNER_TEMP/hub-client" setup build
+          python3 scripts/verify-bendhub.py "$HUB_PACKAGE" --client-binary "$RUNNER_TEMP/hub-client/build/auth-client" > .cache/dist/bendhub-${{ matrix.os }}.json
+          hub_effect="$RUNNER_TEMP/hub-client/.bend/lib/$HUB_PACKAGE/src/effects/stiff.c"
+          cp "$hub_effect" "$RUNNER_TEMP/hub-effect-original.c"
+          echo '/* deliberate cached-source tamper */' >> "$hub_effect"
+          if make -C "$RUNNER_TEMP/hub-client" build > "$RUNNER_TEMP/hub-tamper.log" 2>&1; then
+            echo 'Cached source tamper was not rejected'; exit 1
+          fi
+          grep -q 'Cached package differs from pinned manifest' "$RUNNER_TEMP/hub-tamper.log"
+          cp "$RUNNER_TEMP/hub-effect-original.c" "$hub_effect"
+          make -C "$RUNNER_TEMP/hub-client" build
       - name: Retain verified build bytes and evidence
         uses: actions/upload-artifact@v4
         with:

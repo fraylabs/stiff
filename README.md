@@ -178,6 +178,12 @@ twelve caught accounting and HTTP-policy bugs before building a binary.
 authorization and modeled read-state laws. SQLite and native HTTP integration
 remain tested edges outside the proofs.
 
+Pure route matching and selection now agree with an independent specification
+for arbitrary finite route tables, including exact captures, first matching
+method/path selection and the 405 Allow method order. These proofs connect to
+pure 404/405/401 dispatch laws. `make routing-mistakes` catches four routing
+mistakes before building; see [routing contracts and trusted edges](docs/contracts.md#routing-and-the-edge).
+
 ## Use Stiff in your own project
 
 The Git-pinned consumer example uses Bend 2.0.35. Copy [examples/auth-client](examples/auth-client) into a separate project and run

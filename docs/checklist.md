@@ -1,6 +1,29 @@
 # Framework completion checklist
 
-## Current release: 0.5.0
+## Current release: 0.6.0
+
+Stiff **0.6.0** targets Bend **2.0.35**. Pure route matching and selection
+agree with an independent specification for arbitrary finite route tables,
+methods, patterns and paths. This connects exact first-hit selection, captured
+parameters and Allow methods to pure 404/405/401 dispatch laws.
+`make routing-mistakes` catches four ordinarily typechecked mistakes with both
+universal proofs and concrete false laws before building a mutant binary.
+See [routing contracts](contracts.md#routing-and-the-edge) for semantics and
+[release evidence](evidence/0.6.0/) for separate verification scopes.
+
+Base split/equality semantics, compiler and Bend-to-BendTT translation, the
+separate effectful Router, HTTP parsing, credentials, serialization, native
+effects and persistence remain trusted/tested. These are pure modeled
+dispatch laws; they do not prove every socket response or full memory safety.
+Historical capacity measurements and independent kernel checks retain their
+original revisions.
+
+The starter and both consumers pin the immutable 0.6.0 source/build-tool anchor
+`747a75915ad1b68bc60118e635915c9d3314a17e`. Release archives remain platform-specific
+native examples requiring dynamic libcurl, json-c and SQLite, with patched
+libevent 2.2.2-alpha included statically.
+
+## Historical 0.5.0 release
 
 Stiff **0.5.0** targets Bend **2.0.35**. The [room-bookings example](../examples/bookings)
 proves no double booking after an accepted booking on arbitrary schedules,

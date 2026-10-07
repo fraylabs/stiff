@@ -1,15 +1,15 @@
 # BendHub package
 
-Stiff's experimental 0.5.0 library is available as an immutable BendHub package:
+Stiff's experimental 0.6.0 library is available as an immutable BendHub package:
 
 ```text
-0x958db28bf0cef817bff69fac7beb9846
+0x36c893ade1f158581b4c8c34eb3b510e
 ```
 
 This published hash requires **Bend 2.0.35**, matching the current Git checkout.
 The native effects depend on its private compiler ABI; a newer compiler is not
 automatically compatible. The GitHub
-[v0.5.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.5.0) provides
+[v0.6.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.6.0) provides
 native archives and pinned build tooling. The historical 0.2.0 package remains
 immutable and requires Bend 2.0.20.
 
@@ -27,9 +27,9 @@ make setup build
 The example uses these imports:
 
 ```python
-import 0x958db28bf0cef817bff69fac7beb9846/src/http.bend as Http
-import 0x958db28bf0cef817bff69fac7beb9846/src/io.bend as Net
-import 0x958db28bf0cef817bff69fac7beb9846/src/json.bend as Json
+import 0x36c893ade1f158581b4c8c34eb3b510e/src/http.bend as Http
+import 0x36c893ade1f158581b4c8c34eb3b510e/src/io.bend as Net
+import 0x36c893ade1f158581b4c8c34eb3b510e/src/json.bend as Json
 ```
 
 The same package contains `url`, `server`, `app`, `router`, `schema`, `store`
@@ -40,7 +40,7 @@ checking. Native effects and external dependencies remain trusted code.
 
 BendHub stores Bend and referenced C sources. It does **not** install the native
 libraries, compiler or build scripts. The example separately fetches build tools
-from GitHub revision `8767c10c84fdbadf92d3f7f9dc5b9c58be4b4157`, verifies that
+from GitHub revision `747a75915ad1b68bc60118e635915c9d3314a17e`, verifies that
 revision before building, and keeps the downloaded hub package in `.bend/lib`
 using `BEND_LIB`. It does not change your global compiler or package cache.
 The library, compiler pin and native build scripts match the tagged release;
@@ -58,7 +58,7 @@ resolver. Keep the full hash in your imports and the build-tool Git revision in
 Never assume that an unchanged native toolchain supports a different package,
 or that updating Bend is safe for an existing package.
 
-The 20-file package contains the public modules, five C effect files, laws/proofs
+The 23-file package contains the public modules, five C effect files, laws/proofs
 and `stiff.bend`, whose comments carry the full MIT license. Bend 2.0.35 also
 includes the standalone `LICENSE` file in the manifest. Examples, test
 fixtures, generated binaries, dependency caches and private workspace files are
@@ -73,7 +73,7 @@ The hash identifies bytes; it is not a proof of native safety or an author ident
 Run from this checkout after `make setup`:
 
 ```sh
-python3 scripts/verify-bendhub.py 0x958db28bf0cef817bff69fac7beb9846
+python3 scripts/verify-bendhub.py 0x36c893ade1f158581b4c8c34eb3b510e
 ```
 
 This network-dependent release check creates an empty temporary `BEND_LIB`,
@@ -88,9 +88,9 @@ The temporary consumers and their synthetic state are removed afterwards.
 It requires the exact package sources, so use the corresponding source revision
 when checking an older package after library changes.
 
-[Publication and download evidence](evidence/0.5.0/bendhub.json) records the
-verified hash, compiler and local platform. This package verification adds
-macOS arm64 evidence; the broader platform checks are linked
+[Publication and download evidence](evidence/0.6.0/bendhub.json) records the
+verified hash, compiler and hosted platforms. This package verification adds
+hosted Linux x64 and arm64 evidence; the broader platform checks are linked
 from [the checklist](checklist.md).
 
 To reproduce the package from this source, use the pinned compiler:

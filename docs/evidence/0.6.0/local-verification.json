@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-07",
+  "platform": "macOS arm64",
+  "compiler": "Bend 2.0.35",
+  "source_anchor": "747a75915ad1b68bc60118e635915c9d3314a17e",
+  "framework_proof": "ALL PROOFS CHECK",
+  "routing_proof": "ALL PROOFS CHECK",
+  "routing_mistakes_caught": 4,
+  "ledger_check": "ALL PROOFS CHECK",
+  "ledger_mistakes_caught": 12,
+  "bookings_check": "ALL PROOFS CHECK",
+  "bookings_mistakes_caught": 6,
+  "scope": "Compiler check-only gates and mistakes targets. No local full suite, sanitizer suite, native example tests or kernel verdict builds; those checks use hosted CI. Existing pinned compiler and libevent cache verified without rebuilding dependencies."
+}
