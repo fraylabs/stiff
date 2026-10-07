@@ -1,0 +1,178 @@
+{
+  "compiler": "Bend 2.0.35",
+  "scope": "Universal structural proofs over arbitrary finite pure contracts tables and strings; no table-size bound.",
+  "specification": "src/routing_spec.bend",
+  "routing_laws": [
+    "nonempty_matches",
+    "literal_matches",
+    "parameter_matches",
+    "capture_matches",
+    "segment_matches",
+    "values_match_spec",
+    "match_path_matches_spec",
+    "membership_matches",
+    "unique_matches",
+    "allowed_matches",
+    "chosen_matches",
+    "selection_step",
+    "select_matches_fold",
+    "fallback_nonempty",
+    "fallback_summary",
+    "choose_summary",
+    "resolve_matches_summary",
+    "select_matches_spec",
+    "selected_first",
+    "missing_no_hits",
+    "known_methods",
+    "known_summary",
+    "wrong_method_exact_allow",
+    "dispatch_unknown",
+    "dispatch_wrong_method",
+    "dispatch_protected",
+    "fallback_never_missing",
+    "choose_never_missing",
+    "resolve_missing_iff",
+    "missing_iff_no_path",
+    "fallback_wrong_summary",
+    "choose_wrong_summary",
+    "resolve_wrong_iff",
+    "wrong_method_iff"
+  ],
+  "routing_law_count": 34,
+  "implementation_bug_found": false,
+  "checker_limitations_encountered": [],
+  "proof_checks": [
+    {
+      "command": ".cache/toolchain/bin/bend src/PROOF.bend --check-only",
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+    },
+    {
+      "command": ".cache/toolchain/bin/bend src/PROOF.bend --verdict",
+      "exit": 0,
+      "verdict": "ALL PROOFS CHECK\n"
+    },
+    {
+      "command": "make routing-mistakes",
+      "exit": 0,
+      "verdict": "python3 scripts/routing-mistakes.py\ncase-insensitive-get: CAUGHT: case_sensitive_method (universal proof and concrete witness)\nempty-capture: CAUGHT: empty_capture_rejected (universal proof and concrete witness)\nlast-match-wins: CAUGHT: first_route_wins (universal proof and concrete witness)\nduplicate-allow: CAUGHT: allow_last_occurrence_order (universal proof and concrete witness)\n"
+    },
+    {
+      "command": "make -C examples/ledger check mistakes verdict",
+      "exit": 0,
+      "verdict": "python3 tasks.py check\nChecking src/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nChecking examples/ledger/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\npython3 tasks.py mistakes\nChecking src/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nChecking examples/ledger/PROOF.bend...\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\n01-credit-extra-cent: CAUGHT: transfer_conserves_example (generic proof: L.move_conserves)\n02-credit-without-debit: CAUGHT: transfer_conserves_example (generic proof: L.move_conserves)\n03-missing-funds-check: CAUGHT: insufficient_conserves_example (generic proof: L.move_conserves)\n04-unbalanced-fee: CAUGHT: transfer_conserves_example (generic proof: L.move_conserves)\n05-rejected-debits: CAUGHT: rejected_transfer_unchanged_example (generic proof: L.finish_conserves)\n06-double-apply-retry: CAUGHT: same_key_twice_equals_once_example (generic proof: replay_response)\n07-forget-idempotency-key: CAUGHT: same_key_twice_equals_once_example (generic proof: L.finish_retry)\n08-reverse-accounts: CAUGHT: alice_exact_debit_credit_example (generic proof: L.finish_conserves)\n09-replay-labelled-applied: CAUGHT: replay_response_example (generic proof: replay_response)\n10-missing-auth-check: CAUGHT: protected_accounts_example (generic proof: protected_accounts_denied)\n11-get-writes: CAUGHT: get_no_write_example (generic proof: get_does_not_write)\n12-undeclared-status: CAUGHT: declared_status_example (generic proof: transfer_status_declared)\npython3 tasks.py verdict\nALL PROOFS CHECK\n"
+    },
+    {
+      "command": "make -C examples/bookings check mistakes verdict",
+      "exit": 0,
+      "verdict": "python3 tasks.py check\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\npython3 tasks.py mistakes\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\nALL PROOFS CHECK\nUse --verdict for mathematical validity.\n01-closed-interval: CAUGHT: half_open_boundary (generic proof: overlap_matches_half_open)\n02-start-only: CAUGHT: enclosing_slot_rejected (generic proof: overlap_matches_half_open)\n03-other-rooms: CAUGHT: same_room_rejected (generic proof: overlap_matches_half_open)\n04-wrong-cancellation: CAUGHT: cancel_exact_instance (generic proof: remove_exact)\n05-double-apply: CAUGHT: retry_once_instance (generic proof: dispatch_safe)\n06-get-writes: CAUGHT: get_no_write_instance (generic proof: read_preserves)\npython3 tasks.py verdict\nALL PROOFS CHECK\n"
+    }
+  ],
+  "routing_mutations": [
+    {
+      "mutation": "case-insensitive-get",
+      "witness": "case_sensitive_method",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {C.matched(C.values(String.split(pattern, '/'), String.split(path, '/')), Bool.or(Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(verb, method))), Bool.and(Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(verb, \"GET\"))), Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(method, \"get\"))))), C.Route{id, verb, pattern, protected, statuses}, C.select(tail, method, path)) == resolve(S.include(S.segments(String.split(pattern, '/'), String.split(path, '/')), C.Route{id, verb, pattern, protected, statuses}, S.hits(tail, path)), method) : C.Selection}\n- observed : {C.matched(C.values(String.split(pattern, '/'), String.split(path, '/')), Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(verb, method))), C.Route{id, verb, pattern, protected, statuses}, C.select(tail, method, path)) == resolve(S.include(S.segments(String.split(pattern, '/'), String.split(path, '/')), C.Route{id, verb, pattern, protected, statuses}, S.hits(tail, path)), method) : C.Selection}\nContext:\n- id        : Nat\n- verb      : String\n- pattern   : String\n- protected : Bool\n- statuses  : List<&2, Nat>\n- tail      : List<&2, C.Route>\n- method    : String\n- path      : String\nLocation: select_matches_fold\n187 |         case C.Route{id, verb, pattern, protected, statuses}:\n188>|           %Equal.sym(C.Match, C.match_path(pattern, path), S.path(pattern, path), match_path_matches_spec(pattern, path)) :\n    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n189 |             {C.matched(_, String.eq(verb, method), route, C.select(tail, method, path)) == fold_select(route <> tail, method, path) : C.Selection}\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Found{C.Route{0n, \"GET\", \"/x\", False{}, []}, []}\n- observed : C.WrongMethod{[\"GET\"]}\nLocation: case_sensitive_method\n7 | def case_sensitive_method():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    },
+    {
+      "mutation": "empty-capture",
+      "witness": "empty_capture_rejected",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {C.literal(Bool.not(String.is_empty(name)), u => C.prepend(name, value, rest)) == S.combine(S.parameter(S.nonempty(name, value), name, value), rest) : C.Match}\n- observed : {C.literal(Bool.and(Bool.not(String.is_empty(name)), Bool.not(String.is_empty(value))), u => C.prepend(name, value, rest)) == S.combine(S.parameter(S.nonempty(name, value), name, value), rest) : C.Match}\nContext:\n- head  : Char\n- name  : String\n- value : String\n- rest  : C.Match\nLocation: capture_matches\n78 |     case True{}:\n79>|       %Equal.sym(Bool, Bool.and(Bool.not(String.is_empty(name)), Bool.not(String.is_empty(value))), S.nonempty(name, value), nonempty_matches(name, value)) :\n   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n80 |         {C.literal(_, u => C.prepend(name, value, rest)) == S.combine(S.parameter(S.nonempty(name, value), name, value), rest) : C.Match}\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Matched{[C.Param{\"id\", \"\"}]}\n- observed : C.NoMatch{}\nLocation: empty_capture_rejected\n6 | def empty_capture_rejected():\n7>|   {==}\n  |   ^^^^\n8 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    },
+    {
+      "mutation": "last-match-wins",
+      "witness": "first_route_wins",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.last_choice(suffix, route, params)\n- observed : C.Found{route, params}\nContext:\n- route  : C.Route\n- params : List<&2, C.Param>\n- suffix : C.Selection\nLocation: chosen_matches\n154 |   match same:\n155>|     case True{}: {==}\n    |                  ^^^^\n156 |     case False{}:\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Found{C.Route{1n, \"GET\", \"/x\", True{}, []}, []}\n- observed : C.Found{C.Route{0n, \"GET\", \"/:id\", False{}, []}, [C.Param{\"id\", \"x\"}]}\nLocation: first_route_wins\n7 | def first_route_wins():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    },
+    {
+      "mutation": "duplicate-allow",
+      "witness": "allow_last_occurrence_order",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {C.WrongMethod{verb <> methods} == C.WrongMethod{S.retain(S.member(verb, methods), verb, methods)} : C.Selection}\n- observed : {C.WrongMethod{C.unique(C.has_method(verb, methods), verb, methods)} == C.WrongMethod{S.retain(S.member(verb, methods), verb, methods)} : C.Selection}\nContext:\n- verb    : String\n- methods : List<&2, String>\nLocation: allowed_matches\n142 |     case C.WrongMethod{+methods}:\n143>|       %Equal.sym(Bool, C.has_method(verb, methods), S.member(verb, methods), membership_matches(verb, methods)) :\n    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n144 |         {C.WrongMethod{C.unique(_, verb, methods)} == fallback(verb, suffix) : C.Selection}\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.WrongMethod{[\"GET\", \"POST\", \"GET\"]}\n- observed : C.WrongMethod{[\"POST\", \"GET\"]}\nLocation: allow_last_occurrence_order\n7 | def allow_last_occurrence_order():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    }
+  ],
+  "native_examples": {
+    "ledger": {
+      "command": "make -C examples/ledger check mistakes test verdict",
+      "exit": 0,
+      "native_tests_passed": 15,
+      "existing_mutations_caught": 12,
+      "kernel_verdict": "ALL PROOFS CHECK"
+    },
+    "bookings": {
+      "command": "make -C examples/bookings check mistakes test verdict",
+      "exit": 0,
+      "native_tests_passed": 7,
+      "existing_mutations_caught": 6,
+      "kernel_verdict": "ALL PROOFS CHECK"
+    }
+  },
+  "full_suite": {
+    "command": "make setup test",
+    "setup": "Pinned compiler and scoped libevent cache verified; no global install.",
+    "exit": 2,
+    "tests_run": 147,
+    "passed": 145,
+    "failed": 1,
+    "skipped": 1,
+    "failure": "test_native_measurement_overload_recovery_and_shutdown: RSS sampling unavailable, PermissionError for /bin/ps; benchmark semantic phases passed, shutdown exit 0.",
+    "skip": "Standalone pinned authenticated consumer setup is opt-in locally and runs in CI."
+  },
+  "trusted_edges": [
+    "Base split/equality semantics",
+    "Bend-to-BendTT translation, compiler, runtime and native ABI",
+    "Separate effectful Router implementation",
+    "HTTP parsing, credentials, serialization including Allow, effects and persistence"
+  ]
+}

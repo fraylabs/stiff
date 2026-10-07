@@ -1,5 +1,6 @@
 import Base
 import ./CONTRACTS_PROOF.bend as Contracts
+import ./ROUTING_WITNESSES.bend as RoutingWitnesses
 import ./http.bend as Http
 import ./LAWS.bend as Laws
 

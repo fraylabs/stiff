@@ -1,5 +1,6 @@
 import Base
 import ./contracts.bend as C
+import ./ROUTING_PROOF.bend as Routing
 
 law protected_denies:
   for -S: Data

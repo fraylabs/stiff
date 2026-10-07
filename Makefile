@@ -33,3 +33,7 @@ runner:
 .PHONY: new
 new:
 	python3 scripts/new.py --name "$(NAME)" --dir "$(DIR)"
+
+.PHONY: routing-mistakes
+routing-mistakes:
+	python3 scripts/routing-mistakes.py

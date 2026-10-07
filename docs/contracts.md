@@ -85,11 +85,77 @@ to selected routes; unknown paths and wrong methods still get 404/405 before
 handler authorization. Credentials are a caller-supplied Bool, not a credential
 validation system.
 
-`select` is pure and total, but the universal 404/405 theorems start from its
-Selection result. They are not a general correctness proof of URI matching or
-method-list collection. The ledger supplies concrete table proofs and native
-routing tests. The contracts matcher has the same documented pattern semantics
-as Router; the existing effectful Router API remains available.
+The pure contracts matcher and selector now agree universally with the
+independent [routing specification](../src/routing_spec.bend). The
+[routing proofs](../src/ROUTING_PROOF.bend) are imported by
+`CONTRACTS_PROOF.bend`, so both the framework and example gates check them.
+These are structural proofs for **arbitrary finite route tables, methods,
+patterns and paths**, not bounded tables or sampled cases. Route IDs, protection
+flags, status lists and captured parameters are retained exactly.
+
+The specification first matches raw `/`-separated segments, then filters the
+table into path hits in declaration order. A literal segment must equal the raw
+segment. A segment beginning with `:` captures only if both its remaining name
+and the path segment are non-empty. Empty literal segments match empty segments;
+leading, repeated and trailing slashes are significant. Captures retain pattern
+order, including repeated parameter names. No percent-decoding, case folding,
+query parsing or normalization occurs here. `String.split`, `String.eq` and
+character equality are trusted Base semantics.
+
+Two separate specification observations find the first exact method hit and
+collect all path-hit methods, dropping any verb already present in the suffix.
+Their summary is Found for the first method hit, Missing for no path hits, and
+WrongMethod otherwise with exactly that last-occurrence method order. The proof
+connects the implementation's recursive selection to this two-observation
+specification; the specification calls no contracts matching or selection helper.
+
+| Routing law | Quantified guarantee |
+| --- | --- |
+| `values_match_spec` | For any two segment lists, the complete Match equals the segment specification, including failure and exact captures |
+| `match_path_matches_spec` | Same equality for every pair of raw strings split at `/`; soundness and completeness follow from full Match equality |
+| `membership_matches`, `unique_matches`, `allowed_matches` | Implementation method membership, duplicate handling and suffix collection agree with the specification for arbitrary lists and suffix selections |
+| `resolve_matches_summary`, `select_matches_spec` | Complete Selection equals first-method-hit plus independently collected Allow methods, for any table/method/path; pins down all three constructors and their fields |
+| `selected_first` | Given the specification's first method hit, select returns precisely that route and its parameters |
+| `missing_no_hits` | Given no specification path hits, select returns Missing |
+| `missing_iff_no_path` | Missing's constructor observation is True if and only if the specification path-hit list is empty, for any table/method/path |
+| `wrong_method_exact_allow` | Given non-empty specification path hits and no method hit, select returns WrongMethod with exactly the specification's allowed list |
+| `wrong_method_iff` | WrongMethod's constructor observation is True if and only if there are path hits and no specification method hit, for any table/method/path |
+| `dispatch_unknown` | Under the no-path-hit premise, arbitrary-table dispatch returns exactly 404/not_found, unchanged state and empty Allow |
+| `dispatch_wrong_method` | Under the known-path/no-method-hit premises, arbitrary-table dispatch returns exactly 405/method_not_allowed, unchanged state and the specification's Allow list |
+| `dispatch_protected` | If the specification's first method hit is protected, invalid credentials return exactly 401/unauthorized, unchanged state and empty Allow for any handler |
+
+The conditional laws' premises describe independent observations of the actual
+table and request, rather than assuming the implementation's Selection result.
+The unconditional `select_matches_spec` covers all cases, including the reverse
+directions: Missing exactly when no pattern matches, and WrongMethod exactly
+when at least one pattern matches but no method does.
+
+`make routing-mistakes` checks four ordinary well-typed mutations against the
+universal proofs **and** a false concrete law instance. A proof rejection alone
+can mean that a proof needs updating; the witness demonstrates incorrect behavior.
+No mutant executable is emitted.
+
+| Mistake | Rejected witness |
+| --- | --- |
+| Treat lowercase `get` as `GET` | `case_sensitive_method`: returns Found instead of WrongMethod |
+| Capture an empty path segment | `empty_capture_rejected`: `/x/:id` must reject `/x/` |
+| Let the last method/path hit win | `first_route_wins`: the first parameter route must win over a later exact route |
+| Prepend duplicate Allow methods | `allow_last_occurrence_order`: GET, POST, GET must produce POST, GET |
+
+The existing effectful `Router` API has the same documented semantics but is a
+separate implementation; no universal refinement proof connects its handler
+registry to these Data-only contracts. Its native routing tests remain necessary.
+The raw HTTP parser, request-to-table adapter and Allow-header serialization also
+remain tested edges. The ledger and bookings supply concrete application-table
+proofs and native routing tests in addition to these framework laws.
+
+[Routing verification evidence](evidence/routing-verification.json) records all
+34 routing laws/lemmas, accepted compiler and independent kernel verdicts, the
+four mutation failures and both examples' passing check/mistakes/test/verdict
+gates. The full local suite had 145 passes, one opt-in consumer-setup skip and
+one RSS benchmark failure because process-memory inspection was unavailable;
+its semantic benchmark phases and shutdown passed. No checker limitation or
+implementation bug was found in this proof work.
 
 The [bookings example](../examples/bookings) applies the same contracts to room
 schedules: no double booking, exact cancellation, retry state equality, read

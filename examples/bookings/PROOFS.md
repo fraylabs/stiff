@@ -67,8 +67,12 @@ They are not assumptions about arbitrary callers or axioms.
 
 The eight framework contracts laws are also imported by the application gate.
 They quantify over arbitrary state/body types, pure handlers and selected routes.
-Selection/path matching has concrete tests here, not a universal correctness
-proof. Status declarations include the tested adapter's 400/409/500/503 errors;
+The gate also imports 34 framework [routing laws and
+lemmas](../../src/ROUTING_PROOF.bend), proving pure path matching, exact captures,
+first method/path selection and deduplicated Allow order for arbitrary tables.
+The independent kernel accepts these too. The separate effectful Router and
+HTTP parsing/serialization remain tested edges; see the [exact routing
+scope](../../docs/contracts.md#routing-and-the-edge). Status declarations include the tested adapter's 400/409/500/503 errors;
 the pure laws do not verify those effectful error paths or transport fallbacks.
 
 ## Verification and trusted edge

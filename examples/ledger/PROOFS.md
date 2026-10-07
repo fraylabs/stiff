@@ -97,6 +97,15 @@ read-state preservation. Both proof files are imported by the ledger proof gate
 and were checked by the independent kernel. There remain 28 engine/arithmetic
 laws; these additions do not weaken or replace them.
 
+The framework gate now also includes 34 [routing laws and
+lemmas](../../src/ROUTING_PROOF.bend). They establish pure path matching, exact
+captures, first method/path selection and Allow collection for arbitrary tables,
+against an independent segment and two-observation specification. Their 404,
+405 and protected-route 401 consequences quantify over arbitrary state/body
+types and handlers. See the [exact scope and routing mutation
+demo](../../docs/contracts.md#routing-and-the-edge); effectful routing and the
+HTTP adapter remain tested edges.
+
 The effectful adapter consumes the actual H.transfer/H.complete plans. Replay
 conversion selects the persisted original operation before constructing the
 final plan; the response adds its canonical fields as `operation`. The replay
@@ -142,8 +151,8 @@ real authentication system; existing endpoints remain public.
 - Loopback binding, no real authentication, TLS, arbitrary account creation, fees,
   money issuance, receipt compaction, bank integration or payment provider.
 
-The persisted request-to-engine mapping, JSON encoding/decoding, general URI
-matching correctness, receipt field comparison, schema enforcement, whole-snapshot write discipline and
+The persisted request-to-engine mapping, JSON encoding/decoding, HTTP URI parsing
+and effectful routing, receipt field comparison, schema enforcement, whole-snapshot write discipline and
 startup/restart logic are application code outside these proofs. SQLite atomicity
 and durability depend on the C effect, SQLite, OS, filesystem and hardware.
 Networking depends on Stiff's C ABI, libevent and json-c; libcurl is linked by the

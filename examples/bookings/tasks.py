@@ -40,7 +40,8 @@ def mistakes():
         workspace.mkdir(parents=True, exist_ok=True)
         for path in HERE.glob('*.bend'):
             (workspace / path.name).write_text(path.read_text().replace('../../src/', './'))
-        for filename in ('contracts.bend', 'CONTRACTS_PROOF.bend'):
+        for filename in ('contracts.bend', 'CONTRACTS_PROOF.bend',
+                         'routing_spec.bend', 'ROUTING_PROOF.bend'):
             shutil.copyfile(ROOT / 'src' / filename, workspace / filename)
         applied = run(['patch', '--batch', '--fuzz=0', '-p0', '-i', patch], workspace)
         if applied['exit']:

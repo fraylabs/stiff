@@ -90,7 +90,8 @@ def mistakes():
                      'http.bend', 'HTTP_PROOF.bend'):
             content = (HERE / name).read_text().replace('../../src/', './')
             (workspace / name).write_text(content)
-        for name in ('contracts.bend', 'CONTRACTS_PROOF.bend'):
+        for name in ('contracts.bend', 'CONTRACTS_PROOF.bend',
+                     'routing_spec.bend', 'ROUTING_PROOF.bend'):
             shutil.copyfile(ROOT / 'src' / name, workspace / name)
         applied = run(['patch', '--batch', '--fuzz=0', '-p0', '-i', patch], workspace)
         if applied['exit']:
