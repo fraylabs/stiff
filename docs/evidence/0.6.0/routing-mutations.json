@@ -1,0 +1,76 @@
+{
+  "experiments": [
+    {
+      "mutation": "case-insensitive-get",
+      "witness": "case_sensitive_method",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {C.matched(C.values(String.split(pattern, '/'), String.split(path, '/')), Bool.or(Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(verb, method))), Bool.and(Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(verb, \"GET\"))), Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(method, \"get\"))))), C.Route{id, verb, pattern, protected, statuses}, C.select(tail, method, path)) == resolve(S.include(S.segments(String.split(pattern, '/'), String.split(path, '/')), C.Route{id, verb, pattern, protected, statuses}, S.hits(tail, path)), method) : C.Selection}\n- observed : {C.matched(C.values(String.split(pattern, '/'), String.split(path, '/')), Cmp.is_eq(Pair.snd(Sigma<&1, &1, String, _ => String>, Cmp, String.cmp(verb, method))), C.Route{id, verb, pattern, protected, statuses}, C.select(tail, method, path)) == resolve(S.include(S.segments(String.split(pattern, '/'), String.split(path, '/')), C.Route{id, verb, pattern, protected, statuses}, S.hits(tail, path)), method) : C.Selection}\nContext:\n- id        : Nat\n- verb      : String\n- pattern   : String\n- protected : Bool\n- statuses  : List<&2, Nat>\n- tail      : List<&2, C.Route>\n- method    : String\n- path      : String\nLocation: select_matches_fold\n187 |         case C.Route{id, verb, pattern, protected, statuses}:\n188>|           %Equal.sym(C.Match, C.match_path(pattern, path), S.path(pattern, path), match_path_matches_spec(pattern, path)) :\n    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n189 |             {C.matched(_, String.eq(verb, method), route, C.select(tail, method, path)) == fold_select(route <> tail, method, path) : C.Selection}\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Found{C.Route{0n, \"GET\", \"/x\", False{}, []}, []}\n- observed : C.WrongMethod{[\"GET\"]}\nLocation: case_sensitive_method\n7 | def case_sensitive_method():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    },
+    {
+      "mutation": "empty-capture",
+      "witness": "empty_capture_rejected",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {C.literal(Bool.not(String.is_empty(name)), u => C.prepend(name, value, rest)) == S.combine(S.parameter(S.nonempty(name, value), name, value), rest) : C.Match}\n- observed : {C.literal(Bool.and(Bool.not(String.is_empty(name)), Bool.not(String.is_empty(value))), u => C.prepend(name, value, rest)) == S.combine(S.parameter(S.nonempty(name, value), name, value), rest) : C.Match}\nContext:\n- head  : Char\n- name  : String\n- value : String\n- rest  : C.Match\nLocation: capture_matches\n78 |     case True{}:\n79>|       %Equal.sym(Bool, Bool.and(Bool.not(String.is_empty(name)), Bool.not(String.is_empty(value))), S.nonempty(name, value), nonempty_matches(name, value)) :\n   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n80 |         {C.literal(_, u => C.prepend(name, value, rest)) == S.combine(S.parameter(S.nonempty(name, value), name, value), rest) : C.Match}\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Matched{[C.Param{\"id\", \"\"}]}\n- observed : C.NoMatch{}\nLocation: empty_capture_rejected\n6 | def empty_capture_rejected():\n7>|   {==}\n  |   ^^^^\n8 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    },
+    {
+      "mutation": "last-match-wins",
+      "witness": "first_route_wins",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.last_choice(suffix, route, params)\n- observed : C.Found{route, params}\nContext:\n- route  : C.Route\n- params : List<&2, C.Param>\n- suffix : C.Selection\nLocation: chosen_matches\n154 |   match same:\n155>|     case True{}: {==}\n    |                  ^^^^\n156 |     case False{}:\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.Found{C.Route{1n, \"GET\", \"/x\", True{}, []}, []}\n- observed : C.Found{C.Route{0n, \"GET\", \"/:id\", False{}, []}, [C.Param{\"id\", \"x\"}]}\nLocation: first_route_wins\n7 | def first_route_wins():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    },
+    {
+      "mutation": "duplicate-allow",
+      "witness": "allow_last_occurrence_order",
+      "ordinary_typecheck": {
+        "exit": 0,
+        "verdict": "ALL PROOFS CHECK\nUse --verdict for mathematical validity.\n"
+      },
+      "universal_proof": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : {C.WrongMethod{verb <> methods} == C.WrongMethod{S.retain(S.member(verb, methods), verb, methods)} : C.Selection}\n- observed : {C.WrongMethod{C.unique(C.has_method(verb, methods), verb, methods)} == C.WrongMethod{S.retain(S.member(verb, methods), verb, methods)} : C.Selection}\nContext:\n- verb    : String\n- methods : List<&2, String>\nLocation: allowed_matches\n142 |     case C.WrongMethod{+methods}:\n143>|       %Equal.sym(Bool, C.has_method(verb, methods), S.member(verb, methods), membership_matches(verb, methods)) :\n    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n144 |         {C.WrongMethod{C.unique(_, verb, methods)} == fallback(verb, suffix) : C.Selection}\n"
+      },
+      "concrete_witness": {
+        "exit": 1,
+        "verdict": "SOME PROOFS FAIL\nError:\n- expected : C.WrongMethod{[\"GET\", \"POST\", \"GET\"]}\n- observed : C.WrongMethod{[\"POST\", \"GET\"]}\nLocation: allow_last_occurrence_order\n7 | def allow_last_occurrence_order():\n8>|   {==}\n  |   ^^^^\n9 | \n"
+      },
+      "caught": true,
+      "binary_built": false
+    }
+  ]
+}

@@ -46,5 +46,8 @@
     "src/url.bend": "b16f2621fba6616ba1fb2073e30c03f8d894f935445d82342cea6428d088ad86",
     "stiff.bend": "c4d318339c2519387e899e6965365af5a4e09986798b561978adf94ef9c7f3d7"
   },
-  "why": "Consumer pins name an earlier immutable 0.6.0 anchor. Subsequent changes add consumer pins, release workflow, documentation and evidence, avoiding a circular self-referential Git hash."
+  "why": "Consumer pins name an earlier immutable 0.6.0 anchor. Subsequent changes add consumer pins, release workflow, documentation and evidence, avoiding a circular self-referential Git hash.",
+  "tag": "v0.6.0",
+  "tag_revision": "5c76db12d98dd696c4ec8a7877e8e245c539d035",
+  "matches_tagged_library_native_and_build_tools": true
 }

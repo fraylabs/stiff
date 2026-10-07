@@ -10,5 +10,8 @@
   "ledger_mistakes_caught": 12,
   "bookings_check": "ALL PROOFS CHECK",
   "bookings_mistakes_caught": 6,
-  "scope": "Compiler check-only gates and mistakes targets. No local full suite, sanitizer suite, native example tests or kernel verdict builds; those checks use hosted CI. Existing pinned compiler and libevent cache verified without rebuilding dependencies."
+  "scope": "Compiler check-only gates and mistakes targets. No local full suite, sanitizer suite, native example tests or kernel verdict builds; those checks use hosted CI. Existing pinned compiler and libevent cache verified without rebuilding dependencies.",
+  "released_source_revision": "5c76db12d98dd696c4ec8a7877e8e245c539d035",
+  "checked_source_revision": "56eba463b3396e7402e5c61ffbf6c48a462fcbcc",
+  "checked_library_sources_match_release": true
 }

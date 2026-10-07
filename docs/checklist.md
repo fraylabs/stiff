@@ -23,6 +23,29 @@ The starter and both consumers pin the immutable 0.6.0 source/build-tool anchor
 native examples requiring dynamic libcurl, json-c and SQLite, with patched
 libevent 2.2.2-alpha included statically.
 
+[Release-source CI](https://github.com/fraylabs/stiff/actions/runs/37608180748)
+and [source-anchor CI](https://github.com/fraylabs/stiff/actions/runs/37607958163)
+passed all eight platform/profile jobs each. All four normal release-source jobs
+generated, set up, checked, built and mutation-checked the starter against its new
+pin. [Anchor hashes](evidence/0.6.0/source-anchor.json) match the tagged library,
+native sources and build tools.
+
+The [hosted release workflow](https://github.com/fraylabs/stiff/actions/runs/37610062432)
+published BendHub and built/verified both Linux archives. On Linux x64 and arm64,
+empty-cache hub consumers matched all 23 source files, checked the framework
+proof verdict, passed authenticated HTTPS and six persistent application journeys,
+and rejected tampered cached native sources in the copied client.
+
+All three exact clean archives passed provenance/checksums, supervised health,
+create/read/restart and six persistent-notes journeys without build tools on PATH.
+All six [published assets](https://github.com/fraylabs/stiff/releases/tag/v0.6.0)
+were downloaded and byte-compared with their verified originals. Only light proof
+checks and the single macOS archive build/verification ran locally; hosted CI
+supplies the full-suite and sanitizer results. [Publication receipt](evidence/0.6.0/publication.json),
+[archive results](evidence/0.6.0/release-archives.json) and [hub evidence](evidence/0.6.0/bendhub.json)
+record exact revisions and separate scopes. Receipt commits follow the tag without
+changing the released library or build tools.
+
 ## Historical 0.5.0 release
 
 Stiff **0.5.0** targets Bend **2.0.35**. The [room-bookings example](../examples/bookings)

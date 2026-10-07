@@ -36,7 +36,8 @@ The same package contains `url`, `server`, `app`, `router`, `schema`, `store`
 and pure `contracts` under `src/`. Import each module directly; importing `stiff.bend` exposes the
 package version and checks the collected library, but does not re-export module
 aliases. `src/PROOF.bend` and `src/LAWS.bend` are included for explicit proof
-checking. Native effects and external dependencies remain trusted code.
+checking; the package also includes `routing_spec.bend`, `ROUTING_PROOF.bend`
+and routing witnesses. Native effects and external dependencies remain trusted code.
 
 BendHub stores Bend and referenced C sources. It does **not** install the native
 libraries, compiler or build scripts. The example separately fetches build tools
