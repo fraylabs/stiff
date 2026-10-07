@@ -1,13 +1,17 @@
 name: Release archives
 on:
   push:
-    branches: [release-0.5.0]
+    branches: [release-0.6.0]
   workflow_dispatch:
     inputs:
       source_ref:
         description: Exact candidate commit or existing release tag
         required: true
         default: main
+        type: string
+      hub_package:
+        description: Optional immutable BendHub hash to verify with native consumers
+        default: ""
         type: string
       publish:
         description: Upload verified archives to the existing pre-release (tag required)
@@ -53,6 +57,12 @@ jobs:
         run: python3 scripts/package.py --require-clean
       - name: Verify exact archive
         run: python3 scripts/verify-package.py .cache/dist/*.tar.gz --evidence .cache/dist/verification-${{ matrix.os }}.json
+      - name: Verify published BendHub consumers
+        if: inputs.hub_package != ''
+        env:
+          HUB_PACKAGE: ${{ inputs.hub_package }}
+        run: |
+          python3 scripts/verify-bendhub.py "$HUB_PACKAGE" > .cache/dist/bendhub-${{ matrix.os }}.json
       - name: Retain verified build bytes and evidence
         uses: actions/upload-artifact@v4
         with:

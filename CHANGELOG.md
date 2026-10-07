@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 — October 7, 2026
+
+- Prove pure path matching and route selection against an independent specification for arbitrary finite route tables, methods, patterns and paths. The proofs preserve the first exact method/path hit, route metadata and exact captured parameters.
+- Connect routing to complete pure dispatch laws for 404, 405 with exact Allow methods, and selected protected-route 401 decisions.
+- Add `make routing-mistakes`: four ordinarily typechecked routing mistakes fail the universal proof and a concrete false law before any mutant binary is built. Run it in normal Linux/macOS CI.
+
+Experimental release pinned to Bend 2.0.35. Proofs cover pure modeled decisions.
+Base split/equality semantics, compiler and Bend-to-BendTT translation, the
+separate effectful Router, HTTP parsing, credentials, serialization, native
+effects and persistence remain trusted/tested. Pure dispatch laws do not prove
+every socket response. See docs/contracts.md for the precise boundary.
+
 ## 0.5.0 — October 7, 2026
 
 - Add the proven room-bookings example: no double booking after any accepted booking, half-open slots, exact cancellation and retry state equality. Six ordinarily typechecked mistakes fail the proof gate before any mutant binary is built.

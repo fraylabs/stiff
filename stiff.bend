@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Stiff experimental 0.5.0; requires Bend 2.0.35 (private native ABI).
+# Stiff experimental 0.6.0; requires Bend 2.0.35 (private native ABI).
 # Native C effects and dependencies are trusted, not formally verified.
 # Build with Stiff scripts/build-native.sh, not bare bend -o.
 # Requires libcurl and json-c; storage adds SQLite; server adds the scoped,
@@ -42,4 +42,4 @@ import ./src/store.bend as Store
 import ./src/PROOF.bend as Proof
 
 def version() -> String:
-  "0.5.0"
+  "0.6.0"
