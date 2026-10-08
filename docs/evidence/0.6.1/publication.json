@@ -1,0 +1,83 @@
+{
+  "version": "0.6.1",
+  "tag": "v0.6.1",
+  "tag_revision": "ed3e6f567e5963648b21dc2bec0df989d3647aae",
+  "release_url": "https://github.com/fraylabs/stiff/releases/tag/v0.6.1",
+  "published_at": "2026-10-08T17:55:04Z",
+  "author": "BrianLYS",
+  "prerelease": true,
+  "bendhub_package": "0x600981079d65a285d008308db02b846c",
+  "starter_and_consumer_library_native_tools_revision": "2e8faf5ae991c132bcf0f71577c87e19542245bb",
+  "consumer_anchor_matches_tagged_library_and_native_build_sources": true,
+  "assets": [
+    {
+      "name": "stiff-0.6.1-darwin-arm64.tar.gz",
+      "size": 351714,
+      "sha256": "284988805572daf6967ee89c4131ab82a2e454307a8af97d8384c62c6660cee7",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.6.1/stiff-0.6.1-darwin-arm64.tar.gz",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.6.1-darwin-arm64.tar.gz.sha256",
+      "size": 98,
+      "sha256": "875d9a912c483ecc8133e2adae27c7eb369b575fd038fad7985c0973538309d8",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.6.1/stiff-0.6.1-darwin-arm64.tar.gz.sha256",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.6.1-linux-aarch64.tar.gz",
+      "size": 440093,
+      "sha256": "3175c1cca7f870516c4e95710ec80fecabc7b0ffd022c92eed09c424f16dadb9",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.6.1/stiff-0.6.1-linux-aarch64.tar.gz",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.6.1-linux-aarch64.tar.gz.sha256",
+      "size": 99,
+      "sha256": "9bd1a80258050fd5df26e11aef5bf69b09e129a6e463974848cd42e6b7a61cfb",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.6.1/stiff-0.6.1-linux-aarch64.tar.gz.sha256",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.6.1-linux-x86_64.tar.gz",
+      "size": 452404,
+      "sha256": "5cd2b4dd8357aa1130336df2ba1c67c81c0ebaf674a21190550b99efc053db60",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.6.1/stiff-0.6.1-linux-x86_64.tar.gz",
+      "published_download_matches": true
+    },
+    {
+      "name": "stiff-0.6.1-linux-x86_64.tar.gz.sha256",
+      "size": 98,
+      "sha256": "ab18c7546408851e4565565fbc7667cd5a105fbf905ad3e3242496ac9cea6595",
+      "url": "https://github.com/fraylabs/stiff/releases/download/v0.6.1/stiff-0.6.1-linux-x86_64.tar.gz.sha256",
+      "published_download_matches": true
+    }
+  ],
+  "ci_runs": {
+    "compiler_upgrade": 37813873059,
+    "latest_bend_compatibility": 37813873702,
+    "source_anchor": 37817545176,
+    "tag_source": 37817670207,
+    "bendhub_and_linux_archives": 37820260274
+  },
+  "verification": {
+    "source_anchor_ci": "8/8 passed",
+    "release_source_ci": "8/8 passed",
+    "archive_platforms": 3,
+    "persistent_journeys_per_archive": 6,
+    "published_assets_downloaded_and_byte_compared": 6,
+    "bendhub_source_files_matched": 23,
+    "bendhub_native_platforms": [
+      "Linux x64",
+      "Linux arm64"
+    ],
+    "copied_hub_consumer_and_tamper_rejection": "passed on both hosted platforms",
+    "local_scope": "check-only proof gates, examples check/mistakes, routing-mistakes, one clean macOS archive build and verification with existing pinned dependencies; no local full suite, sanitizers, native example test targets, kernel verdict builds or dependency rebuilds"
+  },
+  "main_push": "fast-forward; no force push or published history rewrite",
+  "limits": [
+    "Base split/equality, compiler/translation/runtime, the separate effectful Router and native edges remain trusted.",
+    "Native hub consumption was verified on hosted Linux x64 and arm64.",
+    "Compiler proof checking does not establish end-to-end verification or full memory safety."
+  ]
+}

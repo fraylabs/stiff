@@ -1,0 +1,12 @@
+{
+  "framework_verdict": "ALL PROOFS CHECK",
+  "ledger_mutations": "12/12 caught",
+  "bookings_mutations": "6/6 caught",
+  "routing_mutations": "4/4 caught",
+  "log_sha256": {
+    "ledger": "baefb198537c189171eb21297268f5fccb560c771804caa652353f1f31095287",
+    "bookings": "6833c06fc733a0d8b25a682cd6558490287ec493f9f17512d02a804d9d98259a",
+    "routing": "5bedd08ab419c653d9fa4ded20fd64c66b943444563b7ee2ff27077f06299d80"
+  },
+  "local_scope": "check-only proof gates, examples check/mistakes, routing-mistakes, one clean macOS archive build and verification with existing pinned dependencies; no local full suite, sanitizers, native example test targets, kernel verdict builds or dependency rebuilds"
+}

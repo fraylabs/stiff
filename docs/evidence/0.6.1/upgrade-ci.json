@@ -1,0 +1,1197 @@
+{
+  "source": "0a3a746faed7fcd9138a868997834c2e328e6af1",
+  "compiler": "bend 2.0.36",
+  "pinned": {
+    "conclusion": "success",
+    "createdAt": "2026-10-08T17:05:33Z",
+    "event": "push",
+    "headSha": "0a3a746faed7fcd9138a868997834c2e328e6af1",
+    "jobs": [
+      {
+        "completedAt": "2026-10-08T17:11:09Z",
+        "conclusion": "success",
+        "databaseId": 113437356822,
+        "name": "test (macos-15, normal)",
+        "startedAt": "2026-10-08T17:05:41Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:41Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:44Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:44Z",
+            "conclusion": "skipped",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:48Z",
+            "conclusion": "success",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:48Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:05:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:38Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:05:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:35Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:56Z",
+            "conclusion": "success",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:09:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:04Z",
+            "conclusion": "success",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:10:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:04Z",
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:11:04Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:07Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:11:04Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437356822"
+      },
+      {
+        "completedAt": "2026-10-08T17:09:29Z",
+        "conclusion": "success",
+        "databaseId": 113437357059,
+        "name": "test (ubuntu-24.04-arm, normal)",
+        "startedAt": "2026-10-08T17:05:38Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:39Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:39Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:55Z",
+            "conclusion": "success",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:55Z",
+            "conclusion": "skipped",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:55Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:05:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:13Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:05:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:16Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:22Z",
+            "conclusion": "success",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:08:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:27Z",
+            "conclusion": "success",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:09:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:28Z",
+            "conclusion": "success",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:09:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:28Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:09:28Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357059"
+      },
+      {
+        "completedAt": "2026-10-08T17:18:40Z",
+        "conclusion": "success",
+        "databaseId": 113437357068,
+        "name": "test (macos-15-intel, sanitized)",
+        "startedAt": "2026-10-08T17:10:45Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:10:45Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:10:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:47Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:10:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:47Z",
+            "conclusion": "skipped",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:10:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:52Z",
+            "conclusion": "success",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:10:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:53Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:10:52Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:12:29Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:10:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:38Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:12:29Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:38Z",
+            "conclusion": "skipped",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:18:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:38Z",
+            "conclusion": "skipped",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:18:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:38Z",
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:18:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:38Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:18:38Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357068"
+      },
+      {
+        "completedAt": "2026-10-08T17:09:00Z",
+        "conclusion": "success",
+        "databaseId": 113437357081,
+        "name": "test (ubuntu-24.04, normal)",
+        "startedAt": "2026-10-08T17:05:36Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:37Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:37Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:47Z",
+            "conclusion": "success",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:47Z",
+            "conclusion": "skipped",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:53Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:05:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:21Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:05:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:03Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:53Z",
+            "conclusion": "success",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:08:03Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:58Z",
+            "conclusion": "success",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:08:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:58Z",
+            "conclusion": "success",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:08:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:58Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:08:58Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357081"
+      },
+      {
+        "completedAt": "2026-10-08T17:09:19Z",
+        "conclusion": "success",
+        "databaseId": 113437357183,
+        "name": "test (ubuntu-24.04-arm, sanitized)",
+        "startedAt": "2026-10-08T17:05:38Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:39Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:40Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:55Z",
+            "conclusion": "success",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:40Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:55Z",
+            "conclusion": "skipped",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:56Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:05:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:13Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:05:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:17Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:17Z",
+            "conclusion": "skipped",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:09:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:17Z",
+            "conclusion": "skipped",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:09:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:17Z",
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:09:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:17Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:09:17Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357183"
+      },
+      {
+        "completedAt": "2026-10-08T17:09:34Z",
+        "conclusion": "success",
+        "databaseId": 113437357260,
+        "name": "test (ubuntu-24.04, sanitized)",
+        "startedAt": "2026-10-08T17:05:36Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:37Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:38Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:46Z",
+            "conclusion": "success",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:46Z",
+            "conclusion": "skipped",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:47Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:05:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:07Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:05:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:33Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:33Z",
+            "conclusion": "skipped",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:09:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:33Z",
+            "conclusion": "skipped",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:09:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:33Z",
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:09:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:33Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:09:33Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357260"
+      },
+      {
+        "completedAt": "2026-10-08T17:18:27Z",
+        "conclusion": "success",
+        "databaseId": 113437357395,
+        "name": "test (macos-15-intel, normal)",
+        "startedAt": "2026-10-08T17:09:22Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:09:23Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:09:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:24Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:09:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:24Z",
+            "conclusion": "skipped",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:09:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:30Z",
+            "conclusion": "success",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:09:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:09:31Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:09:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:15Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:09:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:16:29Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:11:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:15Z",
+            "conclusion": "success",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:16:29Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:23Z",
+            "conclusion": "success",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:18:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:23Z",
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:18:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:18:24Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:18:23Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357395"
+      },
+      {
+        "completedAt": "2026-10-08T17:24:41Z",
+        "conclusion": "success",
+        "databaseId": 113437357463,
+        "name": "test (macos-15, sanitized)",
+        "startedAt": "2026-10-08T17:19:08Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:19:09Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:19:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:19:11Z",
+            "conclusion": "success",
+            "name": "Check out the exact public commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:19:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:19:11Z",
+            "conclusion": "skipped",
+            "name": "Install native build and test tools",
+            "number": 3,
+            "startedAt": "2026-10-08T17:19:11Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:19:14Z",
+            "conclusion": "success",
+            "name": "Install macOS native dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:19:11Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:19:14Z",
+            "conclusion": "success",
+            "name": "Run clang --version",
+            "number": 5,
+            "startedAt": "2026-10-08T17:19:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:20:07Z",
+            "conclusion": "success",
+            "name": "Run make setup",
+            "number": 6,
+            "startedAt": "2026-10-08T17:19:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:24:38Z",
+            "conclusion": "success",
+            "name": "Run make test",
+            "number": 7,
+            "startedAt": "2026-10-08T17:20:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:24:38Z",
+            "conclusion": "skipped",
+            "name": "Verify proven storage examples",
+            "number": 8,
+            "startedAt": "2026-10-08T17:24:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:24:38Z",
+            "conclusion": "skipped",
+            "name": "Generate and build a standalone proven API",
+            "number": 9,
+            "startedAt": "2026-10-08T17:24:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:24:38Z",
+            "conclusion": "skipped",
+            "name": "Verify hard resident-memory isolation in a disposable unit",
+            "number": 10,
+            "startedAt": "2026-10-08T17:24:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:24:39Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-08T17:24:38Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059/job/113437357463"
+      }
+    ],
+    "name": "Check",
+    "status": "completed",
+    "updatedAt": "2026-10-08T17:24:42Z",
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37813873059"
+  },
+  "latest": {
+    "conclusion": "success",
+    "createdAt": "2026-10-08T17:05:33Z",
+    "event": "workflow_dispatch",
+    "headSha": "0a3a746faed7fcd9138a868997834c2e328e6af1",
+    "jobs": [
+      {
+        "completedAt": "2026-10-08T17:31:25Z",
+        "conclusion": "success",
+        "databaseId": 113446021340,
+        "name": "Bend 2.0.36 / macos-15 / sanitized",
+        "startedAt": "2026-10-08T17:26:05Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:26:05Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:26:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:26:08Z",
+            "conclusion": "success",
+            "name": "Check out exact Stiff commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:26:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:26:08Z",
+            "conclusion": "skipped",
+            "name": "Install Linux dependencies",
+            "number": 3,
+            "startedAt": "2026-10-08T17:26:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:26:09Z",
+            "conclusion": "success",
+            "name": "Install macOS dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:26:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:26:10Z",
+            "conclusion": "success",
+            "name": "Prepare disposable candidate checkout",
+            "number": 5,
+            "startedAt": "2026-10-08T17:26:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:26:59Z",
+            "conclusion": "success",
+            "name": "Download and verify candidate compiler",
+            "number": 6,
+            "startedAt": "2026-10-08T17:26:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:31:21Z",
+            "conclusion": "success",
+            "name": "Run suite including proof verdict and negative proof",
+            "number": 7,
+            "startedAt": "2026-10-08T17:26:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:31:21Z",
+            "conclusion": "success",
+            "name": "Report candidate result",
+            "number": 8,
+            "startedAt": "2026-10-08T17:31:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:31:24Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-08T17:31:21Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873702/job/113446021340"
+      },
+      {
+        "completedAt": "2026-10-08T17:08:44Z",
+        "conclusion": "success",
+        "databaseId": 113446023045,
+        "name": "Bend 2.0.36 / ubuntu-24.04 / normal",
+        "startedAt": "2026-10-08T17:05:44Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:45Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:46Z",
+            "conclusion": "success",
+            "name": "Check out exact Stiff commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:57Z",
+            "conclusion": "success",
+            "name": "Install Linux dependencies",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:57Z",
+            "conclusion": "skipped",
+            "name": "Install macOS dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:57Z",
+            "conclusion": "success",
+            "name": "Prepare disposable candidate checkout",
+            "number": 5,
+            "startedAt": "2026-10-08T17:05:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:30Z",
+            "conclusion": "success",
+            "name": "Download and verify candidate compiler",
+            "number": 6,
+            "startedAt": "2026-10-08T17:05:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:42Z",
+            "conclusion": "success",
+            "name": "Run suite including proof verdict and negative proof",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:42Z",
+            "conclusion": "success",
+            "name": "Report candidate result",
+            "number": 8,
+            "startedAt": "2026-10-08T17:08:42Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:08:42Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-08T17:08:42Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873702/job/113446023045"
+      },
+      {
+        "completedAt": "2026-10-08T17:14:56Z",
+        "conclusion": "success",
+        "databaseId": 113446023610,
+        "name": "Bend 2.0.36 / macos-15 / normal",
+        "startedAt": "2026-10-08T17:11:16Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:11:17Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:11:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:19Z",
+            "conclusion": "success",
+            "name": "Check out exact Stiff commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:11:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:19Z",
+            "conclusion": "skipped",
+            "name": "Install Linux dependencies",
+            "number": 3,
+            "startedAt": "2026-10-08T17:11:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:21Z",
+            "conclusion": "success",
+            "name": "Install macOS dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:11:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:11:21Z",
+            "conclusion": "success",
+            "name": "Prepare disposable candidate checkout",
+            "number": 5,
+            "startedAt": "2026-10-08T17:11:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:12:05Z",
+            "conclusion": "success",
+            "name": "Download and verify candidate compiler",
+            "number": 6,
+            "startedAt": "2026-10-08T17:11:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:14:51Z",
+            "conclusion": "success",
+            "name": "Run suite including proof verdict and negative proof",
+            "number": 7,
+            "startedAt": "2026-10-08T17:12:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:14:52Z",
+            "conclusion": "success",
+            "name": "Report candidate result",
+            "number": 8,
+            "startedAt": "2026-10-08T17:14:51Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:14:54Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-08T17:14:52Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873702/job/113446023610"
+      },
+      {
+        "completedAt": "2026-10-08T17:10:05Z",
+        "conclusion": "success",
+        "databaseId": 113446083637,
+        "name": "Bend 2.0.36 / ubuntu-24.04 / sanitized",
+        "startedAt": "2026-10-08T17:05:44Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:45Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:46Z",
+            "conclusion": "success",
+            "name": "Check out exact Stiff commit",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:07Z",
+            "conclusion": "success",
+            "name": "Install Linux dependencies",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:07Z",
+            "conclusion": "skipped",
+            "name": "Install macOS dependencies",
+            "number": 4,
+            "startedAt": "2026-10-08T17:06:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:07Z",
+            "conclusion": "success",
+            "name": "Prepare disposable candidate checkout",
+            "number": 5,
+            "startedAt": "2026-10-08T17:06:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:06:42Z",
+            "conclusion": "success",
+            "name": "Download and verify candidate compiler",
+            "number": 6,
+            "startedAt": "2026-10-08T17:06:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:03Z",
+            "conclusion": "success",
+            "name": "Run suite including proof verdict and negative proof",
+            "number": 7,
+            "startedAt": "2026-10-08T17:06:42Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:03Z",
+            "conclusion": "success",
+            "name": "Report candidate result",
+            "number": 8,
+            "startedAt": "2026-10-08T17:10:03Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:10:03Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-08T17:10:03Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873702/job/113446083637"
+      },
+      {
+        "completedAt": "2026-10-08T17:05:41Z",
+        "conclusion": "success",
+        "databaseId": 113446092420,
+        "name": "resolve",
+        "startedAt": "2026-10-08T17:05:38Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-08T17:05:39Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:39Z",
+            "conclusion": "success",
+            "name": "Resolve newest stable Bend release",
+            "number": 2,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:39Z",
+            "conclusion": "skipped",
+            "name": "Report resolution failure",
+            "number": 3,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-08T17:05:40Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 4,
+            "startedAt": "2026-10-08T17:05:39Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/fraylabs/stiff/actions/runs/37813873702/job/113446092420"
+      }
+    ],
+    "name": "Latest Bend compatibility",
+    "status": "completed",
+    "updatedAt": "2026-10-08T17:31:25Z",
+    "url": "https://github.com/fraylabs/stiff/actions/runs/37813873702"
+  },
+  "latest_runner_interruption": "One runner-interrupted job rerun once; final result success.",
+  "independent_kernel_verdict": "not run"
+}

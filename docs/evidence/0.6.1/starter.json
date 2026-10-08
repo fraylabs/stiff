@@ -1,0 +1,48 @@
+{
+  "tag_revision": "ed3e6f567e5963648b21dc2bec0df989d3647aae",
+  "starter_pin": "2e8faf5ae991c132bcf0f71577c87e19542245bb",
+  "library_and_build_tools_match_tag": true,
+  "generator": "scripts/new.py",
+  "commands_verified_in_ci": [
+    "setup",
+    "check",
+    "build",
+    "mistakes"
+  ],
+  "normal_jobs": [
+    {
+      "name": "test (macos-15-intel, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37817670207/job/113450344212",
+      "conclusion": "success"
+    },
+    {
+      "name": "test (macos-15, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37817670207/job/113450344259",
+      "conclusion": "success"
+    },
+    {
+      "name": "test (ubuntu-24.04-arm, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37817670207/job/113450344291",
+      "conclusion": "success"
+    },
+    {
+      "name": "test (ubuntu-24.04, normal)",
+      "url": "https://github.com/fraylabs/stiff/actions/runs/37817670207/job/113450344453",
+      "conclusion": "success"
+    }
+  ],
+  "framework_and_application_verdict": "ALL PROOFS CHECK",
+  "greeting_mistake": "caught before building a mutant binary",
+  "source_sha256": {
+    "templates/proven-api/.gitignore": "a34bec66d19e079390e070f98e30f1b696ece6d66ff3dab40c218beb4c956f9d",
+    "templates/proven-api/LICENSE": "91155449683df48cd7a4c3d5b8e693537dd44658ac5294376a1a1c396f6204a4",
+    "templates/proven-api/Makefile": "f4b4783f19b24c8dfb59eb081153fd0863634490d2226672667442b860e5ae4c",
+    "templates/proven-api/PROOF.bend": "a15312b059a746a32fc987f93cf29cf282fc4475c8b8ca72f69c1eae4f1299b4",
+    "templates/proven-api/README.md": "cfb8a3a27a0ee471198f1740260bf7c7ed6ecf327f4053115ea32849b2a82722",
+    "templates/proven-api/api.bend": "3373adfc925137ea63f9929b582c73aeeab7f1eeb382ae38076b119496cca7c2",
+    "templates/proven-api/fetch-stiff.sh": "f637931b01bc27f346a8b1ba9bda6f3b32573eeffe5ebbcd071d2139ffafc664",
+    "templates/proven-api/main.bend": "8a8bd619eb3609d8d813e9975e03fc7f4f995cc2982c433700bddfb96295c5b0",
+    "templates/proven-api/stiff.rev": "1ef45a5119797bedecbfc95a9afeb3580228c3c7919e64e1308be98b1aca7cef",
+    "templates/proven-api/tasks.py": "048229c20ece340cb09a0c48725ab9f94479bfbffc611b3defbcbb27f530a8a4"
+  }
+}

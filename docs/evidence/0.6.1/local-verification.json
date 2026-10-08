@@ -1,0 +1,66 @@
+{
+  "archive": "stiff-0.6.1-darwin-arm64.tar.gz",
+  "sha256": "284988805572daf6967ee89c4131ab82a2e454307a8af97d8384c62c6660cee7",
+  "manifest": {
+    "schema_version": 1,
+    "static_libraries": {
+      "libevent": {
+        "archive_sha256": "4ab1b369bcb5af0c5971b8ade4e95a2c1326f6d0dc1ba75d620bf0331c3184a8",
+        "build": {
+          "library_type": "STATIC",
+          "mbedtls": false,
+          "openssl": false,
+          "position_independent_code": true,
+          "tests": false
+        },
+        "license_sha256": "75092d5ecfeefefacc0f345b6f0172234ca580c279c537de7229597cfbfd71e7",
+        "package_version": "2.2.2",
+        "patches": [
+          {
+            "path": "patches/libevent-error-headers.patch",
+            "sha256": "77f3200db9822c892f2eafe7ded46822add96c34fd0f4b3077f0d7d5addb6461",
+            "upstream_status": "local-not-submitted"
+          }
+        ],
+        "runtime_version": "2.2.2-alpha-dev",
+        "source_commit": "df3ecad3a040fd6d4fad4287defe113395de6fd7",
+        "source_tag": "release-2.2.2-alpha",
+        "source_tag_object": "58bc9c771db13a518362ed5803739d7942ea7650",
+        "source_url": "https://github.com/libevent/libevent/releases/download/release-2.2.2-alpha/libevent-2.2.2-alpha.tar.gz",
+        "version": "2.2.2-alpha"
+      }
+    },
+    "version": "0.6.1",
+    "revision": "ed3e6f567e5963648b21dc2bec0df989d3647aae",
+    "dirty": false,
+    "platform": "darwin-arm64",
+    "bend": "2.0.36",
+    "runtime_libraries": {
+      "libcurl": "8.7.1",
+      "json-c": "0.19",
+      "sqlite3": "3.54.0"
+    },
+    "binaries": {
+      "app": {
+        "sanitizer": "none",
+        "bend_abi": "compiler"
+      },
+      "notes": {
+        "sanitizer": "none",
+        "bend_abi": "compiler"
+      },
+      "stiff-run": {
+        "sanitizer": "none",
+        "language": "C11"
+      }
+    },
+    "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)"
+  },
+  "checksums": true,
+  "outside_checkout": true,
+  "no_build_tools_on_path": true,
+  "supervised_app_health": true,
+  "create_read_restart": true,
+  "persistent_application_tests": 6,
+  "exact_archive_tested": true
+}

@@ -11,6 +11,16 @@ records the final source and publication checks.
 Published 0.6.0 archives, Git consumer revisions and the immutable BendHub
 package still require 2.0.35. The initial upgrade did not include a release operation.
 
+## Release completion
+
+Stiff 0.6.1 is published with Bend 2.0.36. Both the source-anchor and final-source
+Check matrices passed 8/8. Hosted publication and Linux x64/arm64 consumer
+verification passed; all six GitHub assets matched retained build bytes.
+The starter and both consumers now pin 0.6.1. The remaining sections preserve the
+initial upgrade analysis and light-validation scope, including the consumer state
+at that time; final receipts are in [0.6.1 release evidence](evidence/0.6.1).
+Independent kernel verdicts were not run.
+
 ## What changed upstream and why it broke
 
 Upstream [PR #1281](https://github.com/bendlang/bend/pull/1281), commit

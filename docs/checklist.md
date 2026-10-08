@@ -1,10 +1,52 @@
 # Framework completion checklist
 
-The current checkout includes an unreleased Bend 2.0.36 upgrade. Its light checks
-and pending CI matrix are in [the upgrade report](bend-2.0.36.md). Release evidence
-below describes the published artifacts and their original compiler pins.
+Stiff 0.6.1 supports Bend 2.0.36. Historical releases below retain their
+original compiler pins and verification scopes.
 
-## Current release: 0.6.0
+## Current release: 0.6.1
+
+Stiff **0.6.1** adopts Bend 2.0.36’s two-argument effect registration API and
+checks generated `io_eff` and `Effect` signatures before C compilation.
+Immediate dispatch and explicit helper-thread parking are preserved.
+The starter and both consumers pin source/build-tool anchor
+`2e8faf5ae991c132bcf0f71577c87e19542245bb`; its library, native and build-tool
+bytes match tag `v0.6.1` at `ed3e6f567e5963648b21dc2bec0df989d3647aae`.
+`STIFF_CACHE` shares pinned libevent and installs the starter’s own compiler
+when the shared compiler differs. **Use Stiff 0.6.0 for Bend 2.0.35.**
+
+[Release-source CI](https://github.com/fraylabs/stiff/actions/runs/37817670207)
+and [source-anchor CI](https://github.com/fraylabs/stiff/actions/runs/37817545176)
+passed all eight Linux/macOS normal and sanitizer jobs each. All four normal
+release-source jobs generated, set up, proof-checked, built and mutation-checked
+the starter. [Compiler upgrade CI](evidence/0.6.1/upgrade-ci.json) also records
+the earlier full pinned and latest-compatibility results. Light local checks
+caught 12 ledger, 6 bookings and 4 routing mistakes before mutant builds.
+
+The [hosted release workflow](https://github.com/fraylabs/stiff/actions/runs/37820260274)
+published BendHub `0x600981079d65a285d008308db02b846c` and built/verified both
+Linux archives. Linux x64 and arm64 empty-cache consumers matched all 23 source
+files, checked the proof verdict, passed authenticated HTTPS and six persistent
+application journeys, and rejected cached native-source tampering.
+
+All three exact clean archives passed provenance/checksums, supervised health,
+create/read/restart and six persistent notes journeys without build tools on PATH.
+All six [release assets](https://github.com/fraylabs/stiff/releases/tag/v0.6.1)
+were downloaded and byte-compared with their verified originals. Only light proof
+checks, the compiler download, and one macOS archive build/verification ran locally,
+using existing pinned libevent; full suites and sanitizers ran on hosted CI.
+[Publication receipt](evidence/0.6.1/publication.json),
+[archive results](evidence/0.6.1/release-archives.json),
+[hub evidence](evidence/0.6.1/bendhub.json) and
+[anchor hashes](evidence/0.6.1/source-anchor.json) record the exact bytes and scopes.
+Receipt commits follow the tag without changing released library or build tools.
+
+The proven-versus-trusted boundary is unchanged: pure modeled routing/dispatch
+laws trust Base semantics and compiler/translation; the effectful Router, HTTP
+parsing, credentials, serialization, native effects and persistence remain
+trusted/tested. No independent kernel checks or new capacity measurements were
+run for this release; no end-to-end verification or full memory-safety claim.
+
+## Historical 0.6.0 release
 
 Stiff **0.6.0** targets Bend **2.0.35**. Pure route matching and selection
 agree with an independent specification for arbitrary finite route tables,
