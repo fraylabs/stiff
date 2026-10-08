@@ -32,6 +32,6 @@ class TemplateCacheTests(unittest.TestCase):
                      patch.object(tasks, 'dependency'), \
                      patch.object(tasks, 'run', return_value=SimpleNamespace(returncode=0, stdout='', stderr='')) as run:
                     tasks.setup()
-                self.assertEqual((dependency / '.cache/libevent').resolve(), cache / 'libevent')
+                self.assertEqual((dependency / '.cache/libevent').resolve(), (cache / 'libevent').resolve())
                 self.assertEqual((dependency / '.cache/toolchain').is_symlink(), compatible)
                 run.assert_called_once_with([tasks.sys.executable, dependency / 'scripts/setup.py'])

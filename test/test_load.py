@@ -165,9 +165,12 @@ class LoadTests(unittest.TestCase):
         unused.bind(("127.0.0.1", 0))
         port = unused.getsockname()[1]
         unused.close()
+        # One offer at the start of a one-second window, with a timeout long
+        # enough that a refused connection is never reported as a timeout on
+        # a busy runner.
         transport = LOAD.run_load(LOAD.LoadConfig(
-            url=f"http://127.0.0.1:{port}/", rate=10, duration=0.1,
-            workers=1, queue_capacity=1, timeout=0.2))
+            url=f"http://127.0.0.1:{port}/", rate=1, duration=1.0,
+            workers=1, queue_capacity=1, timeout=2))
         self.assertEqual(transport["counts"]["transport_errors"], 1)
         self.assertEqual(transport["statuses"], {})
 
