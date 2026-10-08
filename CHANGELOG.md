@@ -1,13 +1,20 @@
 # Changelog
 
-## Unreleased
+## 0.6.1 — October 9, 2026
 
-- Pin Bend 2.0.36 and adopt its two-argument native effect registration API.
+- Support Bend 2.0.36 and its two-argument native effect registration API.
   Immediate dispatch and explicit `io_work` helper-thread parking are preserved.
-- Reject unexpected generated registration/callback signatures before C compilation.
-- Keep published consumer pins on Bend 2.0.35 and share only compatible compiler caches.
+- Reject unexpected generated `io_eff` and `Effect` signatures before C compilation,
+  with a clear mismatch message.
+- Move the proven API starter and Git/BendHub consumers to the 0.6.1 source and
+  compiler pins. `STIFF_CACHE` shares pinned libevent and installs the starter’s
+  own compiler when the shared compiler differs.
+- Fix CI timing and executable-path checks without widening the supported ABI.
 
-See [the upgrade report](docs/bend-2.0.36.md) for light checks and pending CI verification.
+Experimental release pinned to Bend 2.0.36. **Use Stiff 0.6.0 for Bend 2.0.35**;
+its archives and immutable BendHub package remain pinned to that compiler.
+The proven-versus-trusted boundary is unchanged; see
+[the compiler upgrade report](docs/bend-2.0.36.md) and [contracts](docs/contracts.md).
 
 ## 0.6.0 — October 7, 2026
 
