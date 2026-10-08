@@ -1,7 +1,8 @@
 # Sanitizer investigation and diagnostic profile
 
-Current compiler: Bend 2.0.35, source revision
-`79df8d9c40722ee9507a1e253f283b51025f9d6c`. The original Bend 2.0.20 failure reproduced on
+Current checkout compiler: Bend 2.0.36, source revision
+`ae1101ca7d15364f9274fa6b1367d175884a7da7`. Its sanitizer matrix is pending;
+see [the upgrade report](bend-2.0.36.md). The original Bend 2.0.20 failure reproduced on
 macOS arm64 with Apple Clang 21.0.0 (`clang-2100.1.1.101`).
 
 ## Finding

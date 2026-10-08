@@ -356,9 +356,9 @@ static void __attribute__((constructor)) stiff_json_register(void) {
     err_fail("Stiff ABI mismatch: SCon expected arity 2");
 #endif
 #ifdef CID(Json.parse)
-  io_eff(CID(Json.parse), json_parse_run, 0);
+  io_eff(CID(Json.parse), json_parse_run);
 #endif
 #ifdef CID(Json.stringify_with_limit)
-  io_eff(CID(Json.stringify_with_limit), json_stringify_with_limit_run, 0);
+  io_eff(CID(Json.stringify_with_limit), json_stringify_with_limit_run);
 #endif
 }

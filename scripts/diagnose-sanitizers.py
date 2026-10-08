@@ -14,7 +14,7 @@ DIRECTORY.mkdir(parents=True, exist_ok=True)
 report = {
     "platform": platform.platform(),
     "compiler": subprocess.check_output([os.environ.get("CC", "clang"), "--version"], text=True),
-    "bend_pin": "2.0.35",
+    "bend_pin": "2.0.36",
     "results": [],
 }
 for abi in ("compiler", "standard"):

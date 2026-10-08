@@ -1,6 +1,7 @@
 # Tracking Bend releases and first use
 
-The supported compiler remains Bend 2.0.35. `.github/workflows/check.yml` is
+The current checkout pins Bend 2.0.36; its full verification is pending in
+[the upgrade report](bend-2.0.36.md). Published 0.6.0 artifacts retain 2.0.35. `.github/workflows/check.yml` is
 unchanged by the tracking work. `bend-latest.yml` resolves GitHub's newest non-prerelease Bend release
 once per daily run (03:23 UTC) or manual dispatch, then tests Linux x64 and macOS
 arm64 with normal and combined sanitizer profiles. Both use the complete suite,
@@ -48,6 +49,11 @@ covered by those journeys.
 
 A negative compiled test changes the generated HttpOk descriptor's arity and
 hot flag separately and requires an explicit Stiff ABI error before HTTP IO.
+The native build also checks the generated `io_eff(u32, Effect)` registration
+and `Effect(Env, Term*, IoWork*)` callback declarations before invoking Clang.
+A lightweight negative test changes each signature and requires an explicit
+Stiff ABI mismatch, with no C compilation. These checks intentionally reject
+unexpected declaration spellings for review; they do not prove semantic compatibility.
 The candidate integrity tests cover checksum preference, GitHub digests,
 unpinned warnings and rejection of malformed checksum metadata.
 

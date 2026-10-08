@@ -1,0 +1,48 @@
+{
+  "base_revision": "9b7cebc",
+  "branch": "bend-2.0.36",
+  "compiler": "bend 2.0.36",
+  "compiler_source": "ae1101ca7d15364f9274fa6b1367d175884a7da7",
+  "platform": "Darwin arm64",
+  "python": "3.11.8",
+  "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+  "archive": {
+    "platform": "darwin-arm64",
+    "sha256": "2876687ceb0aba836abc98b3f62c8fc9fb612d124ae2af6814d5ec937760878d",
+    "integrity": "release checksum and GitHub asset digest; downloaded bytes verified"
+  },
+  "checks": {
+    "framework_ledger_bookings_check": "ALL PROOFS CHECK",
+    "ledger_mistakes": "12/12 caught",
+    "bookings_mistakes": "6/6 caught",
+    "routing_mistakes": "4/4 caught",
+    "false_proof": "SOME PROOFS FAIL; rejected",
+    "abi_signature_negative": "2 altered declarations rejected before C compilation",
+    "template_cache": "matching and incompatible compiler cases passed",
+    "native_smoke_build": "get-json built; one native program compiled",
+    "native_loopback": "exit 0; HTTP 200 and expected title; clean stderr",
+    "native_closed_port": "expected network error; exit 1"
+  },
+  "log_directory": ".cache/bend-2.0.36",
+  "log_sha256": {
+    "ledger-light.log": "baefb198537c189171eb21297268f5fccb560c771804caa652353f1f31095287",
+    "bookings-light.log": "6833c06fc733a0d8b25a682cd6558490287ec493f9f17512d02a804d9d98259a",
+    "routing-light.log": "5bedd08ab419c653d9fa4ded20fd64c66b943444563b7ee2ff27077f06299d80",
+    "false-proof.log": "3d07bfdb7e9af387ae71b8cb5c4c6cd665a733ca0e29c5c9e96522a51359da34",
+    "smoke-build.log": "44a9a81619a6738c4e8864ed868a5c8586d8e765e3ae94203a4048fd850ccaf3",
+    "smoke-run.log": "290f35b419ad5ada3fc0f9583bbf41ad40e6261f53bb29c14299ef1b005b90b4",
+    "smoke-loopback.log": "859468faa4e1b3b3741474875ed1fdd8da49edac4102299721e35baf429c5daf"
+  },
+  "pending": [
+    "full pinned Check matrix",
+    "Latest Bend compatibility",
+    "independent kernel verdict (separate)"
+  ],
+  "not_run_locally": [
+    "make test",
+    "sanitizers",
+    "native example test targets",
+    "libevent rebuild",
+    "kernel build/verdict"
+  ]
+}

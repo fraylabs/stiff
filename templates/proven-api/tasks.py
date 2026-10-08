@@ -72,9 +72,17 @@ def setup():
                 raise SystemExit('STIFF_CACHE libevent pin differs; choose a compatible cache.')
             if not (cache / 'toolchain/.archive-sha256').is_file():
                 raise SystemExit('STIFF_CACHE compiler checksum marker missing.')
+            # A newer checkout can share libevent with this published revision,
+            # but its compiler may have a different private effect ABI.
+            spec = importlib.util.spec_from_file_location('bend_setup', DEPENDENCY / 'scripts/setup.py')
+            bend_setup = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(bend_setup)
+            compatible = (cache / 'toolchain/.archive-sha256').read_text().strip() in bend_setup.DIGESTS.values()
             target = DEPENDENCY / '.cache'
             target.mkdir(exist_ok=True)
             for name in ('toolchain', 'libevent'):
+                if name == 'toolchain' and not compatible:
+                    continue  # setup installs this revision's own pinned compiler
                 link = target / name
                 if not link.exists() and not link.is_symlink():
                     link.symlink_to(cache / name, target_is_directory=True)

@@ -10,7 +10,7 @@ from tasks import CACHE, ROOT, LEAN, KERNEL, heavy, run
 
 URL = 'https://github.com/leanprover/lean4/releases/download/v4.34.0/lean-4.34.0-darwin_aarch64.tar.zst'
 SHA256 = '69f263fa6e21bbc2466bbfb1affcd92479ee2714c883a07de548e099a5922932'
-KERNEL_SOURCE_SHA256 = 'e15042434e73aab07ab05cea4b77b5619082c00a6d4924ea2d4a2cdec05facce'
+KERNEL_SOURCE_SHA256 = 'c40d2b219c77c64de1fd6c32224cc53fa928436d8ab7df5bf5a7e585d556cc32'
 
 
 def digest(path):
@@ -42,7 +42,7 @@ def main():
                 raise SystemExit(result['verdict'])
         source = ROOT / '.cache/toolchain/bend2/bendtt.lean'
         if digest(source) != KERNEL_SOURCE_SHA256:
-            raise SystemExit('BendTT source does not match the pinned Bend 2.0.35 toolchain')
+            raise SystemExit('BendTT source does not match the pinned Bend 2.0.36 toolchain')
         KERNEL.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, KERNEL.parent / 'bendtt.lean')
         # Supply absolute tools; do not put Lean's bundled Clang on the API build PATH.

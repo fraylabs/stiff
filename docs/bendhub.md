@@ -6,7 +6,9 @@ Stiff's experimental 0.6.0 library is available as an immutable BendHub package:
 0x36c893ade1f158581b4c8c34eb3b510e
 ```
 
-This published hash requires **Bend 2.0.35**, matching the current Git checkout.
+This published hash requires **Bend 2.0.35**. The current Git checkout has an
+unreleased [Bend 2.0.36 upgrade](bend-2.0.36.md); use the release's pinned tooling
+for this immutable package.
 The native effects depend on its private compiler ABI; a newer compiler is not
 automatically compatible. The GitHub
 [v0.6.0 release](https://github.com/fraylabs/stiff/releases/tag/v0.6.0) provides
@@ -71,7 +73,7 @@ The hash identifies bytes; it is not a proof of native safety or an author ident
 
 ## Verification and reproduction
 
-Run from this checkout after `make setup`:
+Run from the matching 0.6.0 release checkout after `make setup`:
 
 ```sh
 python3 scripts/verify-bendhub.py 0x36c893ade1f158581b4c8c34eb3b510e

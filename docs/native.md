@@ -5,7 +5,7 @@ against libcurl and json-c, and runs as a native executable. The runnable applic
 
 ## Build
 
-`make setup` installs the checksum-verified standalone Bend **2.0.35** release
+`make setup` installs the checksum-verified standalone Bend **2.0.36** release
 under `.cache/toolchain`. Alternatively, supply an existing compiler with `BEND`.
 The application build uses only Bend, Clang, pkg-config, libcurl and json-c:
 
@@ -67,7 +67,7 @@ No native effect calls Node or shells out to the curl command.
   than accepting json-c's lossy conversion. Embedded NUL string values and valid
   Unicode surrogate pairs are supported. JSON values deeper than 128 levels are
   rejected; native POST/PUT/PATCH validation also imposes the parser's nesting bound.
-- Constructor layouts are private Bend 2.0.35 ABI. In particular, HttpOk's nested
+- Constructor layouts are private Bend 2.0.36 ABI. In particular, HttpOk's nested
   Response is flattened into three fields (status, body, response-header list),
   and JsonBool packs its scalar in the constructor word.
   Request now carries six fields; its header list contains boxed two-field Header
@@ -81,8 +81,8 @@ The original Bend 2.0.20 verification on macOS arm64 used Apple Clang, system li
 8.7.1 and json-c 0.19. The executable fetched public HTTPS JSON successfully with
 `PATH=/nonexistent`; `file` identified a Mach-O arm64 executable and `otool -L`
 listed libSystem, libcurl and libjson-c, with no Node runtime. The standalone
-compiler build path is also exercised locally. Current Bend 2.0.35 verification
-is recorded separately in [the upgrade report](bend-2.0.35.md).
+compiler build path is also exercised locally. Bend 2.0.36 light checks and the
+pending full matrix are recorded in [the upgrade report](bend-2.0.36.md).
 
 ```sh
 make test               # Native programs, transport fixtures and pure-law checks

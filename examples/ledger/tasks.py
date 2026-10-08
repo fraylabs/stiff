@@ -32,8 +32,8 @@ def accepted(r):
 
 def check():
     version = run([BEND, 'version'])
-    if version['exit'] or version['verdict'].strip() != 'bend 2.0.35':
-        raise SystemExit('Ledger checks require pinned Bend 2.0.35.')
+    if version['exit'] or version['verdict'].strip() != 'bend 2.0.36':
+        raise SystemExit('Ledger checks require pinned Bend 2.0.36.')
     for source in (ROOT / 'src/PROOF.bend', HERE / 'PROOF.bend'):
         print(f'Checking {source.relative_to(ROOT)}...', flush=True)
         r = run([BEND, source, '--check-only'])

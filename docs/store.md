@@ -110,4 +110,4 @@ Codes include `invalid_store_path`, `invalid_store_input`,
 restart, identical and conflicting idempotency keys, version races across two
 processes, lost acknowledgement, SIGKILL between operations, integrity recovery,
 input bounds and SQL metacharacters. Constructor layouts remain pinned private
-Bend 2.0.35 ABI and must be reverified on a compiler upgrade.
+Bend 2.0.36 ABI and must be reverified on a compiler upgrade.

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Pin Bend 2.0.36 and adopt its two-argument native effect registration API.
+  Immediate dispatch and explicit `io_work` helper-thread parking are preserved.
+- Reject unexpected generated registration/callback signatures before C compilation.
+- Keep published consumer pins on Bend 2.0.35 and share only compatible compiler caches.
+
+See [the upgrade report](docs/bend-2.0.36.md) for light checks and pending CI verification.
+
 ## 0.6.0 — October 7, 2026
 
 - Prove pure path matching and route selection against an independent specification for arbitrary finite route tables, methods, patterns and paths. The proofs preserve the first exact method/path hit, route metadata and exact captured parameters.

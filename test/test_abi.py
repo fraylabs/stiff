@@ -4,10 +4,42 @@ from pathlib import Path
 import re
 import shlex
 import subprocess
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class AbiSignatureTests(unittest.TestCase):
+    def test_registration_and_callback_changes_fail_before_c_compilation(self):
+        # A fake compiler emits only the ABI declarations; no native build or IO.
+        version = re.search(r"!= '([^']+)'", (ROOT / 'scripts/build-native.sh').read_text())[1]
+        with tempfile.TemporaryDirectory(prefix='stiff-abi-signature-') as temporary:
+            directory = Path(temporary)
+            bend = directory / 'bend'
+            bend.write_text(f'#!{sys.executable}\n' +
+                            'import os, pathlib, sys\n' +
+                            f'if sys.argv[1] == "version": print({version!r})\n' +
+                            'else: pathlib.Path(sys.argv[-1]).write_text(os.environ["ABI_SOURCE"])\n')
+            bend.chmod(0o755)
+            cc = directory / 'cc'
+            cc.write_text('#!/bin/sh\n: > "$ABI_CC_CALLED"\nexit 99\n')
+            cc.chmod(0o755)
+            registration = 'static void io_eff(u32 cid, Effect run) {'
+            callback = 'typedef Term (*Effect)(Env e, Term* f, IoWork* w);'
+            for source in (registration.replace('Effect run)', 'Effect run, u32 need)') + '\n' + callback,
+                           registration + '\n' + callback.replace('Term* f', 'const Term* f')):
+                with self.subTest(source=source):
+                    marker = directory / 'cc-called'
+                    result = subprocess.run([str(ROOT / 'scripts/build-native.sh'),
+                                             'unused.bend', str(directory / 'unused')],
+                                            env={**os.environ, 'BEND': str(bend), 'CC': str(cc),
+                                                 'ABI_SOURCE': source, 'ABI_CC_CALLED': str(marker)},
+                                            capture_output=True, text=True, timeout=10)
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertIn('Stiff ABI mismatch: expected io_eff(u32, Effect)', result.stderr)
+                    self.assertFalse(marker.exists())
 
 
 class AbiDescriptorTests(unittest.TestCase):

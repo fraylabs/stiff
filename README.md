@@ -4,11 +4,13 @@ Native HTTP, application and storage building blocks for **Bend 2**. Write a Ben
 `IO` program with routing, schemas, streaming and durable local state, then compile
 it to a native executable.
 
-**Status:** experimental 0.6.0, pinned to Bend **2.0.35**. No Node or npm dependency.
+**Status:** experimental 0.6.0 with an unreleased compiler upgrade, pinned to Bend **2.0.36**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
 [Stiff 0.6.0 release with macOS arm64 and Linux x64/arm64 archives](https://github.com/fraylabs/stiff/releases/tag/v0.6.0).
 [Completed checklist and verification evidence](docs/checklist.md).
+Published 0.6.0 archives and immutable consumer pins still use Bend 2.0.35;
+see [the current compiler upgrade and pending CI checks](docs/bend-2.0.36.md).
 
 ## Get started
 
@@ -90,22 +92,22 @@ make build
 ./.cache/native/get-json https://httpbin.org/json
 ```
 
-`make setup` downloads the standalone Bend 2.0.35 release into `.cache/toolchain`,
+`make setup` downloads the standalone Bend 2.0.36 release into `.cache/toolchain`,
 checks its pinned SHA-256 before extraction, and builds the pinned libevent
 dependency under `.cache/libevent`. Setup changes no global installation.
 It supports macOS/Linux release archives on arm64 and x64. Server builds use
 libevent **2.2.2-alpha**, statically linked from the scoped build; its alpha status
 is explicit. See [native dependency pins](docs/dependencies.md). The source revision
-for this compiler release is `79df8d9c40722ee9507a1e253f283b51025f9d6c`.
+for this compiler release is `ae1101ca7d15364f9274fa6b1367d175884a7da7`.
 For an existing checkout, preserve the old `.cache/toolchain` before setup; see
-[the compiler upgrade report](docs/bend-2.0.35.md) and [cache migration](docs/dependencies.md).
+[the compiler upgrade report](docs/bend-2.0.36.md) and [cache migration](docs/dependencies.md).
 
 Bend's official installer is `curl -fsSL https://bend-lang.com/install.sh | sh`.
 It installs the current upstream compiler, which may differ from Stiff's supported
 version. You do not need it for this quickstart: `make setup` is the supported,
 checksum-pinned path and leaves global Bend installations alone.
 
-If you already have Bend 2.0.35, set `BEND` to its executable. Server builds
+If you already have Bend 2.0.36, set `BEND` to its executable. Server builds
 still need `python3 scripts/setup-libevent.py` for the scoped dependency.
 `CC` can select Clang. To compile another program:
 

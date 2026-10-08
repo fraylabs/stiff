@@ -312,7 +312,7 @@ static Term stiff_send_pack(Env e, IoWork* work) {
       Term header = io_node(e, CID(ResponseHeader), io_str(e, h->name, strlen(h->name)), io_str(e, h->value, strlen(h->value)));
       headers = io_node(e, CID(Con), header, headers);
     }
-    // Bend 2.0.35 flattens HttpOk{Response{status, body, headers}} into three fields.
+    // Bend 2.0.36 flattens HttpOk{Response{status, body, headers}} into three fields.
     u64 loc = heap_alloc(e, cls_fit(3));
     e.mem[loc] = request->status;
     e.mem[loc + 1] = io_str(e, request->response, request->used);
@@ -348,7 +348,7 @@ static Term stiff_send_run(Env e, Term* f, IoWork* work) {
       request->error = "invalid_header";
       break;
     }
-    // List nodes hold a boxed Header and tail in Bend 2.0.35.
+    // List nodes hold a boxed Header and tail in Bend 2.0.36.
     Term pair[2], header[2];
     spare_free(e, cls_fit(2), ctr_take(e, items, 2, pair));
     spare_free(e, cls_fit(2), ctr_take(e, pair[0], 2, header));
@@ -396,5 +396,5 @@ static void __attribute__((constructor)) stiff_send_register(void) {
 #endif
   // Raw HttpOk writes bypass io_seal; this result must remain non-hot.
   if (cid_hot(CID(HttpOk))) err_fail("Stiff ABI mismatch: HttpOk must be non-hot");
-  io_eff(CID(Stiff.send), stiff_send_run, 0);
+  io_eff(CID(Stiff.send), stiff_send_run);
 }

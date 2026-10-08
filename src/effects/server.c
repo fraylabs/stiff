@@ -1224,48 +1224,48 @@ static void __attribute__((constructor)) server_register(void) {
     err_fail("Stiff ABI mismatch: Con expected arity 2");
 #endif
 #ifdef CID(Server.metrics)
-  io_eff(CID(Server.metrics), server_metrics_run, 0);
+  io_eff(CID(Server.metrics), server_metrics_run);
 #endif
 #ifdef CID(Server.active)
-  io_eff(CID(Server.active), server_active_run, 0);
+  io_eff(CID(Server.active), server_active_run);
 #endif
 #ifdef CID(Server.finish)
-  io_eff(CID(Server.finish), server_finish_run, 0);
+  io_eff(CID(Server.finish), server_finish_run);
 #endif
 #ifdef CID(Server.listen)
-  io_eff(CID(Server.listen), server_listen_run, 0);
+  io_eff(CID(Server.listen), server_listen_run);
 #endif
 #ifdef CID(Server.listen_with_limits)
-  io_eff(CID(Server.listen_with_limits), server_listen_with_limits_run, 0);
+  io_eff(CID(Server.listen_with_limits), server_listen_with_limits_run);
 #endif
 #ifdef CID(Server.listen_streaming)
-  io_eff(CID(Server.listen_streaming), server_listen_streaming_run, 0);
+  io_eff(CID(Server.listen_streaming), server_listen_streaming_run);
 #endif
 #ifdef CID(Server.listen_streaming_with_limits)
-  io_eff(CID(Server.listen_streaming_with_limits), server_listen_streaming_with_limits_run, 0);
+  io_eff(CID(Server.listen_streaming_with_limits), server_listen_streaming_with_limits_run);
 #endif
 #ifdef CID(Server.next)
-  io_eff(CID(Server.next), server_next_run, 0);
+  io_eff(CID(Server.next), server_next_run);
 #endif
 #ifdef CID(Server.next_stream)
-  io_eff(CID(Server.next_stream), server_next_stream_run, 0);
+  io_eff(CID(Server.next_stream), server_next_stream_run);
 #endif
 #ifdef CID(Server.body_next)
-  io_eff(CID(Server.body_next), server_body_next_run, 0);
+  io_eff(CID(Server.body_next), server_body_next_run);
 #endif
 #ifdef CID(Server.reply)
-  io_eff(CID(Server.reply), server_reply_run, 0);
+  io_eff(CID(Server.reply), server_reply_run);
 #endif
 #ifdef CID(Server.stream_start_raw)
-  io_eff(CID(Server.stream_start_raw), server_stream_start_raw_run, 0);
+  io_eff(CID(Server.stream_start_raw), server_stream_start_raw_run);
 #endif
 #ifdef CID(Server.stream_write)
-  io_eff(CID(Server.stream_write), server_stream_write_run, 0);
+  io_eff(CID(Server.stream_write), server_stream_write_run);
 #endif
 #ifdef CID(Server.stream_end)
-  io_eff(CID(Server.stream_end), server_stream_end_run, 0);
+  io_eff(CID(Server.stream_end), server_stream_end_run);
 #endif
 #ifdef CID(Server.stop)
-  io_eff(CID(Server.stop), server_stop_run, 0);
+  io_eff(CID(Server.stop), server_stop_run);
 #endif
 }

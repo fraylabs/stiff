@@ -569,15 +569,15 @@ static void __attribute__((constructor)) stiff_store_register(void) {
     err_fail("Stiff ABI mismatch: SCon expected arity 2");
 #endif
 #ifdef CID(Store.open)
-  io_eff(CID(Store.open), stiff_store_open_run, 0);
+  io_eff(CID(Store.open), stiff_store_open_run);
 #endif
 #ifdef CID(Store.read)
-  io_eff(CID(Store.read), stiff_store_read_run, 0);
+  io_eff(CID(Store.read), stiff_store_read_run);
 #endif
 #ifdef CID(Store.compare_write)
-  io_eff(CID(Store.compare_write), stiff_store_compare_write_run, 0);
+  io_eff(CID(Store.compare_write), stiff_store_compare_write_run);
 #endif
 #ifdef CID(Store.operation)
-  io_eff(CID(Store.operation), stiff_store_operation_run, 0);
+  io_eff(CID(Store.operation), stiff_store_operation_run);
 #endif
 }

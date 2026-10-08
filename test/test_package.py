@@ -34,7 +34,7 @@ class PackageTests(unittest.TestCase):
                 digest, name = line.split()
                 self.assertEqual(hashlib.sha256((stage/name).read_bytes()).hexdigest(),digest)
             manifest = json.loads((stage/'manifest.json').read_text())
-            self.assertEqual(manifest['bend'],'2.0.35')
+            self.assertEqual(manifest['bend'],'2.0.36')
             self.assertEqual(set(manifest['runtime_libraries']),{'libcurl','json-c','sqlite3'})
             self.assertEqual(manifest['static_libraries']['libevent']['version'],'2.2.2-alpha')
             self.assertTrue(all(binary['sanitizer']=='none' for binary in manifest['binaries'].values()))

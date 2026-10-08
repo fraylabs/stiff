@@ -45,7 +45,7 @@ def main():
             return result
 
         # Type-check/code-generate the foreign-effect anchor without executing it.
-        # --check-only is a safe-proof verdict in Bend 2.0.35, so check the
+        # --check-only is a safe-proof verdict in Bend 2.0.36, so check the
         # separate pure PROOF module with that flag instead.
         (project / 'check.bend').write_text(
             f'import Base\nimport {args.package}/stiff.bend as Stiff\n'

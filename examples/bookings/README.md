@@ -1,6 +1,6 @@
 # Rooms fill. Slots don't collide.
 
-A native room-booking HTTP API on **Stiff + Bend 2.0.35**. Rooms 0, 1 and 2
+A native room-booking HTTP API on **Stiff + Bend 2.0.36**. Rooms 0, 1 and 2
 have half-open slots `[start, end)`: a booking ending at 20 and another starting
 at 20 fit together. An enclosing slot conflicts even if its start is outside
 the existing booking. Different rooms can use the same time.

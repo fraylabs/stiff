@@ -11,8 +11,8 @@ if [ -x "$stiff_root/.cache/toolchain/bin/bend" ]; then
 fi
 stiff_bend=${BEND:-$stiff_default}
 stiff_cc=${CC:-clang}
-if [ "$("$stiff_bend" version)" != 'bend 2.0.35' ]; then
-  echo 'Stiff native effects require Bend 2.0.35.' >&2
+if [ "$("$stiff_bend" version)" != 'bend 2.0.36' ]; then
+  echo 'Stiff native effects require Bend 2.0.36.' >&2
   exit 1
 fi
 case "$2" in *.bend|*.c|*.js|*.mjs|*.json|*.md)
@@ -21,6 +21,13 @@ case "$2" in *.bend|*.c|*.js|*.mjs|*.json|*.md)
 esac
 mkdir -p "$(dirname "$2")"
 BEND_NO_TELEMETRY=1 "$stiff_bend" "$1" -o "$2.c"
+# This private registration ABI has changed between patch releases. Fail before
+# Clang with the expected contract, rather than a cascade of argument errors.
+grep -qFx 'static void io_eff(u32 cid, Effect run) {' "$2.c" &&
+  grep -qFx 'typedef Term (*Effect)(Env e, Term* f, IoWork* w);' "$2.c" || {
+    echo 'Stiff ABI mismatch: expected io_eff(u32, Effect) and Effect(Env, Term*, IoWork*); review the Bend effect API.' >&2
+    exit 1
+  }
 # Clang ASan does not preserve its own state across preserve_none calls. Keep
 # Bend's preserve_most helpers, but use the standard convention at the two
 # preserve_none work-loop sites when address instrumentation is active.

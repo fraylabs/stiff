@@ -1,6 +1,6 @@
 # Money moves. The total doesn't.
 
-A native HTTP money API on **Stiff + Bend 2.0.35**. Two accounts start with 100
+A native HTTP money API on **Stiff + Bend 2.0.36**. Two accounts start with 100
 demo cents each. Its pure engine proves, for arbitrary natural-number balances,
 amounts and key lists: transfers conserve the total, overdrafts reject, rejection
 preserves the complete state, and the same key cannot apply a transfer twice.

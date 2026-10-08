@@ -159,9 +159,9 @@ static void __attribute__((constructor)) stiff_url_register(void) {
     err_fail("Stiff ABI mismatch: SCon expected arity 2");
 #endif
 #ifdef CID(Url.encode_component)
-  io_eff(CID(Url.encode_component), stiff_url_encode_run, 0);
+  io_eff(CID(Url.encode_component), stiff_url_encode_run);
 #endif
 #ifdef CID(Url.with_query)
-  io_eff(CID(Url.with_query), stiff_url_query_run, 0);
+  io_eff(CID(Url.with_query), stiff_url_query_run);
 #endif
 }

@@ -1,5 +1,9 @@
 # Framework completion checklist
 
+The current checkout includes an unreleased Bend 2.0.36 upgrade. Its light checks
+and pending CI matrix are in [the upgrade report](bend-2.0.36.md). Release evidence
+below describes the published artifacts and their original compiler pins.
+
 ## Current release: 0.6.0
 
 Stiff **0.6.0** targets Bend **2.0.35**. Pure route matching and selection

@@ -17,8 +17,8 @@ BEND, ENV, run, accepted, heavy = shared.BEND, shared.ENV, shared.run, shared.ac
 CACHE = ROOT / '.cache/bookings'
 
 def check():
-    if run([BEND, 'version'])['verdict'].strip() != 'bend 2.0.35':
-        raise SystemExit('Bookings require pinned Bend 2.0.35.')
+    if run([BEND, 'version'])['verdict'].strip() != 'bend 2.0.36':
+        raise SystemExit('Bookings require pinned Bend 2.0.36.')
     for source in (ROOT / 'src/PROOF.bend', HERE / 'PROOF.bend'):
         r = run([BEND, source, '--check-only'])
         print(r['verdict'], end='', flush=True)

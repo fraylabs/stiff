@@ -18,6 +18,8 @@ Compiling `main.bend` directly bypasses the gate.
 
 `stiff.rev` pins an exact MIT Stiff 0.6.0 revision. Setup fetches it into
 `deps/stiff`, then installs checksum-pinned Bend 2.0.35 and scoped libevent.
+With `STIFF_CACHE`, it shares libevent and reuses only a compiler whose checksum
+matches that published revision; otherwise setup installs its own pinned compiler.
 No global install. Use a destination path without spaces for native builds. With an existing compatible Stiff cache, use
 `STIFF_CACHE=/absolute/path/to/stiff/.cache make setup` to reuse its compiler
 and libevent via symlinks; setup verifies the pins. Don't edit that shared cache.

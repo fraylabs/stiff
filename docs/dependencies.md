@@ -1,13 +1,13 @@
 # Pinned native dependencies
 
-`make setup` installs Bend 2.0.35 and builds libevent 2.2.2-alpha inside `.cache`.
+`make setup` installs Bend 2.0.36 and builds libevent 2.2.2-alpha inside `.cache`.
 It verifies release archive SHA-256 values before extraction. It does not change
 system packages, global compiler installations or services. Python, CMake and patch are
 build tools only; applications run as native executables.
 
-Bend source revision: `79df8d9c40722ee9507a1e253f283b51025f9d6c`.
+Bend source revision: `ae1101ca7d15364f9274fa6b1367d175884a7da7`.
 The four release archive hashes are pinned in `scripts/setup.py` and come from
-[the upstream 2.0.35 release](https://github.com/bendlang/bend/releases/tag/v2.0.35).
+[the upstream 2.0.36 release](https://github.com/bendlang/bend/releases/tag/v2.0.36).
 
 The exact download URLs, source revisions, tag object and checksums are maintained
 in `scripts/setup.py` and `scripts/setup-libevent.py`. The libevent build is static,

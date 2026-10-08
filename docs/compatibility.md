@@ -1,7 +1,8 @@
 # Compatibility and upgrades
 
 Stiff 0.6.0 is an experimental native framework release. The supported compiler
-is Bend 2.0.35, source `79df8d9c40722ee9507a1e253f283b51025f9d6c`.
+in this checkout is Bend 2.0.36, source `ae1101ca7d15364f9274fa6b1367d175884a7da7`.
+This compiler upgrade is unreleased; published 0.6.0 artifacts retain Bend 2.0.35.
 Server builds also pin the experimental libevent 2.2.2-alpha source; see
 [dependency policy](dependencies.md). The public API consists of the documented Bend modules and `stiff-run` CLI;
 generated C layouts and native effect internals are private. Applications compile
@@ -21,8 +22,9 @@ Clang calling-convention mitigation automatically; normal builds keep Bend's ABI
 Transport error bodies move to the shared JSON envelope; applications must inspect
 status/code rather than compare legacy plain-text messages.
 
-Bend 2.0.35 migration details, private ABI inventory and verification results
-are in [the compiler upgrade report](bend-2.0.35.md). `IO.args()` now includes
+Bend 2.0.36 changes, private ABI deltas and pending verification
+are in [the compiler upgrade report](bend-2.0.36.md), building on the
+[2.0.35 inventory](bend-2.0.35.md). `IO.args()` includes
 the executable name; CLI programs must skip its head. `--check-only` reports
 `ALL PROOFS CHECK`; independent kernel checking with `--verdict` requires Lean
 v4.34.0 or a prebuilt BendTT kernel and is a separate verification step.
