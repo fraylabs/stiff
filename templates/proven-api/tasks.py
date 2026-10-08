@@ -96,8 +96,8 @@ def setup():
 def check():
     dependency()
     version = run([bend(), 'version'])
-    if version.returncode or version.stdout.strip() != 'bend 2.0.35':
-        raise SystemExit('Require pinned Bend 2.0.35; run make setup.')
+    if version.returncode or version.stdout.strip() != 'bend 2.0.36':
+        raise SystemExit('Require pinned Bend 2.0.36; run make setup.')
     for source in (DEPENDENCY / 'src/PROOF.bend', ROOT / 'PROOF.bend'):
         result = run([bend(), source, '--check-only'])
         print(result.stdout + result.stderr, end='', flush=True)

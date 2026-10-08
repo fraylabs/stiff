@@ -4,13 +4,13 @@ Native HTTP, application and storage building blocks for **Bend 2**. Write a Ben
 `IO` program with routing, schemas, streaming and durable local state, then compile
 it to a native executable.
 
-**Status:** experimental 0.6.0 with an unreleased compiler upgrade, pinned to Bend **2.0.36**. No Node or npm dependency.
+**Status:** experimental 0.6.1, pinned to Bend **2.0.36**. No Node or npm dependency.
 This is not a static binary distribution or a production-readiness claim.
 
-[Stiff 0.6.0 release with macOS arm64 and Linux x64/arm64 archives](https://github.com/fraylabs/stiff/releases/tag/v0.6.0).
+[Stiff 0.6.1 release with macOS arm64 and Linux x64/arm64 archives](https://github.com/fraylabs/stiff/releases/tag/v0.6.1).
 [Completed checklist and verification evidence](docs/checklist.md).
-Published 0.6.0 archives and immutable consumer pins still use Bend 2.0.35;
-see [the current compiler upgrade and pending CI checks](docs/bend-2.0.36.md).
+Use Stiff 0.6.0 for Bend 2.0.35; its archives and immutable BendHub package
+retain that compiler pin. See [the compiler upgrade report](docs/bend-2.0.36.md).
 
 ## Get started
 
@@ -69,7 +69,7 @@ make -C ../myapi mistakes
 ```
 
 The [standalone template](templates/proven-api/README.md) has one route, one
-universal law and one deliberate mistake. It pins Stiff 0.6.0 by Git revision;
+universal law and one deliberate mistake. It pins Stiff 0.6.1 by Git revision;
 setup uses the checksum-pinned compiler and scoped native dependencies above.
 Builds require both framework and application proof verdicts. With a compatible
 existing cache, use `STIFF_CACHE=/absolute/path/to/stiff/.cache make -C ../myapi setup`.
@@ -188,7 +188,7 @@ mistakes before building; see [routing contracts and trusted edges](docs/contrac
 
 ## Use Stiff in your own project
 
-The Git-pinned consumer example uses Bend 2.0.35. Copy [examples/auth-client](examples/auth-client) into a separate project and run
+The Git-pinned consumer example uses Bend 2.0.36. Copy [examples/auth-client](examples/auth-client) into a separate project and run
 `make setup build` there. It fetches Stiff directly from GitHub at the exact
 revision in `stiff.rev`, installs the pinned compiler, and builds a native client.
 Set `STIFF_TOKEN` in the environment, then run
@@ -197,7 +197,7 @@ This Git-based option requires no registry. Commit the revision file alongside y
 upgrades are explicit. See the example README for dependency and token handling.
 
 The published [BendHub package](docs/bendhub.md) and
-[standalone hub client](examples/bendhub-client) target Bend 2.0.35.
+[standalone hub client](examples/bendhub-client) target Bend 2.0.36.
 BendHub does not install C dependencies.
 
 ## Bend API

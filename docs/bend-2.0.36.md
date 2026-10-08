@@ -1,11 +1,15 @@
 # Bend 2.0.36 upgrade
 
-This report records the unreleased compiler upgrade from Bend 2.0.35 to 2.0.36,
+This report records the initial compiler upgrade from Bend 2.0.35 to 2.0.36,
 source `ae1101ca7d15364f9274fa6b1367d175884a7da7`, on branch `bend-2.0.36`
-from Stiff 0.6.0 revision `9b7cebc`. Full native and sanitizer CI is pending.
+from Stiff 0.6.0 revision `9b7cebc`. The initial light-validation scope is preserved below. Full native and sanitizer
+CI subsequently passed on `0a3a746faed7fcd9138a868997834c2e328e6af1`: [Check](https://github.com/fraylabs/stiff/actions/runs/37813873059)
+(8/8) and [Latest Bend compatibility](https://github.com/fraylabs/stiff/actions/runs/37813873702)
+(all green after rerunning one runner-interrupted job). Stiff 0.6.1 moves the
+starter and consumers to the new compiler; [release evidence](evidence/0.6.1)
+records the final source and publication checks.
 Published 0.6.0 archives, Git consumer revisions and the immutable BendHub
-package still require 2.0.35. No push, tag, release or publication is part of
-this upgrade.
+package still require 2.0.35. The initial upgrade did not include a release operation.
 
 ## What changed upstream and why it broke
 
@@ -110,15 +114,14 @@ example test targets, libevent rebuild or independent kernel work was performed.
 Compiler downloads, generated C, binaries and raw logs remain in ignored cache.
 [Validation metadata and log hashes](evidence/bend-2.0.36.json) record these checks.
 
-## Remaining verification and upstream issues
+## Initial verification requirements and upstream issues
 
 Run the full pinned **Check** matrix (Linux x64/arm64 and macOS arm64/x64,
 normal and combined sanitizers) plus **Latest Bend compatibility** (four test
 jobs plus resolution) on the committed branch. This must cover compiled ABI
 descriptor corruption, HTTP/HTTPS, JSON/URL/store layouts, server lifecycle,
 framing, streaming/upload/callback lifetimes, cancellation, packaging and the
-standalone consumer/template journeys. Full passing compatibility is not yet
-claimed. Independent `--verdict` remains separate and was not run here.
+standalone consumer/template journeys. These hosted checks subsequently passed as linked above. Independent `--verdict` remains separate and was not run here.
 
 No new upstream bug was found, so no workaround, repro or issue filing was
 needed. The documented registration change accounts for the observed C error.

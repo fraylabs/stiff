@@ -14,7 +14,7 @@ the status and JSON `message` field, and exits nonzero on HTTP errors. It does
 not follow redirects or retry requests.
 
 `main.bend` imports immutable BendHub sources. `stiff.rev` separately pins the
-GitHub checkout used for native build tooling and its checked Bend 2.0.35 and
+GitHub checkout used for native build tooling and its checked Bend 2.0.36 and
 libevent dependencies. BendHub does not install C libraries or build scripts.
 The downloaded checkout also contains sources, but this program imports the
 hub package, not those local modules. `make build` stores hub downloads under
